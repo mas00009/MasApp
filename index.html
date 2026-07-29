@@ -629,11 +629,11 @@
   #tab-lift .exc-mode:active{background:var(--surface-2)}
   #tab-lift .exc{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden}
   #tab-lift .exc-head{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px}
-  #tab-lift .exc-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:9px}
+  #tab-lift .exc-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:5px;padding:2px 0}
   #tab-lift .exc-row1{display:flex;align-items:center;gap:8px;min-width:0}
-  #tab-lift .exc-row2{display:flex;align-items:center;gap:8px;min-width:0}
+  #tab-lift .exc-metarow{display:flex;align-items:center;gap:10px;min-width:0;min-height:13px;padding-left:21px;overflow:hidden}
+  #tab-lift .exc-row2{display:flex;align-items:center;gap:8px;min-width:0;padding-left:21px}
   #tab-lift .exc-actions{flex:none;display:flex;align-items:center;gap:8px}
-  #tab-lift .exc-metaslot{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding-left:21px;overflow:hidden}
   #tab-lift .exc-head .exc-title{flex:1;min-width:0;display:flex;align-items:center;gap:5px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
   #tab-lift .exc-chev{flex:none;width:16px;height:16px;color:var(--faint);display:grid;place-items:center;transition:transform .18s ease}
   #tab-lift .exc-chev svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -643,7 +643,7 @@
   body.exc-reordering{-webkit-user-select:none;user-select:none}
   body.exc-reordering #tab-lift .exc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   body.exc-reordering #tab-lift .exc-title{cursor:grabbing}
-  #tab-lift .exc-thumb{flex:0 0 auto;width:72px;height:72px;border-radius:12px;background:#fff;overflow:hidden;display:block;cursor:pointer}
+  #tab-lift .exc-thumb{flex:0 0 auto;width:94px;height:94px;border-radius:13px;background:#fff;overflow:hidden;display:block;cursor:pointer}
   #tab-lift .exc-thumb:active{opacity:.7}
   #tab-lift .exc-thumb:empty{display:none}
   #tab-lift .exc-thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -3710,8 +3710,14 @@
     var setsHtml=(e.sets||[]).map(function(st,i){ return setRow(e,st,i); }).join("");
     var last=lastExerciseBefore(e.name, wKey()), pb=exercisePB(e.name);
     var lastLine="";
-    if(last){ var ls=fmtSetsCompact(last.sets); if(ls) lastLine="<span class='exc-last'>"+esc(ls)+"</span>"; }
-    var pbBadge = pb ? "<span class='exc-pb'>PB "+pb.w+"\u00d7"+pb.r+"</span>" : "";
+    if(last){
+      // prefer completed sets (matches PB); fall back to all logged sets for
+      // older sessions where nothing was ticked done
+      var doneSets=(last.sets||[]).filter(function(s){return s.done;});
+      var prevSets=doneSets.length?doneSets:last.sets;
+      var ls=fmtSetsCompact(prevSets); if(ls) lastLine="<span class='exc-last'>"+esc(ls)+"</span>";
+    }
+    var pbBadge = pb ? "<span class='exc-pb'>PB "+(pb.bw?(pb.r+" reps"):(pb.w+"\u00d7"+pb.r))+"</span>" : "";
     var collapsed = isToday(wCurrent) ? !!collapsedExc[e.id] : !pastOpen[e.id];
     var thumb=exImg(e.name);
     return "<div class='exc"+(collapsed?" collapsed":"")+"' data-ex='"+e.id+"'>"+
@@ -3725,13 +3731,11 @@
               "<button class='exc-x' data-remove-ex='"+e.id+"' aria-label='Remove exercise'>\u00d7</button>"+
             "</span>"+
           "</div>"+
+          "<div class='exc-metarow'>"+lastLine+pbBadge+"</div>"+
           "<div class='exc-row2'>"+
-            "<span class='exc-metaslot'>"+lastLine+pbBadge+"</span>"+
-            "<span class='exc-actions'>"+
-              "<button type='button' class='exc-mode' data-mode-cycle='"+e.id+"' aria-label='Change logging type' title='Logging type: tap to switch weights / bodyweight / time'>"+exModeLabel(e)+"</button>"+
-              "<button type='button' class='exc-rest' data-rest-cycle aria-label='Rest timer length'>"+restDefault+"s</button>"+
-              "<button class='set-add' data-add-set='"+e.id+"' aria-label='Add set'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 6v12M6 12h12'/></svg></button>"+
-            "</span>"+
+            "<button type='button' class='exc-mode' data-mode-cycle='"+e.id+"' aria-label='Change logging type' title='Logging type: tap to switch weights / bodyweight / time'>"+exModeLabel(e)+"</button>"+
+            "<button type='button' class='exc-rest' data-rest-cycle aria-label='Rest timer length'>"+restDefault+"s</button>"+
+            "<button class='set-add' data-add-set='"+e.id+"' aria-label='Add set'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 6v12M6 12h12'/></svg></button>"+
           "</div>"+
         "</div>"+
       "</div>"+
@@ -4337,10 +4341,19 @@
     for(var i=0;i<ds.length;i++){ var ex=(workouts[ds[i]].exercises||[]).filter(function(e){return e.name===name;})[0]; if(ex&&ex.sets&&ex.sets.length) return {date:ds[i], sets:ex.sets}; }
     return null;
   }
+  // Personal best from COMPLETED sets only. Weighted exercises rank by weight
+  // (then reps); pure bodyweight exercises (no weight logged) rank by reps.
   function exercisePB(name){
-    var best=null;
-    Object.keys(workouts).forEach(function(k){ (workouts[k].exercises||[]).forEach(function(e){ if(e.name!==name) return; (e.sets||[]).forEach(function(st){ var w=num(st.w), r=num(st.reps); if(w>0&&r>0){ if(!best||w>best.w||(w===best.w&&r>best.r)) best={w:w,r:r}; } }); }); });
-    return best;
+    var bestW=null, bestReps=null;
+    Object.keys(workouts).forEach(function(k){ (workouts[k].exercises||[]).forEach(function(e){ if(e.name!==name) return; (e.sets||[]).forEach(function(st){
+      if(!st.done) return;                       // only sets marked done count
+      var w=num(st.w), r=num(st.reps); if(r<=0) return;
+      if(w>0){ if(!bestW||w>bestW.w||(w===bestW.w&&r>bestW.r)) bestW={w:w,r:r}; }
+      if(!bestReps||r>bestReps.r) bestReps={r:r};
+    }); }); });
+    if(bestW) return {w:bestW.w, r:bestW.r, bw:false};
+    if(bestReps) return {w:0, r:bestReps.r, bw:true};
+    return null;
   }
   function fmtSetLabel(s){ var w=num(s.w), r=num(s.reps); return w>0 ? (w+"\u00d7"+r) : String(r); }
   function fmtSets(sets){ return sets.filter(function(s){return num(s.w)>0||num(s.reps)>0;}).map(fmtSetLabel).join(", "); }
