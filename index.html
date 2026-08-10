@@ -628,7 +628,7 @@
   #tab-lift .exc-mode{flex:none;min-width:48px;height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--ff-ui);font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   #tab-lift .exc-mode:active{background:var(--surface-2)}
   #tab-lift .exc{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;overflow:hidden}
-  #tab-lift .exc-head{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px}
+  #tab-lift .exc-head{position:relative;display:flex;align-items:stretch;gap:12px;padding:10px 12px}
   #tab-lift .exc-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:5px;padding:2px 0}
   #tab-lift .exc-row1{display:flex;align-items:center;gap:8px;min-width:0}
   #tab-lift .exc-metarow{display:flex;align-items:center;gap:10px;min-width:0;min-height:13px;padding-left:21px;overflow:hidden}
@@ -642,7 +642,7 @@
   #tab-lift .exc.collapsed .exc-metarow,
   #tab-lift .exc.collapsed .exc-row2,
   #tab-lift .exc.collapsed .exc-hist{display:none}
-  #tab-lift .exc.collapsed .exc-main{justify-content:center}
+  #tab-lift .exc.collapsed .exc-main{justify-content:flex-start}
   #tab-lift .exc.exc-dragging{position:relative;z-index:5;border-color:color-mix(in srgb,var(--protein) 55%,var(--border));box-shadow:0 12px 28px rgba(0,0,0,.55);transform:scale(1.015)}
   body.exc-reordering{-webkit-user-select:none;user-select:none}
   body.exc-reordering #tab-lift .exc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
