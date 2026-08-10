@@ -638,7 +638,11 @@
   #tab-lift .exc-chev{flex:none;width:16px;height:16px;color:var(--faint);display:grid;place-items:center;transition:transform .18s ease}
   #tab-lift .exc-chev svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
   #tab-lift .exc:not(.collapsed) .exc-chev{transform:rotate(90deg)}
-  #tab-lift .exc.collapsed .sets{display:none}
+  #tab-lift .exc.collapsed .sets,
+  #tab-lift .exc.collapsed .exc-metarow,
+  #tab-lift .exc.collapsed .exc-row2,
+  #tab-lift .exc.collapsed .exc-hist{display:none}
+  #tab-lift .exc.collapsed .exc-main{justify-content:center}
   #tab-lift .exc.exc-dragging{position:relative;z-index:5;border-color:color-mix(in srgb,var(--protein) 55%,var(--border));box-shadow:0 12px 28px rgba(0,0,0,.55);transform:scale(1.015)}
   body.exc-reordering{-webkit-user-select:none;user-select:none}
   body.exc-reordering #tab-lift .exc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -3689,15 +3693,19 @@
         "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
         "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
     }
-    var wPh="0", sugg="";
-    if(wv==="" && !isDur){
-      var s=suggestSet(e.name, i, num(st.reps));
-      if(s!=null){ wPh=String(s); sugg="<button class='set-sugg' data-sugg='"+s+"' aria-label='Use suggested weight'>\u2192 "+s+"</button>"; }
+    var wPh="0", rPh=(isDur?"30":"0"), sugg="";
+    if(!isDur){
+      var s=suggestSet(e.name, i);
+      if(s){
+        if(wv==="") wPh=String(s.w);
+        if(rv==="") rPh=String(s.reps);
+        if(wv==="") sugg="<button class='set-sugg' data-sugg-w='"+s.w+"' data-sugg-r='"+s.reps+"' aria-label='Use suggested target'>\u2192 "+s.w+"\u00d7"+s.reps+"</button>";
+      }
     }
     return "<div class='set-row"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
       "<span class='set-n'>"+(i+1)+"</span>"+
       "<span class='set-fld'><input class='set-w' type='number' inputmode='decimal' value='"+wv+"' placeholder='"+wPh+"'>"+sugg+"<span class='u'>kg</span></span>"+
-      "<span class='set-fld'><input class='set-r' type='number' inputmode='numeric' value='"+rv+"' placeholder='"+(isDur?"30":"0")+"'><span class='u'>"+(isDur?"sec":"reps")+"</span></span>"+
+      "<span class='set-fld'><input class='set-r' type='number' inputmode='numeric' value='"+rv+"' placeholder='"+rPh+"'><span class='u'>"+(isDur?"sec":"reps")+"</span></span>"+
       "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
       "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
   }
@@ -3920,7 +3928,7 @@
     if(dt){ var exd=exById(dt.getAttribute("data-dur-toggle")); if(exd){ exd.dur=!exd.dur; saveWorkouts(); renderWorkout(); } return; }
     var sg=e.target.closest(".set-sugg");
     if(sg){ var srow=sg.closest(".set-row"), exs=exById(srow.getAttribute("data-ex")), ssi=+srow.getAttribute("data-set");
-      if(exs&&exs.sets[ssi]){ exs.sets[ssi].w=num(sg.getAttribute("data-sugg")); saveWorkouts(); renderWorkout(); } return; }
+      if(exs&&exs.sets[ssi]){ exs.sets[ssi].w=num(sg.getAttribute("data-sugg-w")); exs.sets[ssi].reps=num(sg.getAttribute("data-sugg-r")); saveWorkouts(); renderWorkout(); } return; }
     var dn=e.target.closest(".set-done");
     if(dn){ var row=dn.closest(".set-row"), ex3=exById(row.getAttribute("data-ex")), si=+row.getAttribute("data-set");
       if(ex3&&ex3.sets[si]){ ex3.sets[si].done=!ex3.sets[si].done; var nowDone=ex3.sets[si].done;
@@ -4372,13 +4380,21 @@
   }
   // Progressive overload: suggest a weight for an empty set from last time.
   // If all target reps were hit last time, nudge +2.5 kg; if not, repeat the weight.
-  function suggestSet(exName, setIndex, targetReps){
+  // Double progression: repeat the weight and add a rep each session until you
+  // reach the rep ceiling for that set, then bump the weight by a small,
+  // weight-appropriate step and reset toward the bottom of the range. Based on
+  // the last time this set was COMPLETED, so weight never jumps session-to-session.
+  var PROG_TOP=12, PROG_BOTTOM=8;
+  function progStep(w){ return w>=40 ? 2.5 : (w>=15 ? 1.25 : 0.5); }
+  function suggestSet(exName, setIndex){
     var last=lastExerciseBefore(exName, wKey()); if(!last||!last.sets||!last.sets.length) return null;
-    var ls=last.sets[setIndex] || last.sets[last.sets.length-1];
-    var lw=num(ls.w), lr=num(ls.reps); if(lw<=0) return null;
-    var target=(targetReps&&targetReps>0)?targetReps:lr;
-    var sug=(lr>=target) ? lw+2.5 : lw;
-    return Math.round(sug*100)/100;
+    var done=(last.sets||[]).filter(function(s){return s.done;});
+    var pool=done.length?done:last.sets;
+    var ls=pool[setIndex] || pool[pool.length-1];
+    var lw=num(ls.w), lr=num(ls.reps); if(lr<=0) return null;
+    if(lw<=0) return {w:0, reps:lr+1};                              // no weight: progress reps only
+    if(lr>=PROG_TOP) return {w:Math.round((lw+progStep(lw))*100)/100, reps:PROG_BOTTOM};  // earned a small bump
+    return {w:lw, reps:lr+1};                                       // same weight, one more rep
   }
   function lastWorkoutBefore(beforeKey){ var ds=wDatesWith().filter(function(k){return k<beforeKey;}); return ds.length?ds[ds.length-1]:null; }
   function repeatWorkout(fromKey){
