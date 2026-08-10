@@ -725,9 +725,10 @@
   #exList .exopt-thumb:empty{background:var(--surface);border:1px solid var(--border)}
   #exList .exopt-thumb img{width:100%;height:100%;object-fit:cover;display:block}
   #exList .exopt-name{flex:1;min-width:0;padding:6px 0}
-  #exList .exopt-edit{flex:none;width:32px;height:32px;display:grid;place-items:center;background:transparent;border:none;color:var(--faint);cursor:pointer;border-radius:8px;padding:0}
-  #exList .exopt-edit:active{background:var(--border);color:var(--text)}
-  #exList .exopt-edit svg{width:15px;height:15px}
+  #exList .exopt-edit,#exList .exopt-cam,#exList .exopt-del{flex:none;width:30px;height:32px;display:grid;place-items:center;background:transparent;border:none;color:var(--faint);cursor:pointer;border-radius:8px;padding:0}
+  #exList .exopt-edit:active,#exList .exopt-cam:active,#exList .exopt-del:active{background:var(--border);color:var(--text)}
+  #exList .exopt-edit svg,#exList .exopt-cam svg,#exList .exopt-del svg{width:15px;height:15px}
+  #exList .exopt-del:active{color:var(--danger)}
   #exList .exopt-fav{flex:none;width:32px;height:32px;display:grid;place-items:center;background:transparent;border:none;color:var(--faint);cursor:pointer;border-radius:8px;padding:0}
   #exList .exopt-fav:active{background:var(--border)}
   #exList .exopt-fav svg{width:16px;height:16px;fill:none;transition:fill .12s}
@@ -1809,6 +1810,7 @@
   </div>
   <div class="sheet-body">
     <div class="field"><label>Search or type a new one</label><input type="text" id="exSearch" placeholder="e.g. Bench press, Squat" autocomplete="off"></div>
+    <input type="file" id="exPhotoFile" accept="image/*" capture="environment" style="display:none">
     <div id="exList"></div>
   </div>
 </div>
@@ -3635,8 +3637,17 @@
   function exModeFor(name){ if(EX_MODE[name]) return EX_MODE[name]; if(exIsDur(name)) return "time"; if(exIsBodyweight(name)) return "bw"; return "std"; }
   function exModeFlags(name){ var m=exModeFor(name); return {dur:m==="time", bw:m==="bw"}; }
   function exModeLabel(e){ return e.dur?"SEC":(e.bw?"BW":"WT"); }
-  function exImg(name){ var f=EX_ID[name]; return f?("assets/exdb/images/"+f+".jpg"):""; }
-  function exGif(name){ var f=EX_ID[name]; return f?("assets/exdb/gifs/"+f+".gif"):""; }
+  // User-added custom exercises (names), persisted + synced.
+  var EXCUSTOM_KEY="mt_ex_custom", EX_CUSTOM=[];
+  function saveExCustom(){ sSet(EXCUSTOM_KEY, JSON.stringify(EX_CUSTOM)); }
+  function isCustomEx(name){ return EX_CUSTOM.some(function(n){return n.toLowerCase()===String(name).toLowerCase();}); }
+  function addExCustom(name){ name=(name||"").trim(); if(!name||EX_ID[name]||isCustomEx(name)) return; EX_CUSTOM.push(name); saveExCustom(); }
+  function removeExCustom(name){ EX_CUSTOM=EX_CUSTOM.filter(function(n){return n!==name;}); if(EX_PHOTO[name]){ delete EX_PHOTO[name]; saveExPhotos(); } saveExCustom(); }
+  // User photos of the actual machine/exercise (name -> downscaled data URL), persisted + synced.
+  var EXPHOTO_KEY="mt_ex_photos", EX_PHOTO={};
+  function saveExPhotos(){ sSet(EXPHOTO_KEY, JSON.stringify(EX_PHOTO)); }
+  function exImg(name){ if(EX_PHOTO[name]) return EX_PHOTO[name]; var f=EX_ID[name]; return f?("assets/exdb/images/"+f+".jpg"):""; }
+  function exGif(name){ var f=EX_ID[name]; return f?("assets/exdb/gifs/"+f+".gif"):""; }   // reference animation only (form review); thumbnails use exImg/photo
   function buildExLibrary(){
     var g={};
     EX_DB.forEach(function(r){ var glabel=EX_BODY_MAP[r[1]]||r[1], sec=exEquipBucket(r[2]); (g[glabel]=g[glabel]||{}); (g[glabel][sec]=g[glabel][sec]||[]).push(r[0]); });
@@ -3645,8 +3656,9 @@
     return out;
   }
   var EX_LIBRARY=buildExLibrary();
-  function allExNames(){ return EX_DB.map(function(r){ return r[0]; }); }
-  var COMMON_EX=allExNames();
+  var EX_DB_NAMES=EX_DB.map(function(r){ return r[0]; });
+  function allExNames(){ return EX_CUSTOM.length ? EX_DB_NAMES.concat(EX_CUSTOM) : EX_DB_NAMES; }
+  var COMMON_EX=EX_DB_NAMES;   // legacy alias
   function wKey(){ return keyOf(wCurrent); }
   function wSession(){ var k=wKey(); if(!workouts[k]) workouts[k]={exercises:[]}; if(!workouts[k].exercises) workouts[k].exercises=[]; return workouts[k]; }
   function saveWorkouts(){ sSet(WORKOUT_KEY, JSON.stringify(workouts)); }
@@ -3798,14 +3810,18 @@
   function favNames(){ return allExNames().filter(isFav).sort(function(a,b){ var da=exDisplay(a).toLowerCase(), db=exDisplay(b).toLowerCase(); return da<db?-1:da>db?1:0; }); }
   var EX_PEN_SVG="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20h9'/><path d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/></svg>";
   var EX_STAR_SVG="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3.2l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.98 6.79 19.2l.99-5.79-4.21-4.1 5.82-.85z'/></svg>";
+  var EX_CAM_SVG="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'><path d='M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l1-1.6A1.5 1.5 0 0 1 10.5 4.7h3a1.5 1.5 0 0 1 1.3.7l1 1.6h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z'/><circle cx='12' cy='12.5' r='3.2'/></svg>";
+  var EX_TRASH_SVG="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12'/></svg>";
   function exOptHTML(orig){
-    var disp=exDisplay(orig), img=exGif(orig)||exImg(orig);
-    var fav=isFav(orig);
+    var disp=exDisplay(orig), img=EX_PHOTO[orig]||exGif(orig)||exImg(orig);   // photo > animation > static
+    var fav=isFav(orig), custom=isCustomEx(orig);
     return "<div class='exopt' role='button' tabindex='0' data-exname=\""+esc(disp)+"\">"+
       "<span class='exopt-thumb'>"+(img?"<img loading='lazy' src='"+img+"' alt=''>":"")+"</span>"+
       "<span class='exopt-name'>"+esc(disp)+"</span>"+
+      "<button type='button' class='exopt-cam' data-ex-photo=\""+esc(orig)+"\" aria-label='Set photo'>"+EX_CAM_SVG+"</button>"+
       "<button type='button' class='exopt-fav"+(fav?" on":"")+"' data-ex-fav=\""+esc(orig)+"\" aria-label='"+(fav?"Remove favourite":"Add favourite")+"' aria-pressed='"+(fav?"true":"false")+"'>"+EX_STAR_SVG+"</button>"+
       "<button type='button' class='exopt-edit' data-ex-rename=\""+esc(orig)+"\" aria-label='Rename'>"+EX_PEN_SVG+"</button>"+
+      (custom?"<button type='button' class='exopt-del' data-ex-delcustom=\""+esc(orig)+"\" aria-label='Delete custom exercise'>"+EX_TRASH_SVG+"</button>":"")+
     "</div>";
   }
   function commitRename(orig, val){
@@ -3831,16 +3847,22 @@
     var box=document.getElementById("exList"); q=(q||"").trim().toLowerCase();
     var raw=document.getElementById("exSearch").value.trim(), html="";
     exMatches=[];
-    if(raw && !COMMON_EX.some(function(n){return n.toLowerCase()===q;})){
+    var names=allExNames();
+    if(raw && !names.some(function(n){return n.toLowerCase()===q || exDisplay(n).toLowerCase()===q;})){
       html+="<button class='exopt custom' data-exc='1'>+ Add \u201c"+esc(raw)+"\u201d</button>";
     }
     if(q){
-      exMatches=COMMON_EX.filter(function(n){ return n.toLowerCase().indexOf(q)>=0 || exDisplay(n).toLowerCase().indexOf(q)>=0; });
+      exMatches=names.filter(function(n){ return n.toLowerCase().indexOf(q)>=0 || exDisplay(n).toLowerCase().indexOf(q)>=0; });
       // favourites first, keeping original order within each group
       exMatches.sort(function(a,b){ return (isFav(a)?0:1)-(isFav(b)?0:1); });
       html+=exMatches.map(exOptHTML).join("");
       box.innerHTML=html || "<div class='wk-empty'>No matches. Type a custom name above.</div>";
       return;
+    }
+    if(EX_CUSTOM.length){
+      var copen=!!exGroupOpen["__custom"];
+      var cbody=copen?("<div class='ex-grp-body'>"+EX_CUSTOM.slice().sort(function(a,b){var da=exDisplay(a).toLowerCase(),db=exDisplay(b).toLowerCase();return da<db?-1:da>db?1:0;}).map(exOptHTML).join("")+"</div>"):"";
+      html+="<div class='ex-grp'><button type='button' class='ex-grp-h' data-exgrp='__custom' aria-expanded='"+(copen?"true":"false")+"'><span>My Exercises</span><span class='ex-grp-n'>"+EX_CUSTOM.length+"</span><span class='ex-grp-chev'>"+(copen?"▾":"▸")+"</span></button>"+cbody+"</div>";
     }
     html+=EX_LIBRARY.map(function(gr){
       var items=[]; gr.sections.forEach(function(sec){ sec.items.forEach(function(n){ items.push({n:n,s:sec.s}); }); });
@@ -4058,6 +4080,10 @@
       if(!sWas){ setTimeout(function(){ var el=document.querySelector('.ex-sec-h[data-exsec="'+CSS.escape(sk)+'"]'); if(el) scrollExListTop(el, 10); }, 40); }
       return;
     }
+    var cam=e.target.closest("[data-ex-photo]");
+    if(cam){ exPhotoTarget=cam.getAttribute("data-ex-photo"); document.getElementById("exPhotoFile").click(); return; }
+    var del=e.target.closest("[data-ex-delcustom]");
+    if(del){ var dn=del.getAttribute("data-ex-delcustom"); if(confirm("Delete \""+exDisplay(dn)+"\" from your exercises?")){ removeExCustom(dn); renderExList(document.getElementById("exSearch").value); } return; }
     var star=e.target.closest("[data-ex-fav]");
     if(star){ toggleFav(star.getAttribute("data-ex-fav")); return; }
     var pen=e.target.closest("[data-ex-rename]");
@@ -4066,8 +4092,22 @@
     if(sv){ var ip=sv.parentNode.querySelector(".exopt-input"); commitRename(sv.getAttribute("data-ex-save"), ip?ip.value:""); return; }
     var b=e.target.closest("[data-exname],[data-exc]"); if(!b) return;
     var name = b.hasAttribute("data-exc") ? document.getElementById("exSearch").value.trim() : b.getAttribute("data-exname");
-    if(name){ addExercise(name); closeSheets(); }
+    if(name){ if(b.hasAttribute("data-exc")) addExCustom(name); addExercise(name); closeSheets(); }
   });
+  // set a photo for an exercise (custom or override a stock one)
+  var exPhotoTarget=null;
+  (function(){
+    var inp=document.getElementById("exPhotoFile"); if(!inp) return;
+    inp.addEventListener("change", async function(e){
+      var f=e.target.files && e.target.files[0]; e.target.value="";
+      if(!f || !exPhotoTarget) return;
+      try{
+        var r=await downscaleImage(f, 320, 0.8);
+        if(r && r.b64){ EX_PHOTO[exPhotoTarget]="data:"+r.media+";base64,"+r.b64; saveExPhotos(); renderExList(document.getElementById("exSearch").value); if(typeof renderWorkout==="function") renderWorkout(); }
+      }catch(err){}
+      exPhotoTarget=null;
+    });
+  })();
 
   /* ---------- form review (photos -> AI form feedback) ---------- */
   var formEx="", formQueue=[], FORM_KEY="mt_form_reviews", formReviews={};
@@ -5161,6 +5201,8 @@
     var exrRaw=await sGet(EXRENAMES_KEY); if(exrRaw){ try{ EX_RENAMES=JSON.parse(exrRaw)||{}; }catch(e){ EX_RENAMES={}; } }
     var exfRaw=await sGet(EXFAV_KEY); if(exfRaw){ try{ EX_FAV=JSON.parse(exfRaw)||{}; }catch(e){ EX_FAV={}; } }
     var exmRaw=await sGet(EXMODE_KEY); if(exmRaw){ try{ EX_MODE=JSON.parse(exmRaw)||{}; }catch(e){ EX_MODE={}; } }
+    var excRaw=await sGet(EXCUSTOM_KEY); if(excRaw){ try{ EX_CUSTOM=JSON.parse(excRaw)||[]; }catch(e){ EX_CUSTOM=[]; } }
+    var expRaw=await sGet(EXPHOTO_KEY); if(expRaw){ try{ EX_PHOTO=JSON.parse(expRaw)||{}; }catch(e){ EX_PHOTO={}; } }
     var rRaw=await sGet(REST_KEY); if(rRaw){ var rv=parseInt(rRaw,10); if(isFinite(rv)&&rv>0) restDefault=rv; }
     var wtRaw=await sGet(WATER_KEY); if(wtRaw){ try{ water=JSON.parse(wtRaw)||{}; }catch(e){ water={}; } }
     var jRaw=await sGet(JOURNAL_KEY); if(jRaw){ try{ journal=JSON.parse(jRaw)||{}; }catch(e){ journal={}; } }
