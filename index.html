@@ -976,6 +976,12 @@
   /* workout extras */
   #tab-lift .wk-repeat{width:100%;background:transparent;border:1px dashed color-mix(in srgb,var(--blue) 45%,var(--border));color:var(--blue);border-radius:12px;padding:12px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer;margin-bottom:9px;letter-spacing:.02em}
   #tab-lift .wk-repeat:active{background:var(--surface-2)}
+  #tab-lift .wk-repeat-head{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);font-weight:700;margin:2px 4px 8px}
+  #tab-lift .wk-repeat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  #tab-lift .wk-repeat-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #tab-lift .wk-repeat-row:active{background:var(--surface-2)}
+  #tab-lift .wrr-date{flex:none;min-width:56px;font-family:var(--ff-num);font-size:12px;font-weight:700;color:var(--text)}
+  #tab-lift .wrr-ex{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* water */
   #tab-food .water{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:6px 8px 6px 12px;margin-bottom:9px}
@@ -3766,9 +3772,17 @@
     var durStat=document.getElementById("wkDurStat"); if(durStat) durStat.classList.toggle("manual", typeof s.durMin==="number" && s.durMin>0);
     setWkTop(stt);
     list.innerHTML = s.exercises.length ? (s.exercises.map(excCard).join("")+"<button type='button' class='wk-saveplan' data-save-plan>Save as plan</button>") : (function(){
-      var lw=lastWorkoutBefore(wKey());
-      var rep = lw ? "<button class='wk-repeat' data-repeat='"+lw+"'>\u21bb Repeat "+esc(fmtShort(lw))+"'s session</button>" : "";
-      return rep + "<div class='wk-empty'>No exercises yet.<br>Add exercises, or load a saved plan.</div>";
+      var past=wDatesWith().filter(function(k){ return k<wKey(); }).reverse();  // most recent first
+      var repHtml="";
+      if(past.length){
+        repHtml="<div class='wk-repeat-head'>\u21bb Repeat a previous session</div><div class='wk-repeat-list'>"+
+          past.slice(0,20).map(function(k){
+            var ex=(workouts[k].exercises||[]);
+            var names=ex.map(function(e){return exDisplay(e.name);}).slice(0,3).join(", ")+(ex.length>3?" +"+(ex.length-3):"");
+            return "<button type='button' class='wk-repeat-row' data-repeat='"+k+"'><span class='wrr-date'>"+esc(fmtShort(k))+"</span><span class='wrr-ex'>"+esc(names)+"</span></button>";
+          }).join("")+"</div>";
+      }
+      return repHtml + "<div class='wk-empty'>No exercises yet.<br>Add exercises, or load a saved plan.</div>";
     })();
   }
   function updateWkStatsLight(){
