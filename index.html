@@ -181,6 +181,22 @@
   .item .info:active .nm{opacity:.55}
   .item .info .nm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .item .info .sub{font-family:var(--ff-num);font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap}
+  /* plan mode */
+  .food-utility{display:flex;align-items:stretch;gap:8px;margin-bottom:9px}
+  .food-utility .water{flex:1;min-width:0;margin-bottom:0}
+  .plan-toggle{flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);
+    color:var(--muted);border-radius:12px;padding:0 14px 0 12px;font-family:var(--ff-ui);font-weight:600;font-size:12px;cursor:pointer;letter-spacing:.01em}
+  .plan-toggle .pt-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--muted);background:transparent;flex:none;transition:all .15s}
+  .plan-toggle[aria-pressed="true"]{color:var(--carbs);border-color:color-mix(in srgb,var(--carbs) 55%,var(--border))}
+  .plan-toggle[aria-pressed="true"] .pt-dot{background:var(--carbs);border-color:var(--carbs);box-shadow:0 0 8px color-mix(in srgb,var(--carbs) 60%,transparent)}
+  .plan-toggle:active{background:var(--surface-2)}
+  .item.planned{background:repeating-linear-gradient(135deg,transparent,transparent 7px,color-mix(in srgb,var(--carbs) 5%,transparent) 7px,color-mix(in srgb,var(--carbs) 5%,transparent) 14px)}
+  .item.planned .info .nm{opacity:.82}
+  .item.planned .meal-kcol,.item.planned .info .sub{opacity:.7}
+  .plan-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--carbs);
+    background:color-mix(in srgb,var(--carbs) 12%,transparent);border:1px solid color-mix(in srgb,var(--carbs) 45%,var(--border));border-radius:5px;padding:2px 5px 2px 4px;margin-right:6px;vertical-align:1px;cursor:pointer;font-family:var(--ff-ui)}
+  .plan-tag svg{width:10px;height:10px;fill:none;stroke:var(--carbs);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .plan-tag:active{background:color-mix(in srgb,var(--carbs) 26%,transparent)}
   .qty{display:flex;align-items:center;gap:2px;justify-self:end}
   .qbtn{width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:15px;display:grid;place-items:center;cursor:pointer}
   .qbtn:active{background:var(--border)}
@@ -642,7 +658,9 @@
   #tab-lift .exc.collapsed .exc-metarow,
   #tab-lift .exc.collapsed .exc-row2,
   #tab-lift .exc.collapsed .exc-hist{display:none}
-  #tab-lift .exc.collapsed .exc-main{justify-content:flex-start}
+  #tab-lift .exc.collapsed .exc-head{align-items:center;gap:10px;padding:6px 12px}
+  #tab-lift .exc.collapsed .exc-main{justify-content:center}
+  #tab-lift .exc.collapsed .exc-thumb{width:40px;height:40px;border-radius:9px}
   #tab-lift .exc.exc-dragging{position:relative;z-index:5;border-color:color-mix(in srgb,var(--protein) 55%,var(--border));box-shadow:0 12px 28px rgba(0,0,0,.55);transform:scale(1.015)}
   body.exc-reordering{-webkit-user-select:none;user-select:none}
   body.exc-reordering #tab-lift .exc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -985,7 +1003,7 @@
   #tab-lift .wrr-ex{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* water */
-  #tab-food .water{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:6px 8px 6px 12px;margin-bottom:9px}
+  #tab-food .water{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 7px 4px 11px;margin-bottom:0}
   #tab-food .water .wd-ico{width:22px;height:22px;border-radius:7px;background:color-mix(in srgb,var(--blue) 15%,transparent);display:grid;place-items:center;flex:none}
   #tab-food .water .wd-ico svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   #tab-food .water .wd-l{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;flex:1;min-width:0}
@@ -1227,13 +1245,18 @@
     </div>
   </section>
 
-  <div class="water">
-    <span class="wd-ico"><svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>
-    <span class="wd-l">Water</span>
-    <span class="wd-v"><span id="waterVal">0</span><small id="waterMl">0 mL</small></span>
-    <div class="wd-btns">
-      <button id="waterMinus" aria-label="Remove a cup">−</button>
-      <button id="waterPlus" aria-label="Add a cup">+</button>
+  <div class="food-utility">
+    <button type="button" id="planToggle" class="plan-toggle" aria-pressed="false">
+      <span class="pt-dot"></span><span class="pt-lbl">Plan</span>
+    </button>
+    <div class="water">
+      <span class="wd-ico"><svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>
+      <span class="wd-l">Water</span>
+      <span class="wd-v"><span id="waterVal">0</span><small id="waterMl">0 mL</small></span>
+      <div class="wd-btns">
+        <button id="waterMinus" aria-label="Remove a cup">−</button>
+        <button id="waterPlus" aria-label="Add a cup">+</button>
+      </div>
     </div>
   </div>
 
@@ -1932,6 +1955,7 @@
   var aiKey="", aiModel="google/gemini-3.5-flash", aiCustomModels=[];
   var current=new Date();
   var addMeal="breakfast", editingId=null, editLogRef=null;
+  var planMode=false;
 
   var STARTER=[
     {name:"Musashi Shred & Burn Protein Shake",serving:"Ready-to-drink high protein shake",cal:181,p:31.7,c:3.8,f:3.6},
@@ -2057,8 +2081,9 @@
       var el=document.createElement("div");
       el.className="meal"+(collapsed[m]?" collapsed":"");
       var rows = items.map(function(it){
-        return "<div class='item' data-id='"+it.id+"'>"+
-          "<div class='info' data-item-edit role='button' tabindex='0'><div class='nm'>"+esc(it.name)+"</div>"+
+        var tag = it.planned ? "<button type='button' class='plan-tag' data-make-actual aria-label='Mark as eaten' title='Tap when eaten'><svg viewBox='0 0 24 24' aria-hidden='true'><polyline points='5 12 10 17 19 7'/></svg>Plan</button>" : "";
+        return "<div class='item"+(it.planned?" planned":"")+"' data-id='"+it.id+"'>"+
+          "<div class='info' data-item-edit role='button' tabindex='0'><div class='nm'>"+tag+esc(it.name)+"</div>"+
           "<div class='sub'>"+r0(it.p*it.qty)+"P "+r0(it.c*it.qty)+"C "+r0(it.f*it.qty)+"F</div></div>"+
           "<div class='meal-kcol'><span class='knum'>"+r0(it.cal*it.qty)+"</span><span class='kunit'></span></div>"+
           "<div class='qty'><button class='qbtn' data-act='dec'>−</button>"+
@@ -2083,7 +2108,12 @@
   var collapsed={breakfast:false,lunch:false,dinner:false};
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
-  function renderAll(){ renderHeader(); renderSummary(); renderMeals(); renderWater(); }
+  function renderPlanBar(){
+    var tog=document.getElementById("planToggle");
+    if(!tog) return;
+    tog.setAttribute("aria-pressed", planMode?"true":"false");
+  }
+  function renderAll(){ renderHeader(); renderSummary(); renderMeals(); renderWater(); renderPlanBar(); }
 
   /* ---------- add-food sheet ---------- */
   function renderFoodList(){
@@ -2102,11 +2132,13 @@
   function addToMeal(food, qty){
     qty=(qty&&qty>0)?qty:1;
     var d=dayLog();
-    var existing=d[addMeal].find(function(it){ return it.foodId===food.id; });
+    var existing=d[addMeal].find(function(it){ return it.foodId===food.id && !it.planned===!planMode; });
     if(existing){ existing.qty+=qty; }
     else{
-      d[addMeal].push({id:uid(),foodId:food.id,name:food.name,serving:food.serving,servingG:food.servingG||0,
-        cal:food.cal,p:food.p,c:food.c,f:food.f,qty:qty});
+      var it={id:uid(),foodId:food.id,name:food.name,serving:food.serving,servingG:food.servingG||0,
+        cal:food.cal,p:food.p,c:food.c,f:food.f,qty:qty};
+      if(planMode) it.planned=true;
+      d[addMeal].push(it);
     }
     saveLog(); renderAll();
   }
@@ -2298,6 +2330,14 @@
   document.getElementById("nextDay").addEventListener("click",function(){ shiftAppDate(1); });
 
   document.getElementById("meals").addEventListener("click",function(e){
+    var mk=e.target.closest("[data-make-actual]");
+    if(mk){
+      var mItem=mk.closest(".item"), mId=mItem.getAttribute("data-id");
+      var mMeal=mItem.closest(".meal").querySelector("[data-meal]").getAttribute("data-meal");
+      var mArr=dayLog()[mMeal], mit=mArr.find(function(x){return x.id===mId;});
+      if(mit){ delete mit.planned; saveLog(); renderAll(); }
+      return;
+    }
     var add=e.target.closest("[data-add]");
     if(add){ openAdd(add.getAttribute("data-add")); return; }
     var toggle=e.target.closest("[data-toggle]");
@@ -2318,6 +2358,10 @@
       else{ arr[idx].qty-=1; if(arr[idx].qty<=0) arr.splice(idx,1); }
       saveLog(); renderAll();
     }
+  });
+
+  document.getElementById("planToggle").addEventListener("click",function(){
+    planMode=!planMode; renderPlanBar();
   });
 
   function openAdd(meal, opts){
@@ -3746,9 +3790,13 @@
     var pbBadge = pb ? "<span class='exc-pb'>PB "+(pb.bw?(pb.r+" reps"):(pb.w+"\u00d7"+pb.r))+"</span>" : "";
     var collapsed = isToday(wCurrent) ? !!collapsedExc[e.id] : !pastOpen[e.id];
     var thumb=exImg(e.name);
+    // collapsed cards animate a small gif; custom machine photos have no gif so keep the photo
+    var gif=EX_PHOTO[e.name]?"":exGif(e.name);
+    var thumbSrc=(collapsed&&gif)?gif:thumb;
+    var thumbImg = thumb ? "<img loading='lazy' src='"+thumbSrc+"' data-static='"+thumb+"' data-gif='"+(gif||"")+"' alt=''>" : "";
     return "<div class='exc"+(collapsed?" collapsed":"")+"' data-ex='"+e.id+"'>"+
       "<div class='exc-head'>"+
-        "<span class='exc-thumb' data-form='"+encodeURIComponent(e.name)+"' role='button' tabindex='0' aria-label='View exercise animation'>"+(thumb?"<img loading='lazy' src='"+thumb+"' alt=''>":"")+"</span>"+
+        "<span class='exc-thumb' data-form='"+encodeURIComponent(e.name)+"' role='button' tabindex='0' aria-label='View exercise animation'>"+thumbImg+"</span>"+
         "<div class='exc-main'>"+
           "<div class='exc-row1'>"+
             "<span class='exc-title' data-ex-collapse='"+e.id+"'><span class='exc-chev' aria-hidden='true'><svg viewBox='0 0 24 24'><polyline points='9 6 15 12 9 18'/></svg></span><span class='en'>"+esc(e.name)+"</span></span>"+
@@ -3929,7 +3977,14 @@
     if(coll){ var cid=coll.getAttribute("data-ex-collapse"), nowCollapsed;
       if(isToday(wCurrent)){ if(collapsedExc[cid]) delete collapsedExc[cid]; else collapsedExc[cid]=1; saveCollapsed(); nowCollapsed=!!collapsedExc[cid]; }
       else { if(pastOpen[cid]) delete pastOpen[cid]; else pastOpen[cid]=1; nowCollapsed=!pastOpen[cid]; }
-      var card=coll.closest(".exc"); if(card) card.classList.toggle("collapsed", nowCollapsed); return; }
+      var card=coll.closest(".exc");
+      if(card){
+        card.classList.toggle("collapsed", nowCollapsed);
+        var timg=card.querySelector(".exc-thumb img");
+        if(timg){ var g=timg.getAttribute("data-gif"), s=timg.getAttribute("data-static");
+          var want=(nowCollapsed&&g)?g:s; if(want&&timg.getAttribute("src")!==want) timg.setAttribute("src",want); }
+      }
+      return; }
     var hist=e.target.closest("[data-hist]");
     if(hist){ openExHist(decodeURIComponent(hist.getAttribute("data-hist"))); return; }
     var fb=e.target.closest("[data-form]");
