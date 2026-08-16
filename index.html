@@ -738,6 +738,8 @@
   #exList .exopt{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:4px 5px 4px 11px;font-family:var(--ff-ui);font-size:13px;font-weight:500;cursor:pointer;margin-bottom:5px}
   #exList .exopt:last-child{margin-bottom:0}
   #exList .exopt:active{background:var(--border)}
+  #exList .exopt.added{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--surface-2))}
+  #exList .exopt.added .exopt-name::after{content:" \2713 added";color:var(--ok);font-weight:700;font-size:11px}
   #exList .exopt.custom{display:block;padding:10px 11px;color:var(--protein);font-weight:700;margin-bottom:8px}
   #exList .exopt-thumb{flex:0 0 auto;width:80px;height:80px;border-radius:10px;background:#fff;overflow:hidden;display:block}
   #exList .exopt-thumb:empty{background:var(--surface);border:1px solid var(--border)}
@@ -1829,7 +1831,7 @@
   <div class="grab"></div>
   <div class="sheet-head">
     <h2>Add Exercise</h2>
-    <button class="close" data-close>Cancel</button>
+    <button class="close" data-close>Done</button>
   </div>
   <div class="sheet-body">
     <div class="field"><label>Search or type a new one</label><input type="text" id="exSearch" placeholder="e.g. Bench press, Squat" autocomplete="off"></div>
@@ -4147,8 +4149,17 @@
     if(sv){ var ip=sv.parentNode.querySelector(".exopt-input"); commitRename(sv.getAttribute("data-ex-save"), ip?ip.value:""); return; }
     var b=e.target.closest("[data-exname],[data-exc]"); if(!b) return;
     var name = b.hasAttribute("data-exc") ? document.getElementById("exSearch").value.trim() : b.getAttribute("data-exname");
-    if(name){ if(b.hasAttribute("data-exc")) addExCustom(name); addExercise(name); closeSheets(); }
+    if(name){
+      if(b.hasAttribute("data-exc")){ addExCustom(name); renderExList(document.getElementById("exSearch").value); b=document.querySelector('#exList [data-exname="'+CSS.escape(exDisplay(name))+'"]')||b; }
+      addExercise(name);
+      flashExOpt(b);   // keep the picker open so several can be added; tap Done to close
+    }
   });
+  function flashExOpt(row){
+    if(!row) return;
+    row.classList.add("added");
+    setTimeout(function(){ row.classList.remove("added"); }, 700);
+  }
   // set a photo for an exercise (custom or override a stock one)
   var exPhotoTarget=null;
   (function(){
