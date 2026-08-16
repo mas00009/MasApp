@@ -614,6 +614,20 @@
   #tab-plan .sess .sess-del{flex:none;width:28px;height:28px;border:none;background:transparent;color:var(--faint);font-size:20px;line-height:1;cursor:pointer;border-radius:8px;display:grid;place-items:center;margin:-2px -2px -2px 0;-webkit-tap-highlight-color:transparent}
   #tab-plan .sess .sess-del:active{color:var(--danger);background:color-mix(in srgb,var(--danger) 14%,transparent)}
   #tab-plan .day-empty{padding:11px 8px 5px;color:var(--faint);font-size:12.5px}
+  /* copy a previous week */
+  #tab-plan .wk-copy{margin-bottom:9px}
+  #tab-plan .wk-copy-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1px dashed color-mix(in srgb,var(--blue) 45%,var(--border));color:var(--blue);border-radius:12px;padding:11px;font-family:var(--ff-ui);font-weight:700;font-size:12.5px;letter-spacing:.02em;cursor:pointer}
+  #tab-plan .wk-copy-btn.solo{margin-bottom:9px}
+  #tab-plan .wk-copy-btn:active{background:var(--surface-2)}
+  #tab-plan .wk-copy-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  #tab-plan .wk-copy-btn em{font-style:normal;font-weight:500;color:var(--muted);font-family:var(--ff-num);font-size:11.5px}
+  #tab-plan .wk-copy-btn .wkc-chev{margin-left:2px;font-size:9px;transition:transform .15s}
+  #tab-plan .wk-copy-btn.open .wkc-chev{transform:rotate(180deg)}
+  #tab-plan .wk-copy-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  #tab-plan .wk-copy-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 13px;cursor:pointer}
+  #tab-plan .wk-copy-row:active{background:var(--surface-2)}
+  #tab-plan .wk-copy-row .wcr-range{font-weight:600;font-size:13px;color:var(--text)}
+  #tab-plan .wk-copy-row .wcr-count{margin-left:auto;font-family:var(--ff-num);font-size:11px;color:var(--muted)}
   #tab-plan .day-slim{display:flex;align-items:center;gap:10px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:7px;cursor:pointer;text-align:left}
   #tab-plan .day-slim:active{background:var(--surface-2)}
   #tab-plan .day-slim.today{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
@@ -3595,6 +3609,31 @@
       "<span class='schip' style='"+chip+"'>"+esc(meta.label)+"</span>"+
       "<button type='button' class='sess-del' data-sess-del='"+s.id+"' aria-label='Delete session'>\u00d7</button></div>";
   }
+  function schedWeekKey(s){ return s.weekStart || planWeekKey(0); }
+  function weekRangeLabel(monKey){
+    var mon=dateFromKey(monKey), sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    return mon.getMonth()===sun.getMonth()
+      ? (mon.getDate()+"–"+sun.getDate()+" "+MON_SHORT[mon.getMonth()])
+      : (mon.getDate()+" "+MON_SHORT[mon.getMonth()]+" – "+sun.getDate()+" "+MON_SHORT[sun.getMonth()]);
+  }
+  // Weeks (Monday keys) strictly before `beforeKey` that hold at least one session, newest first.
+  function weeksWithSessions(beforeKey){
+    var seen={};
+    schedule.forEach(function(s){
+      if(s.day==null||s.day<0||s.day>6) return;
+      var wk=schedWeekKey(s);
+      if(beforeKey && wk>=beforeKey) return;
+      seen[wk]=(seen[wk]||0)+1;
+    });
+    return Object.keys(seen).sort().reverse().map(function(k){ return {week:k, count:seen[k]}; });
+  }
+  function copyWeekInto(fromKey, toKey){
+    var src=schedule.filter(function(s){ return schedWeekKey(s)===fromKey && s.day!=null; });
+    src.forEach(function(s){
+      schedule.push({id:uid(), type:s.type, title:s.title||"", time:s.time||"", dur:s.dur||0, day:s.day, weekStart:toKey});
+    });
+    saveSchedule(); renderPlan();
+  }
   function renderPlan(){
     var strip=document.getElementById("weekStrip"), days=document.getElementById("planDays");
     if(!strip||!days) return;
@@ -3609,7 +3648,26 @@
       var dt=planWeekDate(i).getDate();
       return "<button class='wday"+(showToday&&i===ti?" today":"")+"' data-add-day='"+i+"'><span class='wd'>"+d+"</span><span class='wc'>"+dt+"</span></button>";
     }).join("");
-    days.innerHTML=DAYS_FULL.map(function(name,i){
+    var weekEmpty=byDay.every(function(a){ return a.length===0; });
+    var copyHTML="";
+    if(weekEmpty){
+      var prev=weeksWithSessions(ws);
+      if(prev.length===1){
+        copyHTML="<button type='button' class='wk-copy-btn solo' data-copy-week='"+prev[0].week+"'>"+
+          "<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 12a8 8 0 1 1 2.3 5.6'/><polyline points='4 20 4 14 10 14'/></svg>"+
+          "Copy last week <em>"+weekRangeLabel(prev[0].week)+"</em></button>";
+      } else if(prev.length>1){
+        copyHTML="<div class='wk-copy'><button type='button' class='wk-copy-btn' data-copy-toggle>"+
+          "<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 12a8 8 0 1 1 2.3 5.6'/><polyline points='4 20 4 14 10 14'/></svg>"+
+          "Copy a previous week<span class='wkc-chev'>▾</span></button>"+
+          "<div class='wk-copy-list' hidden>"+prev.slice(0,10).map(function(p){
+            return "<button type='button' class='wk-copy-row' data-copy-week='"+p.week+"'>"+
+              "<span class='wcr-range'>"+weekRangeLabel(p.week)+"</span>"+
+              "<span class='wcr-count'>"+p.count+(p.count===1?" session":" sessions")+"</span></button>";
+          }).join("")+"</div></div>";
+      }
+    }
+    days.innerHTML=copyHTML+DAYS_FULL.map(function(name,i){
       var arr=byDay[i], today=showToday&&i===ti;
       if(!arr.length){
         return "<button class='day-slim"+(today?" today":"")+"' data-add-day='"+i+"'>"+
@@ -3688,6 +3746,10 @@
     var b=e.target.closest("[data-add-day]"); if(b) openSchedule(null, parseInt(b.getAttribute("data-add-day"),10));
   });
   document.getElementById("planDays").addEventListener("click",function(e){
+    var ctog=e.target.closest("[data-copy-toggle]");
+    if(ctog){ var lst=ctog.parentNode.querySelector(".wk-copy-list"); if(lst){ lst.hidden=!lst.hidden; ctog.classList.toggle("open",!lst.hidden); } return; }
+    var cw=e.target.closest("[data-copy-week]");
+    if(cw){ copyWeekInto(cw.getAttribute("data-copy-week"), planWeekKey()); return; }
     var del=e.target.closest("[data-sess-del]");
     if(del){ e.stopPropagation(); deleteSchedSession(del.getAttribute("data-sess-del")); return; }
     var dc=e.target.closest("[data-day-collapse]");
