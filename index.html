@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1D1D1F">
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem("mt_theme")||"midnight";
+    if(t && t!=="midnight") document.documentElement.setAttribute("data-theme",t);
+    var mc={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F"}[t];
+    if(mc){ var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content",mc); }
+  }catch(e){}
+})();
+</script>
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MasApp%22%2C%22short_name%22%3A%22MasApp%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%231D1D1F%22%2C%22theme_color%22%3A%22%231D1D1F%22%2C%22start_url%22%3A%22.%2F%22%7D">
 <title>MasApp</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +28,7 @@
 <style>
   :root{
     --bg:#000000;
+    --summary-bg:#000000;
     --surface:#13151D;
     --surface-2:#1B1E28;
     --border:#252A38;
@@ -46,6 +57,31 @@
     --head-pad-bottom:10px;
 
     --ff-num:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  }
+  /* ---------- theme skins (Midnight is the default :root above) ---------- */
+  html[data-theme="blossom"]{
+    --bg:#FFF1F6; --summary-bg:#2B1822; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
+    --text:#3B2A33; --muted:#9C7C89; --faint:#CBA8B7;
+    --protein:#F53D7D; --grad:linear-gradient(118deg,#FF7FB0 0%,#F53D7D 100%); --glow:0 0 16px rgba(245,61,125,.30);
+    --protein-dial:#A855F7; --fat-dial:#0EA371; --carbs:#EB9612;
+    --supp:#8B6DF0; --water:#1FB6D4; --brand:#7C6CF5; --danger:#E11D5B; --ok:#16A34A; --gold:#E0A93B;
+    --h-morning:#EB9612; --h-wind:#8B6DF0;
+  }
+  html[data-theme="daylight"]{
+    --bg:#F4F5F8; --summary-bg:#171A22; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
+    --text:#1B1E28; --muted:#6B7280; --faint:#A6ADBC;
+    --protein:#FF4D6D; --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%); --glow:0 0 16px rgba(255,77,109,.25);
+    --protein-dial:#9333EA; --fat-dial:#0EA371; --carbs:#E8930C;
+    --supp:#6366F1; --water:#0DA4C4; --brand:#0A84FF; --danger:#E11D48; --ok:#15A34A; --gold:#D99A2B;
+    --h-morning:#E8930C; --h-wind:#7C5CF0;
+  }
+  html[data-theme="grape"]{
+    --bg:#140B1F; --summary-bg:#1B0F2B; --surface:#1F1330; --surface-2:#2A1B41; --border:#3B2858;
+    --text:#F1EAF8; --muted:#A78FC2; --faint:#6C5589;
+    --protein:#FF5FA2; --grad:linear-gradient(118deg,#C46BFF 0%,#FF5FA2 100%); --glow:0 0 16px rgba(255,95,162,.40);
+    --protein-dial:#C084FC; --fat-dial:#10B981; --carbs:#FFB43D;
+    --supp:#A78BFA; --water:#34D3EE; --brand:#A78BFA; --danger:#FF5470; --ok:#3DE08A; --gold:#FFC24B;
+    --h-morning:#FFB43D; --h-wind:#C084FC;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
@@ -76,7 +112,7 @@
     margin:0 auto;
     min-height:100%;
     padding:0 13px calc(80px + env(safe-area-inset-bottom));
-    background:#000;
+    background:var(--bg);
   }
 
   /* header (shared across tabs) */
@@ -118,8 +154,11 @@
 
   /* summary */
   .summary{
-    background:#000;border:none;border-radius:16px;
+    background:var(--summary-bg);border:none;border-radius:16px;
     padding:14px 14px 12px;margin-bottom:11px;
+    /* the overview stays a dark hero panel on every skin, so pin its inner
+       text/track to light values regardless of the (possibly light) theme */
+    --text:#EEF0F6; --muted:#9BA1B0; --faint:#5C6273; --surface-2:#252A38;
   }
   /* keep the food overview (calories + macros) pinned below the header as the meal list scrolls */
   #tab-food .summary{
@@ -423,6 +462,20 @@
   .set-section.open .set-chev{transform:rotate(90deg)}
   .set-body{padding:12px 12px 14px;border-top:1px solid var(--border)}
   .set-body[hidden]{display:none}
+  /* theme picker */
+  .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .theme-opt{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;padding:9px 10px;cursor:pointer;font-family:var(--ff-ui);color:var(--text)}
+  .theme-opt:active{background:var(--border)}
+  .theme-opt.selected{border-color:var(--protein);box-shadow:0 0 0 1px var(--protein)}
+  .theme-sw{position:relative;width:38px;height:38px;border-radius:9px;flex:none;overflow:hidden;border:1px solid rgba(255,255,255,.08);display:block}
+  .theme-sw i{position:absolute;border-radius:2px;display:block}
+  .theme-sw i.a{width:16px;height:5px;left:7px;bottom:13px}
+  .theme-sw i.b{width:10px;height:5px;left:7px;bottom:6px}
+  .theme-name{font-size:12.5px;font-weight:600}
+  .sw-midnight{background:#000}       .sw-midnight i.a{background:#FF4D6D}  .sw-midnight i.b{background:#0A84FF}
+  .sw-blossom{background:#FFF1F6}      .sw-blossom i.a{background:#F53D7D}   .sw-blossom i.b{background:#7C6CF5}
+  .sw-daylight{background:#F4F5F8}     .sw-daylight i.a{background:#FF4D6D}  .sw-daylight i.b{background:#0A84FF}
+  .sw-grape{background:#140B1F}        .sw-grape i.a{background:#FF5FA2}     .sw-grape i.b{background:#A78BFA}
 
   /* tabs */
   .tab-panel{display:none}
@@ -550,6 +603,11 @@
     .bodystage{width:min(100cqw,calc(100cqh * 300 / 450));height:min(100cqh,calc(100cqw * 450 / 300))}
   }
   .figure-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;mix-blend-mode:screen;pointer-events:none}
+  /* the figure art is a blue silhouette on black, meant for a dark backdrop (screen blend).
+     on light skins, invert lightness while keeping the hue (invert + hue-rotate 180) and
+     multiply, so a blue figure shows on the light background instead of vanishing */
+  html[data-theme="blossom"] .figure-img,
+  html[data-theme="daylight"] .figure-img{mix-blend-mode:multiply;filter:invert(1) hue-rotate(180deg) saturate(1.15)}
   .figure{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .figure .lead{stroke:var(--faint);stroke-width:1;opacity:.4}
   .figure .dot{fill:var(--protein)}
@@ -864,7 +922,9 @@
     display:flex;flex-direction:column;gap:4px;justify-content:space-between;overflow:hidden;
     height:calc(100dvh - 80px - env(safe-area-inset-bottom));
     max-height:calc(100dvh - 80px - env(safe-area-inset-bottom));
-    padding-bottom:6px;background:#000;
+    padding-bottom:6px;background:var(--summary-bg);
+    /* the home dashboard is a dark hero on every skin; pin inner text light */
+    --text:#EEF0F6; --muted:#9BA1B0; --faint:#5C6273; --surface-2:#252A38;
   }
   #tab-home .home-brand{
     display:flex;align-items:center;justify-content:center;margin:0;flex:none;
@@ -872,14 +932,14 @@
     height:calc(var(--head-inset-top) + var(--head-bar-h));
     min-height:calc(var(--head-inset-top) + var(--head-bar-h));
     box-sizing:border-box;
-    background:#000;
+    background:var(--summary-bg);
     position:relative;
     z-index:2;
   }
   #tab-home .brand-mark{display:flex;align-items:center;justify-content:center}
   #tab-home .brand-logo{height:32px;width:auto;display:block}
   /* hero ring */
-  #tab-home .hero{position:relative;background:#000;border:none;border-radius:20px;padding:22px 12px 6px;margin-bottom:0;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:none;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;isolation:isolate}
+  #tab-home .hero{position:relative;background:var(--summary-bg);border:none;border-radius:20px;padding:22px 12px 6px;margin-bottom:0;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:none;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;isolation:isolate}
   #tab-home .hero::before{display:none}
   #tab-home .hero::after{display:none}
   #tab-home .hero:active{transform:scale(.995)}
@@ -1590,6 +1650,19 @@
   </div>
   <div class="sheet-body">
     <div class="set-section">
+      <button type="button" class="set-head" data-set-toggle aria-expanded="false"><span>Appearance</span><span class="set-chev">›</span></button>
+      <div class="set-body" hidden>
+        <div class="theme-grid" id="themeGrid">
+          <button type="button" class="theme-opt" data-theme-pick="midnight"><span class="theme-sw sw-midnight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Midnight</span></button>
+          <button type="button" class="theme-opt" data-theme-pick="blossom"><span class="theme-sw sw-blossom"><i class="a"></i><i class="b"></i></span><span class="theme-name">Blossom</span></button>
+          <button type="button" class="theme-opt" data-theme-pick="daylight"><span class="theme-sw sw-daylight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Daylight</span></button>
+          <button type="button" class="theme-opt" data-theme-pick="grape"><span class="theme-sw sw-grape"><i class="a"></i><i class="b"></i></span><span class="theme-name">Grape</span></button>
+        </div>
+        <div class="mono-note" style="text-align:left;margin:10px 2px 0">Pick a skin for the whole app. Your choice is saved on this device.</div>
+      </div>
+    </div>
+
+    <div class="set-section">
       <button type="button" class="set-head" data-set-toggle aria-expanded="false"><span>Profile</span><span class="set-chev">›</span></button>
       <div class="set-body" hidden>
         <div class="grid4" style="margin:0 2px 6px;grid-template-columns:1fr 1fr 1fr">
@@ -1948,6 +2021,19 @@
     if(hasLS){ try{ localStorage.setItem(key,val); }catch(e){} return; }
     mem[key]=val;
   }
+
+  /* ---------- theme ---------- */
+  var THEME_KEY="mt_theme", theme="midnight";
+  var THEME_META={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F"};
+  function applyTheme(t){
+    theme=THEME_META[t]?t:"midnight";
+    if(theme==="midnight") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme",theme);
+    var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content",THEME_META[theme]);
+    var g=document.getElementById("themeGrid");
+    if(g){ [].forEach.call(g.querySelectorAll("[data-theme-pick]"),function(b){ b.classList.toggle("selected", b.getAttribute("data-theme-pick")===theme); }); }
+  }
+  function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
 
   /* ---------- state ---------- */
   var FOODS_KEY="mt_foods", TARGETS_KEY="mt_targets", LOG_KEY="mt_log";
@@ -2510,6 +2596,10 @@
   Array.prototype.slice.call(document.querySelectorAll("[data-settings]")).forEach(function(b){
     b.addEventListener("click",function(){ renderManage(); resetSettingsSections(); openSheet("manageSheet"); });
   });
+  (function(){
+    var grid=document.getElementById("themeGrid"); if(!grid) return;
+    grid.addEventListener("click",function(e){ var b=e.target.closest("[data-theme-pick]"); if(b) setTheme(b.getAttribute("data-theme-pick")); });
+  })();
   (function(){
     var cloud=document.getElementById("hCloud"); if(!cloud) return;
     cloud.addEventListener("click",function(e){
@@ -5368,6 +5458,7 @@
         localStorage.setItem(RESET_FLAG,"1");
       }
     }catch(e){}
+    var thRaw=await sGet(THEME_KEY); applyTheme(thRaw||"midnight");
     var fRaw=await sGet(FOODS_KEY);
     if(fRaw){ try{ foods=JSON.parse(fRaw); }catch(e){ foods=[]; } }
     var fvRaw=await sGet(FOODVER_KEY);
