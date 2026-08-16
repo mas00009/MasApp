@@ -190,6 +190,9 @@
   .plan-toggle[aria-pressed="true"]{color:var(--carbs);border-color:color-mix(in srgb,var(--carbs) 55%,var(--border))}
   .plan-toggle[aria-pressed="true"] .pt-dot{background:var(--carbs);border-color:var(--carbs);box-shadow:0 0 8px color-mix(in srgb,var(--carbs) 60%,transparent)}
   .plan-toggle:active{background:var(--surface-2)}
+  body.food-reordering{-webkit-user-select:none;user-select:none}
+  body.food-reordering .meal .item{-webkit-touch-callout:none}
+  .item.item-dragging{background:var(--surface-2);box-shadow:0 6px 18px rgba(0,0,0,.4);border-radius:10px;position:relative;z-index:5;opacity:.96}
   .item.planned{background:repeating-linear-gradient(135deg,transparent,transparent 7px,color-mix(in srgb,var(--carbs) 5%,transparent) 7px,color-mix(in srgb,var(--carbs) 5%,transparent) 14px)}
   .item.planned .info .nm{opacity:.82}
   .item.planned .meal-kcol,.item.planned .info .sub{opacity:.7}
@@ -2365,6 +2368,66 @@
   document.getElementById("planToggle").addEventListener("click",function(){
     planMode=!planMode; renderPlanBar();
   });
+
+  /* hold-to-reorder food items within a meal (mirrors gym exercise drag) */
+  (function(){
+    var wrap=document.getElementById("meals");
+    var lpTimer=null, lpStartX=0, lpStartY=0, lastY=0, drag=null, didDrag=false;
+    function clearTimer(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
+    function mealBodyOf(el){ var m=el.closest(".meal"); return m?m.querySelector(".meal-body"):null; }
+    function mealNameOf(el){ var m=el.closest(".meal"); return m?m.querySelector("[data-meal]").getAttribute("data-meal"):null; }
+    function startDrag(item){
+      clearTimer(); if(!item||!item.isConnected) return;
+      drag={ item:item, body:mealBodyOf(item), meal:mealNameOf(item) };
+      if(!drag.body){ drag=null; return; }
+      didDrag=true;
+      item.classList.add("item-dragging");
+      document.body.classList.add("food-reordering");
+      if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
+      moveDrag(lastY);
+    }
+    function moveDrag(clientY){
+      if(!drag) return;
+      var items=[].slice.call(drag.body.querySelectorAll(".item")), dragging=drag.item, placed=false;
+      for(var i=0;i<items.length;i++){
+        var c=items[i]; if(c===dragging) continue;
+        var r=c.getBoundingClientRect();
+        if(clientY < r.top + r.height/2){
+          if(dragging.nextElementSibling!==c) drag.body.insertBefore(dragging, c);
+          placed=true; break;
+        }
+      }
+      if(!placed && drag.body.lastElementChild!==dragging) drag.body.appendChild(dragging);
+    }
+    function endDrag(){
+      if(!drag) return;
+      var order=[].slice.call(drag.body.querySelectorAll(".item")).map(function(c){ return c.getAttribute("data-id"); });
+      var arr=dayLog()[drag.meal];
+      if(arr){ arr.sort(function(a,b){ return order.indexOf(a.id)-order.indexOf(b.id); }); saveLog(); }
+      drag.item.classList.remove("item-dragging");
+      document.body.classList.remove("food-reordering");
+      drag=null;
+    }
+    wrap.addEventListener("pointerdown", function(e){
+      if(e.pointerType==="mouse" && e.button!==0) return;
+      didDrag=false; clearTimer();
+      var t=e.target;
+      if(t.closest("input")||t.closest("button")||t.closest(".qty")||t.closest(".plan-tag")) return;
+      var item=t.closest(".item"); if(!item) return;
+      lpStartX=e.clientX; lpStartY=e.clientY; lastY=e.clientY;
+      lpTimer=setTimeout(function(){ startDrag(item); }, 500);
+    });
+    wrap.addEventListener("pointermove", function(e){
+      lastY=e.clientY;
+      if(drag){ moveDrag(e.clientY); return; }
+      if(lpTimer && (Math.abs(e.clientY-lpStartY)>10 || Math.abs(e.clientX-lpStartX)>10)){ clearTimer(); }
+    });
+    function finish(){ clearTimer(); if(drag) endDrag(); }
+    wrap.addEventListener("pointerup", finish);
+    wrap.addEventListener("pointercancel", finish);
+    wrap.addEventListener("touchmove", function(e){ if(drag) e.preventDefault(); }, {passive:false});
+    wrap.addEventListener("click", function(e){ if(didDrag){ didDrag=false; e.stopPropagation(); e.preventDefault(); } }, true);
+  })();
 
   function openAdd(meal, opts){
     opts=opts||{};
