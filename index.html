@@ -9,7 +9,7 @@
   try{
     var t=localStorage.getItem("mt_theme")||"midnight";
     if(t && t!=="midnight") document.documentElement.setAttribute("data-theme",t);
-    var mc={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F"}[t];
+    var mc={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F",crimson:"#0E0406"}[t];
     if(mc){ var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content",mc); }
   }catch(e){}
 })();
@@ -29,14 +29,15 @@
   :root{
     --bg:#000000;
     --summary-bg:#000000;
-    --splash-accent:#FF3B3B;
-    --surface:#13151D;
-    --surface-2:#1B1E28;
-    --border:#252A38;
-    --text:#EEF0F6;
-    --muted:#7E8598;
-    --faint:#4E5464;
-    --protein:#FF4D6D;   /* the red (app accent) */
+    --splash-accent:#22C8FF;
+    --on-accent:#04101d;   /* text on bright accent buttons */
+    --surface:#0F131C;
+    --surface-2:#171C28;
+    --border:#222A3A;
+    --text:#EAF2FB;
+    --muted:#7E8BA3;
+    --faint:#4A5568;
+    --protein:#0A84FF;   /* app accent - electric blue on Midnight */
     --protein-dial:#A855F7;  /* protein macro dial + dot (purple) */
     --fat-dial:#10B981;      /* fat macro dial + dot (emerald) */
     --carbs:#FFB43D;
@@ -50,8 +51,8 @@
     --gold:#FFC24B;
     --h-morning:#FFB43D;
     --h-wind:#9B7DFF;
-    --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%);
-    --glow:0 0 16px rgba(255,77,109,.4);
+    --grad:linear-gradient(118deg,#22C8FF 0%,#0A84FF 100%);
+    --glow:0 0 16px rgba(10,132,255,.45);
     --ff-ui:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
     --head-inset-top:calc(4px + env(safe-area-inset-top));
     --head-bar-h:38px;
@@ -61,27 +62,35 @@
   }
   /* ---------- theme skins (Midnight is the default :root above) ---------- */
   html[data-theme="blossom"]{
-    --bg:#FFF1F6; --summary-bg:#FFF1F6; --splash-accent:#A24BFF; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
-    --text:#3B2A33; --muted:#9C7C89; --faint:#CBA8B7;
-    --protein:#F53D7D; --grad:linear-gradient(118deg,#FF7FB0 0%,#F53D7D 100%); --glow:0 0 16px rgba(245,61,125,.30);
+    --bg:#FFF1F6; --summary-bg:#FFF1F6; --splash-accent:#8B5CF6; --on-accent:#150826; --surface:#FFFFFF; --surface-2:#F3E9FE; --border:#E9D9F7;
+    --text:#31243B; --muted:#8C7C9C; --faint:#BEACD0;
+    --protein:#8B5CF6; --grad:linear-gradient(118deg,#A78BFA 0%,#8B5CF6 100%); --glow:0 0 16px rgba(139,92,246,.30);
     --protein-dial:#A855F7; --fat-dial:#0EA371; --carbs:#EB9612;
-    --supp:#8B6DF0; --water:#1FB6D4; --brand:#7C6CF5; --danger:#E11D5B; --ok:#16A34A; --gold:#E0A93B;
-    --h-morning:#EB9612; --h-wind:#8B6DF0;
+    --supp:#8B5CF6; --water:#1FB6D4; --brand:#8B5CF6; --danger:#E11D5B; --ok:#16A34A; --gold:#E0A93B;
+    --h-morning:#EB9612; --h-wind:#8B5CF6;
   }
   html[data-theme="daylight"]{
-    --bg:#F4F5F8; --summary-bg:#F4F5F8; --splash-accent:#2E7DFF; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
+    --bg:#F4F5F8; --summary-bg:#F4F5F8; --splash-accent:#0A84FF; --on-accent:#04101d; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
     --text:#1B1E28; --muted:#6B7280; --faint:#A6ADBC;
-    --protein:#FF4D6D; --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%); --glow:0 0 16px rgba(255,77,109,.25);
+    --protein:#0A84FF; --grad:linear-gradient(118deg,#3AA0FF 0%,#0A84FF 100%); --glow:0 0 16px rgba(10,132,255,.25);
     --protein-dial:#9333EA; --fat-dial:#0EA371; --carbs:#E8930C;
     --supp:#6366F1; --water:#0DA4C4; --brand:#0A84FF; --danger:#E11D48; --ok:#15A34A; --gold:#D99A2B;
     --h-morning:#E8930C; --h-wind:#7C5CF0;
   }
   html[data-theme="grape"]{
-    --bg:#140B1F; --summary-bg:#1B0F2B; --splash-accent:#FFB43D; --surface:#1F1330; --surface-2:#2A1B41; --border:#3B2858;
+    --bg:#140B1F; --summary-bg:#1B0F2B; --splash-accent:#FFC24B; --on-accent:#241703; --surface:#1F1330; --surface-2:#2A1B41; --border:#3B2858;
     --text:#F1EAF8; --muted:#A78FC2; --faint:#6C5589;
-    --protein:#FF5FA2; --grad:linear-gradient(118deg,#C46BFF 0%,#FF5FA2 100%); --glow:0 0 16px rgba(255,95,162,.40);
+    --protein:#FFC24B; --grad:linear-gradient(118deg,#FFD877 0%,#F5A623 100%); --glow:0 0 16px rgba(245,166,35,.38);
     --protein-dial:#C084FC; --fat-dial:#10B981; --carbs:#FFB43D;
     --supp:#A78BFA; --water:#34D3EE; --brand:#A78BFA; --danger:#FF5470; --ok:#3DE08A; --gold:#FFC24B;
+    --h-morning:#FFB43D; --h-wind:#C084FC;
+  }
+  html[data-theme="crimson"]{
+    --bg:#0E0406; --summary-bg:#0E0406; --splash-accent:#FF3B5C; --on-accent:#2a0710; --surface:#1C0A0E; --surface-2:#28111A; --border:#3E1B25;
+    --text:#FBEAED; --muted:#BE8C96; --faint:#7C4E58;
+    --protein:#FF3B5C; --grad:linear-gradient(118deg,#FF6B7F 0%,#E11D48 100%); --glow:0 0 16px rgba(225,29,72,.42);
+    --protein-dial:#C084FC; --fat-dial:#10B981; --carbs:#FFB43D;
+    --supp:#A78BFA; --water:#34D3EE; --brand:#3B82F6; --danger:#FF5470; --ok:#3DE08A; --gold:#FFC24B;
     --h-morning:#FFB43D; --h-wind:#C084FC;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -346,7 +355,7 @@
   .food .fi .nm{font-size:15px;font-weight:500}
   .food .fi .mm{font-family:var(--ff-num);font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap}
   .mm .p{color:var(--protein-dial)}.mm .c{color:var(--carbs)}.mm .f{color:var(--fat-dial)}
-  .food .plus{width:29px;height:29px;border-radius:9px;background:var(--grad);color:#2a0710;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--glow);line-height:0}
+  .food .plus{width:29px;height:29px;border-radius:9px;background:var(--grad);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--glow);line-height:0}
   .food .plus svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;stroke-linecap:round;fill:none;display:block}
   .food .mgbtns{display:flex;gap:6px}
   .food .mg{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:14px}
@@ -396,7 +405,7 @@
   .grid4 input{font-family:var(--ff-num);padding:11px 8px;text-align:center}
   input[type=number]{-moz-appearance:textfield;appearance:textfield}
   input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0}
-  .primary{width:100%;background:var(--grad);color:#2a0710;border:none;border-radius:12px;padding:14px;font-family:var(--ff-ui);font-weight:700;font-size:14px;cursor:pointer;margin-top:4px;letter-spacing:.04em;text-transform:uppercase;box-shadow:var(--glow)}
+  .primary{width:100%;background:var(--grad);color:var(--on-accent);border:none;border-radius:12px;padding:14px;font-family:var(--ff-ui);font-weight:700;font-size:14px;cursor:pointer;margin-top:4px;letter-spacing:.04em;text-transform:uppercase;box-shadow:var(--glow)}
   .primary:active{opacity:.85}
   .ghost{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;font-family:var(--ff-ui);font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;letter-spacing:.03em;transition:color .2s,border-color .2s,background .2s}
   .ghost.saved{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 55%,var(--border));background:color-mix(in srgb,var(--ok) 12%,var(--surface-2))}
@@ -420,7 +429,7 @@
   .nf-unit{flex:0 0 auto;display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:3px;gap:2px}
   .nf-unit button{border:none;background:transparent;color:var(--muted);font-family:var(--ff-ui);font-size:12px;font-weight:600;
     padding:0 12px;border-radius:9px;cursor:pointer;letter-spacing:.02em}
-  .nf-unit button.on{background:var(--protein);color:#2a0710}
+  .nf-unit button.on{background:var(--protein);color:var(--on-accent)}
   .nf-unit button:disabled{opacity:.4;cursor:not-allowed}
   .nf-amount-hint{font-family:var(--ff-num);font-size:11px;color:var(--muted);margin:6px 2px 0;min-height:14px}
   .nf-manual .field > label,.nf-manual .nf-name-grid > label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;line-height:1.2}
@@ -470,10 +479,11 @@
   .theme-sw i.a{width:16px;height:5px;left:7px;bottom:13px}
   .theme-sw i.b{width:10px;height:5px;left:7px;bottom:6px}
   .theme-name{font-size:12.5px;font-weight:600}
-  .sw-midnight{background:#000}       .sw-midnight i.a{background:#FF4D6D}  .sw-midnight i.b{background:#0A84FF}
-  .sw-blossom{background:#FFF1F6}      .sw-blossom i.a{background:#F53D7D}   .sw-blossom i.b{background:#7C6CF5}
-  .sw-daylight{background:#F4F5F8}     .sw-daylight i.a{background:#FF4D6D}  .sw-daylight i.b{background:#0A84FF}
-  .sw-grape{background:#140B1F}        .sw-grape i.a{background:#FF5FA2}     .sw-grape i.b{background:#A78BFA}
+  .sw-midnight{background:#000}       .sw-midnight i.a{background:#22C8FF}  .sw-midnight i.b{background:#0A84FF}
+  .sw-crimson{background:#0E0406}     .sw-crimson i.a{background:#FF3B5C}   .sw-crimson i.b{background:#3B82F6}
+  .sw-blossom{background:#FFF1F6}      .sw-blossom i.a{background:#8B5CF6}   .sw-blossom i.b{background:#C4A8FF}
+  .sw-daylight{background:#F4F5F8}     .sw-daylight i.a{background:#0A84FF}  .sw-daylight i.b{background:#3AA0FF}
+  .sw-grape{background:#140B1F}        .sw-grape i.a{background:#FFC24B}     .sw-grape i.b{background:#A78BFA}
 
   /* tabs */
   .tab-panel{display:none}
@@ -672,7 +682,7 @@
   .ob-foot{flex:none;display:flex;align-items:center;gap:12px;padding-top:16px}
   .ob-skip{flex:0 0 auto;background:transparent;border:none;color:var(--muted);font-family:var(--ff-ui);font-weight:600;font-size:14px;padding:14px 8px;cursor:pointer}
   .ob-skip:active{color:var(--text)}
-  .ob-next{flex:1;background:var(--grad);color:#2a0710;border:none;border-radius:13px;padding:15px;font-family:var(--ff-ui);font-weight:800;font-size:15px;letter-spacing:.02em;cursor:pointer;box-shadow:var(--glow)}
+  .ob-next{flex:1;background:var(--grad);color:var(--on-accent);border:none;border-radius:13px;padding:15px;font-family:var(--ff-ui);font-weight:800;font-size:15px;letter-spacing:.02em;cursor:pointer;box-shadow:var(--glow)}
   .ob-next:active{transform:scale(.99)}
 
   /* schedule / plan */
@@ -876,7 +886,7 @@
   #exList .exopt-fav.on{color:var(--gold)}
   #exList .exopt-fav.on svg{fill:var(--gold)}
   #exList .exopt-input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--protein);color:var(--text);border-radius:8px;padding:7px 9px;font-family:var(--ff-ui);font-size:14px;outline:none}
-  #exList .exopt-save{flex:none;width:32px;height:32px;display:grid;place-items:center;background:var(--protein);border:none;color:#2a0710;cursor:pointer;border-radius:8px;font-size:15px;padding:0}
+  #exList .exopt-save{flex:none;width:32px;height:32px;display:grid;place-items:center;background:var(--protein);border:none;color:var(--on-accent);cursor:pointer;border-radius:8px;font-size:15px;padding:0}
 
   /* workout plans (templates) */
   #tab-lift .wk-plan-quick{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:2px 0 12px}
@@ -891,7 +901,7 @@
   #plansList .plan-item .pi-main{flex:1;min-width:0;cursor:pointer}
   #plansList .plan-item .pi-name{font-weight:700;font-size:14px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #plansList .plan-item .pi-meta{font-family:var(--ff-num);font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #plansList .plan-item .pi-start{flex:none;background:var(--grad);color:#2a0710;border:none;border-radius:10px;padding:9px 15px;font-family:var(--ff-ui);font-weight:700;font-size:12px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;box-shadow:var(--glow)}
+  #plansList .plan-item .pi-start{flex:none;background:var(--grad);color:var(--on-accent);border:none;border-radius:10px;padding:9px 15px;font-family:var(--ff-ui);font-weight:700;font-size:12px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;box-shadow:var(--glow)}
   #plansList .plan-item .pi-start:active{filter:brightness(.94)}
   #plansList .plan-empty{text-align:center;color:var(--faint);font-size:12.5px;padding:14px 0;line-height:1.6}
   #plansNew{width:100%;background:transparent;border:1px dashed var(--border);color:var(--protein);border-radius:12px;padding:13px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;letter-spacing:.02em}
@@ -1113,7 +1123,7 @@
   #tab-coach .coach-today b{color:var(--text);font-weight:600}
   #tab-coach .coach-journal{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;color:var(--text);font-family:var(--ff-ui);font-size:13px;padding:11px;outline:none;margin-top:10px;box-sizing:border-box}
   #tab-coach .coach-journal::placeholder{color:var(--faint)}
-  #tab-coach .coach-apply{width:100%;background:var(--protein);color:#2a0710;border:none;border-radius:12px;padding:13px;font-family:var(--ff-ui);font-weight:700;font-size:13.5px;cursor:pointer;letter-spacing:.03em;margin-bottom:10px;box-shadow:var(--glow)}
+  #tab-coach .coach-apply{width:100%;background:var(--protein);color:var(--on-accent);border:none;border-radius:12px;padding:13px;font-family:var(--ff-ui);font-weight:700;font-size:13.5px;cursor:pointer;letter-spacing:.03em;margin-bottom:10px;box-shadow:var(--glow)}
 
   /* tab alert dots */
   .tabbtn .ndot{position:absolute;top:5px;left:calc(50% + 8px);width:7px;height:7px;border-radius:50%;background:var(--protein);box-shadow:0 0 6px var(--protein)}
@@ -1142,7 +1152,7 @@
   /* coach follow-up */
   #tab-coach .coach-ask{display:flex;gap:8px;margin-top:12px}
   #tab-coach .coach-ask input{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:12px;font-family:var(--ff-ui);font-size:14px;outline:none}
-  #tab-coach .coach-ask button{flex:none;background:var(--protein);color:#2a0710;border:none;border-radius:11px;padding:0 16px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer}
+  #tab-coach .coach-ask button{flex:none;background:var(--protein);color:var(--on-accent);border:none;border-radius:11px;padding:0 16px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer}
   #tab-coach .coach-cont-h{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:16px 2px 0;padding-top:14px;border-top:1px solid var(--border)}
   #tab-coach .coach-sep{height:1px;background:var(--border);margin:20px 0 16px}
   #tab-coach .coach-regen{margin-top:0}
@@ -1178,7 +1188,7 @@
   #tab-coach .coach-actions .coach-card-t{color:var(--protein)}
   #tab-coach .coach-actions ol{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:9px}
   #tab-coach .coach-actions li{counter-increment:step;position:relative;padding-left:26px;font-size:13px;line-height:1.45;color:var(--text)}
-  #tab-coach .coach-actions li::before{content:counter(step);position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--protein);color:#2a0710;font-family:var(--ff-num);font-size:10px;font-weight:700;display:grid;place-items:center}
+  #tab-coach .coach-actions li::before{content:counter(step);position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--protein);color:var(--on-accent);font-family:var(--ff-num);font-size:10px;font-weight:700;display:grid;place-items:center}
   #tab-coach .coach-disclaimer{text-align:center;color:var(--faint);font-size:10px;margin:4px 0 2px;line-height:1.5}
   #tab-coach .coach-regen{margin-top:2px}
 
@@ -1233,15 +1243,15 @@
   </symbol>
 </svg>
 
-<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand/badge-crimson.png" alt="MásGains"><img class="splash-wordmark" src="assets/brand/wordmark-crimson.png" alt="MásGains"></div></div>
+<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand/badge-electric.png" alt="MásGains"><img class="splash-wordmark" src="assets/brand/wordmark-electric.png" alt="MásGains"></div></div>
 
 <div class="onboard" id="onboard" hidden>
   <div class="ob-top"><div class="ob-dots" id="obDots"></div></div>
   <div class="ob-body" id="obBody">
 
     <section class="ob-step" data-step="welcome">
-      <img class="ob-badge" src="assets/brand/badge-crimson.png" alt="">
-      <img class="ob-wordmark" src="assets/brand/wordmark-crimson.png" alt="MásGains">
+      <img class="ob-badge" src="assets/brand/badge-electric.png" alt="">
+      <img class="ob-wordmark" src="assets/brand/wordmark-electric.png" alt="MásGains">
       <p class="ob-lede">More gains, less guesswork. Let's set you up in under a minute. You can skip any step and change it later in Settings.</p>
     </section>
 
@@ -1309,7 +1319,7 @@
     </section>
 
     <section class="ob-step" data-step="done" hidden>
-      <img class="ob-badge" src="assets/brand/badge-crimson.png" alt="">
+      <img class="ob-badge" src="assets/brand/badge-electric.png" alt="">
       <h2 class="ob-h" style="margin-top:18px">You're all set</h2>
       <p class="ob-lede">Everything's ready. You can revisit any of this from Settings whenever you like. Time to make some gains.</p>
     </section>
@@ -1325,7 +1335,7 @@
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
       <span class="brand-mark">
-      <img class="brand-logo" src="assets/brand/wordmark-crimson.png" alt="MásGains">
+      <img class="brand-logo" src="assets/brand/wordmark-electric.png" alt="MásGains">
 </span>
     </div>
     <div class="hero" data-goto="food">
@@ -1788,8 +1798,9 @@
       <div class="set-body" hidden>
         <div class="theme-grid" id="themeGrid">
           <button type="button" class="theme-opt" data-theme-pick="midnight"><span class="theme-sw sw-midnight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Midnight</span></button>
-          <button type="button" class="theme-opt" data-theme-pick="blossom"><span class="theme-sw sw-blossom"><i class="a"></i><i class="b"></i></span><span class="theme-name">Blossom</span></button>
+          <button type="button" class="theme-opt" data-theme-pick="crimson"><span class="theme-sw sw-crimson"><i class="a"></i><i class="b"></i></span><span class="theme-name">Crimson</span></button>
           <button type="button" class="theme-opt" data-theme-pick="daylight"><span class="theme-sw sw-daylight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Daylight</span></button>
+          <button type="button" class="theme-opt" data-theme-pick="blossom"><span class="theme-sw sw-blossom"><i class="a"></i><i class="b"></i></span><span class="theme-name">Blossom</span></button>
           <button type="button" class="theme-opt" data-theme-pick="grape"><span class="theme-sw sw-grape"><i class="a"></i><i class="b"></i></span><span class="theme-name">Grape</span></button>
         </div>
         <div class="mono-note" style="text-align:left;margin:10px 2px 0">Pick a skin for the whole app. Your choice is saved on this device.</div>
@@ -2159,7 +2170,7 @@
 
   /* ---------- theme ---------- */
   var THEME_KEY="mt_theme", theme="midnight";
-  var THEME_META={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F"};
+  var THEME_META={midnight:"#000000",blossom:"#FFF1F6",daylight:"#F4F5F8",grape:"#140B1F",crimson:"#0E0406"};
   function applyTheme(t){
     theme=THEME_META[t]?t:"midnight";
     if(theme==="midnight") document.documentElement.removeAttribute("data-theme");
@@ -2170,7 +2181,7 @@
     updateLogoSrc();
   }
   // each theme has a MásGains colourway: emblem badge (header/splash) + wordmark (home/splash)
-  var THEME_COLORWAY={midnight:"crimson",daylight:"blue",blossom:"violet",grape:"gold"};
+  var THEME_COLORWAY={midnight:"electric",daylight:"blue",blossom:"violet",grape:"gold",crimson:"crimson"};
   function badgeSrcFor(t){ return "assets/brand/badge-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function wordmarkSrcFor(t){ return "assets/brand/wordmark-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function updateLogoSrc(){
