@@ -14,12 +14,12 @@
   }catch(e){}
 })();
 </script>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22MasApp%22%2C%22short_name%22%3A%22MasApp%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%231D1D1F%22%2C%22theme_color%22%3A%22%231D1D1F%22%2C%22start_url%22%3A%22.%2F%22%7D">
-<title>MasApp</title>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22M%C3%A1sGains%22%2C%22short_name%22%3A%22M%C3%A1sGains%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230B0B10%22%2C%22theme_color%22%3A%22%230B0B10%22%2C%22start_url%22%3A%22./%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22assets/icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<title>MásGains</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="MasApp">
+<meta name="apple-mobile-web-app-title" content="MásGains">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <link rel="icon" type="image/png" href="assets/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,6 +29,7 @@
   :root{
     --bg:#000000;
     --summary-bg:#000000;
+    --splash-accent:#FF3B3B;
     --surface:#13151D;
     --surface-2:#1B1E28;
     --border:#252A38;
@@ -60,7 +61,7 @@
   }
   /* ---------- theme skins (Midnight is the default :root above) ---------- */
   html[data-theme="blossom"]{
-    --bg:#FFF1F6; --summary-bg:#FFF1F6; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
+    --bg:#FFF1F6; --summary-bg:#FFF1F6; --splash-accent:#A24BFF; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
     --text:#3B2A33; --muted:#9C7C89; --faint:#CBA8B7;
     --protein:#F53D7D; --grad:linear-gradient(118deg,#FF7FB0 0%,#F53D7D 100%); --glow:0 0 16px rgba(245,61,125,.30);
     --protein-dial:#A855F7; --fat-dial:#0EA371; --carbs:#EB9612;
@@ -68,7 +69,7 @@
     --h-morning:#EB9612; --h-wind:#8B6DF0;
   }
   html[data-theme="daylight"]{
-    --bg:#F4F5F8; --summary-bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
+    --bg:#F4F5F8; --summary-bg:#F4F5F8; --splash-accent:#2E7DFF; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
     --text:#1B1E28; --muted:#6B7280; --faint:#A6ADBC;
     --protein:#FF4D6D; --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%); --glow:0 0 16px rgba(255,77,109,.25);
     --protein-dial:#9333EA; --fat-dial:#0EA371; --carbs:#E8930C;
@@ -76,7 +77,7 @@
     --h-morning:#E8930C; --h-wind:#7C5CF0;
   }
   html[data-theme="grape"]{
-    --bg:#140B1F; --summary-bg:#1B0F2B; --surface:#1F1330; --surface-2:#2A1B41; --border:#3B2858;
+    --bg:#140B1F; --summary-bg:#1B0F2B; --splash-accent:#FFB43D; --surface:#1F1330; --surface-2:#2A1B41; --border:#3B2858;
     --text:#F1EAF8; --muted:#A78FC2; --faint:#6C5589;
     --protein:#FF5FA2; --grad:linear-gradient(118deg,#C46BFF 0%,#FF5FA2 100%); --glow:0 0 16px rgba(255,95,162,.40);
     --protein-dial:#C084FC; --fat-dial:#10B981; --carbs:#FFB43D;
@@ -627,11 +628,12 @@
   /* splash / entry screen */
   .loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:2000;transition:opacity .5s ease}
   .loading.splash-hide{opacity:0;pointer-events:none}
-  .splash-inner{position:relative;display:grid;place-items:center}
-  .splash-inner::before{content:"";position:absolute;width:82%;aspect-ratio:1;border-radius:50%;
-    background:radial-gradient(circle,color-mix(in srgb,var(--brand) 45%,transparent) 0,transparent 68%);
-    filter:blur(34px);z-index:-1;animation:splashGlow 1.8s ease-in-out infinite}
-  .splash-logo{width:min(52vw,240px);height:auto;display:block;animation:splashIn 1s cubic-bezier(.2,.75,.2,1) both}
+  .splash-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:22px}
+  .splash-inner::before{content:"";position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);width:70%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle,color-mix(in srgb,var(--splash-accent) 50%,transparent) 0,transparent 68%);
+    filter:blur(38px);z-index:-1;animation:splashGlow 1.8s ease-in-out infinite}
+  .splash-logo{width:min(46vw,208px);height:auto;display:block;animation:splashIn 1s cubic-bezier(.2,.75,.2,1) both}
+  .splash-wordmark{width:min(58vw,262px);height:auto;display:block;animation:splashIn 1s cubic-bezier(.2,.75,.2,1) .12s both}
   @keyframes splashIn{0%{opacity:0;transform:scale(.8)}60%{opacity:1}100%{opacity:1;transform:scale(1)}}
   @keyframes splashGlow{0%,100%{opacity:.35;transform:scale(.88)}50%{opacity:.8;transform:scale(1.12)}}
 
@@ -944,7 +946,7 @@
     z-index:2;
   }
   #tab-home .brand-mark{display:flex;align-items:center;justify-content:center}
-  #tab-home .brand-logo{height:32px;width:auto;display:block}
+  #tab-home .brand-logo{height:26px;width:auto;display:block}
   /* hero ring */
   #tab-home .hero{position:relative;background:var(--summary-bg);border:none;border-radius:20px;padding:22px 12px 6px;margin-bottom:0;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:none;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;isolation:isolate}
   #tab-home .hero::before{display:none}
@@ -1149,7 +1151,7 @@
 <body>
 <div id="portraitLock" aria-live="polite">
   <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="6" width="20" height="36" rx="4"/><path d="M24 14v8M20 18h8"/><path d="M34 24h6M37 21v6"/></svg>
-  <div><strong>Rotate to portrait</strong><p>MasApp is portrait-only. Turn your phone upright to continue.</p></div>
+  <div><strong>Rotate to portrait</strong><p>MásGains is portrait-only. Turn your phone upright to continue.</p></div>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
   <defs>
@@ -1193,12 +1195,12 @@
   </symbol>
 </svg>
 
-<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand-logo.png" alt="MasApp"></div></div>
+<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand/badge-crimson.png" alt="MásGains"><img class="splash-wordmark" src="assets/brand/wordmark-crimson.png" alt="MásGains"></div></div>
 <div class="app" id="app" style="display:none">
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
       <span class="brand-mark">
-      <img class="brand-logo" src="assets/brand-logo.png" alt="MAS">
+      <img class="brand-logo" src="assets/brand/wordmark-crimson.png" alt="MásGains">
 </span>
     </div>
     <div class="hero" data-goto="food">
@@ -1780,7 +1782,7 @@
       </div>
     </div>
 
-    <div class="set-foot">MasApp v1.0 · updated 17 Aug 2026, 4:48 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 17 Aug 2026, 4:48 PM</div>
   </div>
 </div>
 
@@ -2041,11 +2043,14 @@
     if(g){ [].forEach.call(g.querySelectorAll("[data-theme-pick]"),function(b){ b.classList.toggle("selected", b.getAttribute("data-theme-pick")===theme); }); }
     updateLogoSrc();
   }
-  // light skins use a dark/blue two-tone logo; dark skins use the full-colour one
-  function logoSrcFor(t){ return (t==="blossom"||t==="daylight") ? "assets/brand-logo-light.png" : "assets/brand-logo.png"; }
+  // each theme has a MásGains colourway: emblem badge (header/splash) + wordmark (home/splash)
+  var THEME_COLORWAY={midnight:"crimson",daylight:"blue",blossom:"violet",grape:"gold"};
+  function badgeSrcFor(t){ return "assets/brand/badge-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
+  function wordmarkSrcFor(t){ return "assets/brand/wordmark-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function updateLogoSrc(){
-    var src=logoSrcFor(theme);
-    document.querySelectorAll(".brand-logo, .htitle-logo, .splash-logo").forEach(function(im){ if(im.getAttribute("src")!==src) im.setAttribute("src",src); });
+    var badge=badgeSrcFor(theme), wm=wordmarkSrcFor(theme);
+    document.querySelectorAll(".htitle-logo, .splash-logo").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
+    document.querySelectorAll(".brand-logo, .splash-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
   }
   function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
 
@@ -2921,7 +2926,7 @@
         "content-type":"application/json",
         "authorization":"Bearer "+aiKey,
         "http-referer":location.href,
-        "x-title":"MasApp"
+        "x-title":"MásGains"
       },
       body:JSON.stringify(payload)
     });
@@ -5523,10 +5528,7 @@
     document.addEventListener("visibilitychange", updateOverlay, {passive:true});
   }
   function initHtitleLogos(){
-    var brand=document.querySelector("#tab-home .brand-logo");
-    if(!brand) return;
-    var url=brand.getAttribute("src");
-    if(!url) return;
+    var badge=badgeSrcFor(theme);
     document.querySelectorAll(".htitle").forEach(function(el){
       if(el.querySelector(".htitle-logo")) return;
       var text=(el.textContent||"").trim();
@@ -5534,7 +5536,7 @@
       var img=document.createElement("img");
       img.className="htitle-logo";
       img.alt="";
-      img.src=url;
+      img.src=badge;
       var span=document.createElement("span");
       span.className="htitle-text";
       span.textContent=text;
