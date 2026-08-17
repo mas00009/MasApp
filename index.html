@@ -83,9 +83,6 @@
     --supp:#A78BFA; --water:#34D3EE; --brand:#A78BFA; --danger:#FF5470; --ok:#3DE08A; --gold:#FFC24B;
     --h-morning:#FFB43D; --h-wind:#C084FC;
   }
-  /* the brand mark is a bright logo (transparent bg); on light skins render it dark so it reads */
-  html[data-theme="blossom"] .brand-logo, html[data-theme="blossom"] .htitle-logo,
-  html[data-theme="daylight"] .brand-logo, html[data-theme="daylight"] .htitle-logo{filter:brightness(0) opacity(.86)}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
   body{
@@ -627,7 +624,16 @@
   #tab-body .body-note:empty{display:none}
   .body-note{text-align:center;color:var(--faint);font-size:11px;margin-top:8px;line-height:1.6}
 
-  .loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:100;color:var(--muted);font-family:var(--ff-num);font-size:13px}
+  /* splash / entry screen */
+  .loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:2000;transition:opacity .5s ease}
+  .loading.splash-hide{opacity:0;pointer-events:none}
+  .splash-inner{position:relative;display:grid;place-items:center}
+  .splash-inner::before{content:"";position:absolute;width:82%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle,color-mix(in srgb,var(--brand) 45%,transparent) 0,transparent 68%);
+    filter:blur(34px);z-index:-1;animation:splashGlow 1.8s ease-in-out infinite}
+  .splash-logo{width:min(52vw,240px);height:auto;display:block;animation:splashIn 1s cubic-bezier(.2,.75,.2,1) both}
+  @keyframes splashIn{0%{opacity:0;transform:scale(.8)}60%{opacity:1}100%{opacity:1;transform:scale(1)}}
+  @keyframes splashGlow{0%,100%{opacity:.35;transform:scale(.88)}50%{opacity:.8;transform:scale(1.12)}}
 
   /* schedule / plan */
   #tab-plan .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
@@ -1187,7 +1193,7 @@
   </symbol>
 </svg>
 
-<div class="loading" id="loading">loading…</div>
+<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand-logo.png" alt="MasApp"></div></div>
 <div class="app" id="app" style="display:none">
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
@@ -1774,7 +1780,7 @@
       </div>
     </div>
 
-    <div class="set-foot">MasApp v1.0 · updated 17 Aug 2026, 4:37 PM</div>
+    <div class="set-foot">MasApp v1.0 · updated 17 Aug 2026, 4:48 PM</div>
   </div>
 </div>
 
@@ -2033,6 +2039,13 @@
     var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content",THEME_META[theme]);
     var g=document.getElementById("themeGrid");
     if(g){ [].forEach.call(g.querySelectorAll("[data-theme-pick]"),function(b){ b.classList.toggle("selected", b.getAttribute("data-theme-pick")===theme); }); }
+    updateLogoSrc();
+  }
+  // light skins use a dark/blue two-tone logo; dark skins use the full-colour one
+  function logoSrcFor(t){ return (t==="blossom"||t==="daylight") ? "assets/brand-logo-light.png" : "assets/brand-logo.png"; }
+  function updateLogoSrc(){
+    var src=logoSrcFor(theme);
+    document.querySelectorAll(".brand-logo, .htitle-logo, .splash-logo").forEach(function(im){ if(im.getAttribute("src")!==src) im.setAttribute("src",src); });
   }
   function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
 
@@ -5528,6 +5541,7 @@
       el.appendChild(img);
       el.appendChild(span);
     });
+    updateLogoSrc();
   }
 
   async function boot(){
@@ -5579,7 +5593,6 @@
     var wcRaw=await sGet(WKCOLLAPSE_KEY); if(wcRaw){ try{ collapsedExc=JSON.parse(wcRaw)||{}; }catch(e){ collapsedExc={}; } }
     if(!latestFor("weight")){ var tk=keyOf(new Date()); if(!body[tk]) body[tk]={}; body[tk].weight=DEFAULT_WEIGHT; await sSet(BODY_KEY, JSON.stringify(body)); }
     await migrateSchema();
-    document.getElementById("loading").style.display="none";
     document.getElementById("app").style.display="block";
     initHtitleLogos();
     initBodyFigureSrc();
@@ -5591,6 +5604,16 @@
     renderWorkout();
     renderHome();
     updateBadges();
+    hideSplash();
+  }
+  var splashT0=Date.now();
+  function hideSplash(){
+    var el=document.getElementById("loading"); if(!el) return;
+    var wait=Math.max(0, 1300-(Date.now()-splashT0));   // let the entry animation breathe
+    setTimeout(function(){
+      el.classList.add("splash-hide");
+      setTimeout(function(){ el.style.display="none"; }, 560);
+    }, wait);
   }
   initPortraitLock();
   boot();
