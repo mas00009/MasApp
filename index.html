@@ -29,7 +29,6 @@
   :root{
     --bg:#000000;
     --summary-bg:#000000;
-    --gauge-bg:transparent;
     --surface:#13151D;
     --surface-2:#1B1E28;
     --border:#252A38;
@@ -61,7 +60,7 @@
   }
   /* ---------- theme skins (Midnight is the default :root above) ---------- */
   html[data-theme="blossom"]{
-    --bg:#FFF1F6; --summary-bg:#FFFFFF; --gauge-bg:#241019; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
+    --bg:#FFF1F6; --summary-bg:#FFF1F6; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
     --text:#3B2A33; --muted:#9C7C89; --faint:#CBA8B7;
     --protein:#F53D7D; --grad:linear-gradient(118deg,#FF7FB0 0%,#F53D7D 100%); --glow:0 0 16px rgba(245,61,125,.30);
     --protein-dial:#A855F7; --fat-dial:#0EA371; --carbs:#EB9612;
@@ -69,7 +68,7 @@
     --h-morning:#EB9612; --h-wind:#8B6DF0;
   }
   html[data-theme="daylight"]{
-    --bg:#F4F5F8; --summary-bg:#FFFFFF; --gauge-bg:#161922; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
+    --bg:#F4F5F8; --summary-bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
     --text:#1B1E28; --muted:#6B7280; --faint:#A6ADBC;
     --protein:#FF4D6D; --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%); --glow:0 0 16px rgba(255,77,109,.25);
     --protein-dial:#9333EA; --fat-dial:#0EA371; --carbs:#E8930C;
@@ -165,10 +164,9 @@
   #tab-food .summary{
     position:sticky;top:calc(var(--head-inset-top) + var(--head-bar-h));z-index:19;
   }
-  /* calorie fuel gauge - stays a dark bar on every skin so the white readout + fill pop */
-  .fuel{position:relative;height:50px;border-radius:14px;background:var(--gauge-bg);overflow:hidden;
-    box-shadow:inset 0 0 0 1px var(--border);margin-bottom:12px;
-    --text:#EEF0F6; --muted:#9BA1B0}
+  /* calorie fuel gauge - a soft track that follows the skin (dark on dark, light on light) */
+  .fuel{position:relative;height:50px;border-radius:14px;background:var(--surface-2);overflow:hidden;
+    box-shadow:inset 0 0 0 1px var(--border);margin-bottom:12px}
   .fuel-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--blue);
     box-shadow:0 0 20px color-mix(in srgb,var(--blue) 40%,transparent);transition:width .55s cubic-bezier(.4,0,.2,1),background .3s,box-shadow .3s}
   .fuel-fill::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;pointer-events:none;
@@ -179,11 +177,11 @@
   #suppFill,#suppFill.complete,#suppFill.over{background:var(--blue);box-shadow:0 0 20px color-mix(in srgb,var(--blue) 40%,transparent)}
   .fuel-content{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:0 15px}
   .fuel-left{display:flex;align-items:center;gap:9px;min-width:0}
-  .fuel-ico{width:22px;height:22px;flex:none;display:block;color:#fff;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))}
-  .fuel-num{font-family:var(--ff-num);font-weight:800;font-size:24px;line-height:1;letter-spacing:-.02em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.45)}
-  .fuel-num span{font-size:11px;font-weight:500;color:rgba(255,255,255,.72);margin-left:4px;text-shadow:none}
+  .fuel-ico{width:22px;height:22px;flex:none;display:block;color:var(--text)}
+  .fuel-num{font-family:var(--ff-num);font-weight:800;font-size:24px;line-height:1;letter-spacing:-.02em;color:var(--text)}
+  .fuel-num span{font-size:11px;font-weight:500;color:var(--muted);margin-left:4px}
   .fuel-right{text-align:right;line-height:1.12}
-  .fuel-rem{font-family:var(--ff-num);font-weight:800;font-size:24px;line-height:1;letter-spacing:-.02em;color:var(--text);text-shadow:0 1px 6px rgba(0,0,0,.4)}
+  .fuel-rem{font-family:var(--ff-num);font-weight:800;font-size:24px;line-height:1;letter-spacing:-.02em;color:var(--text)}
   .fuel-rem span{font-size:11px;font-weight:500;color:var(--muted);margin-left:4px}
   .fuel-rem.good{color:var(--ok)} .fuel-rem.good span{color:color-mix(in srgb,var(--ok) 72%,var(--muted))}
   .fuel-rem.over{color:var(--danger)} .fuel-rem.over span{color:color-mix(in srgb,var(--danger) 72%,var(--muted))}
@@ -887,15 +885,18 @@
   .rest-ctrls button{flex:1;max-width:132px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:15px;padding:18px 10px;font-family:var(--ff-num);font-size:17px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .rest-ctrls button:active{background:var(--border)}
   .rest-ctrls .skip{color:var(--muted)}
-  .restbar.ending{animation:restpulse .85s ease-in-out infinite}
-  .restbar.ending .ra{stroke:var(--ok)}
-  .restbar.ending .rl,.restbar.ending .rtime{color:var(--ok)}
-  @keyframes restpulse{0%,100%{background:color-mix(in srgb,var(--bg) 90%,#000)}50%{background:color-mix(in srgb,var(--ok) 26%,#000)}}
-  .restbar.done{animation:restflash .5s steps(1,end) infinite}
-  .restbar.done .ra{stroke:#04160c}
-  .restbar.done .rt{stroke:color-mix(in srgb,#04160c 35%,transparent)}
-  .restbar.done .rl,.restbar.done .rtime,.restbar.done .rs{color:#04160c}
-  @keyframes restflash{0%,100%{background:#22e07a}50%{background:color-mix(in srgb,var(--ok) 35%,#000)}}
+  /* final seconds: a warm amber breathe */
+  .restbar.ending{animation:restpulse 1s ease-in-out infinite}
+  .restbar.ending .ra{stroke:var(--carbs)}
+  .restbar.ending .rl,.restbar.ending .rtime{color:var(--carbs)}
+  @keyframes restpulse{0%,100%{background:color-mix(in srgb,var(--bg) 90%,#000)}50%{background:color-mix(in srgb,var(--carbs) 18%,color-mix(in srgb,var(--bg) 90%,#000))}}
+  /* done: a cool, smooth accent glow (full ring + check), no harsh blinking */
+  .restbar.done{animation:restdone 1.9s ease-in-out infinite}
+  .restbar.done .ra{stroke:var(--brand);stroke-dashoffset:0!important;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--brand) 60%,transparent))}
+  .restbar.done .rt{stroke:color-mix(in srgb,var(--brand) 22%,transparent)}
+  .restbar.done .rl,.restbar.done .rs{color:var(--brand)}
+  .restbar.done .rtime{color:var(--brand);font-size:clamp(70px,22vw,120px)}
+  @keyframes restdone{0%,100%{background:color-mix(in srgb,var(--bg) 90%,#000)}50%{background:color-mix(in srgb,var(--brand) 15%,color-mix(in srgb,var(--bg) 90%,#000))}}
 
   /* body composition + cut cards */
   .bstat .bstat-v .up{color:var(--protein);-webkit-text-fill-color:var(--protein)}
@@ -4634,7 +4635,49 @@
   });
 
   /* rest timer */
-  var restTimer=null, restEnd=0, restTotal=90, _audioCtx=null;
+  var restTimer=null, restDismissTO=null, restEnd=0, restTotal=90, restSub="", restDoneAt=0, _audioCtx=null;
+  var REST_DONE_MS=5000;   // how long the finished state lingers on screen before auto-closing
+  // rest state is persisted (device-local, not a mt_ key so it never syncs) so it survives the app
+  // being backgrounded or reopened; on return we recompute from the end timestamp
+  function saveRestLive(){ try{ if(restEnd){ localStorage.setItem("restlive", JSON.stringify({end:restEnd,total:restTotal,sub:restSub,doneAt:restDoneAt})); } else { localStorage.removeItem("restlive"); } }catch(e){} }
+  function restStopTimers(){ if(restTimer){ clearInterval(restTimer); restTimer=null; } if(restDismissTO){ clearTimeout(restDismissTO); restDismissTO=null; } }
+  function restDismiss(){
+    restStopTimers(); restEnd=0; restDoneAt=0;
+    try{ localStorage.removeItem("restlive"); }catch(e){}
+    var bar=document.getElementById("restBar");
+    if(bar){ bar.classList.remove("done","ending"); bar.setAttribute("hidden",""); }
+  }
+  function restComplete(announce){
+    var bar=document.getElementById("restBar"); if(!bar) return;
+    restStopTimers();
+    if(!restDoneAt) restDoneAt=Date.now();
+    bar.classList.remove("ending"); bar.classList.add("done"); bar.removeAttribute("hidden");
+    var rt=document.getElementById("restTime"); if(rt) rt.textContent="✓";
+    saveRestLive();
+    if(announce){ try{ if(navigator.vibrate) navigator.vibrate([120,60,120,60,200]); }catch(e){} restBeep(); }
+    var left=REST_DONE_MS-(Date.now()-restDoneAt);
+    if(left<=0){ restDismiss(); return; }
+    restDismissTO=setTimeout(restDismiss, left);
+  }
+  function resumeRest(){
+    var raw; try{ raw=localStorage.getItem("restlive"); }catch(e){ raw=null; }
+    if(!raw) return;
+    var st; try{ st=JSON.parse(raw); }catch(e){ st=null; }
+    if(!st || !st.end){ restDismiss(); return; }
+    restEnd=st.end; restTotal=st.total||restDefault; restSub=st.sub||""; restDoneAt=st.doneAt||0;
+    var bar=document.getElementById("restBar"); if(!bar) return;
+    var subEl=document.getElementById("restSub"); if(subEl) subEl.textContent=restSub;
+    restStopTimers();
+    var now=Date.now();
+    if(restDoneAt || restEnd<=now){
+      if(!restDoneAt) restDoneAt=restEnd;                    // ended while away, never flagged
+      if(now-restDoneAt >= REST_DONE_MS){ restDismiss(); return; }   // finished a while ago: just close
+      restComplete(false);                                  // still fresh: show it, no re-announce
+      return;
+    }
+    bar.classList.remove("done","ending"); bar.removeAttribute("hidden");
+    restTick(); restTimer=setInterval(restTick,250);
+  }
   function restBeep(){
     try{
       var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
@@ -4657,30 +4700,26 @@
     var bar=document.getElementById("restBar"); if(!bar) return;
     var rem=(restEnd-Date.now())/1000, C=2*Math.PI*20, frac=restTotal>0?Math.max(0,Math.min(1,rem/restTotal)):0;
     var arc=document.getElementById("restArc");
-    arc.style.strokeDasharray=C.toFixed(1);
-    arc.style.strokeDashoffset=(C*(1-frac)).toFixed(1);
+    if(arc){ arc.style.strokeDasharray=C.toFixed(1); arc.style.strokeDashoffset=(C*(1-frac)).toFixed(1); }
     document.getElementById("restTime").textContent=fmtClock(rem);
     if(rem>0 && rem<=5){ bar.classList.add("ending"); } else { bar.classList.remove("ending"); }
-    if(rem<=0){
-      clearInterval(restTimer); restTimer=null;
-      bar.classList.remove("ending"); bar.classList.add("done"); document.getElementById("restTime").textContent="0:00";
-      try{ if(navigator.vibrate) navigator.vibrate([120,60,120,60,200]); }catch(e){}
-      restBeep();
-      setTimeout(function(){ bar.setAttribute("hidden",""); bar.classList.remove("done"); },3000);
-    }
+    if(rem<=0){ restComplete(true); }
   }
   function startRest(exName, setNo){
     var bar=document.getElementById("restBar"); if(!bar) return;
     try{ var Ctx=window.AudioContext||window.webkitAudioContext; if(Ctx){ if(!_audioCtx) _audioCtx=new Ctx(); if(_audioCtx.state==="suspended") _audioCtx.resume(); } }catch(e){}
-    restTotal=restDefault; restEnd=Date.now()+restDefault*1000;
-    bar.classList.remove("done"); bar.classList.remove("ending"); bar.removeAttribute("hidden");
-    document.getElementById("restSub").textContent=exName+" · Set "+setNo;
-    if(restTimer) clearInterval(restTimer);
+    restStopTimers();
+    restTotal=restDefault; restEnd=Date.now()+restDefault*1000; restDoneAt=0; restSub=exName+" · Set "+setNo;
+    bar.classList.remove("done","ending"); bar.removeAttribute("hidden");
+    document.getElementById("restSub").textContent=restSub;
+    saveRestLive();
     restTick(); restTimer=setInterval(restTick,250);
   }
-  document.getElementById("restMinus").addEventListener("click", function(){ restEnd-=15000; if(restEnd<Date.now()) restEnd=Date.now(); restTick(); });
-  document.getElementById("restPlus").addEventListener("click", function(){ restEnd+=15000; restTotal+=15; var b=document.getElementById("restBar"); b.classList.remove("done"); b.classList.remove("ending"); if(!restTimer){ restTimer=setInterval(restTick,250); } restTick(); });
-  document.getElementById("restSkip").addEventListener("click", function(){ if(restTimer){clearInterval(restTimer);restTimer=null;} var b=document.getElementById("restBar"); b.classList.remove("done"); b.classList.remove("ending"); b.setAttribute("hidden",""); });
+  document.getElementById("restMinus").addEventListener("click", function(){ if(restDoneAt) return; restEnd-=15000; if(restEnd<Date.now()) restEnd=Date.now(); saveRestLive(); restTick(); });
+  document.getElementById("restPlus").addEventListener("click", function(){ restEnd+=15000; restTotal+=15; restDoneAt=0; var b=document.getElementById("restBar"); b.classList.remove("done","ending"); restStopTimers(); restTimer=setInterval(restTick,250); saveRestLive(); restTick(); });
+  document.getElementById("restSkip").addEventListener("click", restDismiss);
+  document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") resumeRest(); });
+  resumeRest();
 
 
   /* ---------- water ---------- */
