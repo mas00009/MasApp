@@ -469,11 +469,11 @@
   .set-section.open .set-chev{transform:rotate(90deg)}
   .set-body{padding:12px 12px 14px;border-top:1px solid var(--border)}
   .set-body[hidden]{display:none}
-  /* theme picker */
-  .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .theme-opt{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;padding:9px 10px;cursor:pointer;font-family:var(--ff-ui);color:var(--text)}
-  .theme-opt:active{background:var(--border)}
-  .theme-opt.selected{border-color:var(--protein);box-shadow:0 0 0 1px var(--protein)}
+  /* theme picker (compact dropdown) */
+  .theme-row{display:flex;align-items:center;gap:11px}
+  .theme-select{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:12px;font-family:var(--ff-ui);font-size:15px;font-weight:600;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) center,calc(100% - 13px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .theme-select:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
   .theme-sw{position:relative;width:38px;height:38px;border-radius:9px;flex:none;overflow:hidden;border:1px solid rgba(255,255,255,.08);display:block}
   .theme-sw i{position:absolute;border-radius:2px;display:block}
   .theme-sw i.a{width:16px;height:5px;left:7px;bottom:13px}
@@ -1796,12 +1796,15 @@
     <div class="set-section">
       <button type="button" class="set-head" data-set-toggle aria-expanded="false"><span>Appearance</span><span class="set-chev">›</span></button>
       <div class="set-body" hidden>
-        <div class="theme-grid" id="themeGrid">
-          <button type="button" class="theme-opt" data-theme-pick="midnight"><span class="theme-sw sw-midnight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Midnight</span></button>
-          <button type="button" class="theme-opt" data-theme-pick="crimson"><span class="theme-sw sw-crimson"><i class="a"></i><i class="b"></i></span><span class="theme-name">Crimson</span></button>
-          <button type="button" class="theme-opt" data-theme-pick="daylight"><span class="theme-sw sw-daylight"><i class="a"></i><i class="b"></i></span><span class="theme-name">Daylight</span></button>
-          <button type="button" class="theme-opt" data-theme-pick="blossom"><span class="theme-sw sw-blossom"><i class="a"></i><i class="b"></i></span><span class="theme-name">Blossom</span></button>
-          <button type="button" class="theme-opt" data-theme-pick="grape"><span class="theme-sw sw-grape"><i class="a"></i><i class="b"></i></span><span class="theme-name">Grape</span></button>
+        <div class="theme-row">
+          <span class="theme-sw sw-midnight" id="themeSwatch"><i class="a"></i><i class="b"></i></span>
+          <select id="themePick" class="theme-select">
+            <option value="midnight">Midnight</option>
+            <option value="crimson">Crimson</option>
+            <option value="daylight">Daylight</option>
+            <option value="blossom">Blossom</option>
+            <option value="grape">Grape</option>
+          </select>
         </div>
         <div class="mono-note" style="text-align:left;margin:10px 2px 0">Pick a skin for the whole app. Your choice is saved on this device.</div>
       </div>
@@ -2176,8 +2179,8 @@
     if(theme==="midnight") document.documentElement.removeAttribute("data-theme");
     else document.documentElement.setAttribute("data-theme",theme);
     var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content",THEME_META[theme]);
-    var g=document.getElementById("themeGrid");
-    if(g){ [].forEach.call(g.querySelectorAll("[data-theme-pick]"),function(b){ b.classList.toggle("selected", b.getAttribute("data-theme-pick")===theme); }); }
+    var sel=document.getElementById("themePick"); if(sel && sel.value!==theme) sel.value=theme;
+    var sw=document.getElementById("themeSwatch"); if(sw) sw.className="theme-sw sw-"+theme;
     updateLogoSrc();
   }
   // each theme has a MásGains colourway: emblem badge (header/splash) + wordmark (home/splash)
@@ -2870,8 +2873,8 @@
     b.addEventListener("click",function(){ renderManage(); resetSettingsSections(); openSheet("manageSheet"); });
   });
   (function(){
-    var grid=document.getElementById("themeGrid"); if(!grid) return;
-    grid.addEventListener("click",function(e){ var b=e.target.closest("[data-theme-pick]"); if(b) setTheme(b.getAttribute("data-theme-pick")); });
+    var sel=document.getElementById("themePick"); if(!sel) return;
+    sel.addEventListener("change",function(){ setTheme(this.value); });
   })();
   (function(){
     var cloud=document.getElementById("hCloud"); if(!cloud) return;
