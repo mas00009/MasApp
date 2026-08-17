@@ -29,6 +29,7 @@
   :root{
     --bg:#000000;
     --summary-bg:#000000;
+    --gauge-bg:transparent;
     --surface:#13151D;
     --surface-2:#1B1E28;
     --border:#252A38;
@@ -60,7 +61,7 @@
   }
   /* ---------- theme skins (Midnight is the default :root above) ---------- */
   html[data-theme="blossom"]{
-    --bg:#FFF1F6; --summary-bg:#2B1822; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
+    --bg:#FFF1F6; --summary-bg:#FFFFFF; --gauge-bg:#241019; --surface:#FFFFFF; --surface-2:#FDE6F0; --border:#F6D3E1;
     --text:#3B2A33; --muted:#9C7C89; --faint:#CBA8B7;
     --protein:#F53D7D; --grad:linear-gradient(118deg,#FF7FB0 0%,#F53D7D 100%); --glow:0 0 16px rgba(245,61,125,.30);
     --protein-dial:#A855F7; --fat-dial:#0EA371; --carbs:#EB9612;
@@ -68,7 +69,7 @@
     --h-morning:#EB9612; --h-wind:#8B6DF0;
   }
   html[data-theme="daylight"]{
-    --bg:#F4F5F8; --summary-bg:#171A22; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
+    --bg:#F4F5F8; --summary-bg:#FFFFFF; --gauge-bg:#161922; --surface:#FFFFFF; --surface-2:#EBEEF3; --border:#DCE0EA;
     --text:#1B1E28; --muted:#6B7280; --faint:#A6ADBC;
     --protein:#FF4D6D; --grad:linear-gradient(118deg,#FF4D6D 0%,#FF4D6D 100%); --glow:0 0 16px rgba(255,77,109,.25);
     --protein-dial:#9333EA; --fat-dial:#0EA371; --carbs:#E8930C;
@@ -83,6 +84,9 @@
     --supp:#A78BFA; --water:#34D3EE; --brand:#A78BFA; --danger:#FF5470; --ok:#3DE08A; --gold:#FFC24B;
     --h-morning:#FFB43D; --h-wind:#C084FC;
   }
+  /* the brand mark is a bright logo (transparent bg); on light skins render it dark so it reads */
+  html[data-theme="blossom"] .brand-logo, html[data-theme="blossom"] .htitle-logo,
+  html[data-theme="daylight"] .brand-logo, html[data-theme="daylight"] .htitle-logo{filter:brightness(0) opacity(.86)}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
   body{
@@ -156,17 +160,15 @@
   .summary{
     background:var(--summary-bg);border:none;border-radius:16px;
     padding:14px 14px 12px;margin-bottom:11px;
-    /* the overview stays a dark hero panel on every skin, so pin its inner
-       text/track to light values regardless of the (possibly light) theme */
-    --text:#EEF0F6; --muted:#9BA1B0; --faint:#5C6273; --surface-2:#252A38;
   }
   /* keep the food overview (calories + macros) pinned below the header as the meal list scrolls */
   #tab-food .summary{
     position:sticky;top:calc(var(--head-inset-top) + var(--head-bar-h));z-index:19;
   }
-  /* calorie fuel gauge */
-  .fuel{position:relative;height:50px;border-radius:14px;background:transparent;overflow:hidden;
-    box-shadow:inset 0 0 0 1px var(--border);margin-bottom:12px}
+  /* calorie fuel gauge - stays a dark bar on every skin so the white readout + fill pop */
+  .fuel{position:relative;height:50px;border-radius:14px;background:var(--gauge-bg);overflow:hidden;
+    box-shadow:inset 0 0 0 1px var(--border);margin-bottom:12px;
+    --text:#EEF0F6; --muted:#9BA1B0}
   .fuel-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--blue);
     box-shadow:0 0 20px color-mix(in srgb,var(--blue) 40%,transparent);transition:width .55s cubic-bezier(.4,0,.2,1),background .3s,box-shadow .3s}
   .fuel-fill::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;pointer-events:none;
@@ -922,9 +924,7 @@
     display:flex;flex-direction:column;gap:4px;justify-content:space-between;overflow:hidden;
     height:calc(100dvh - 80px - env(safe-area-inset-bottom));
     max-height:calc(100dvh - 80px - env(safe-area-inset-bottom));
-    padding-bottom:6px;background:var(--summary-bg);
-    /* the home dashboard is a dark hero on every skin; pin inner text light */
-    --text:#EEF0F6; --muted:#9BA1B0; --faint:#5C6273; --surface-2:#252A38;
+    padding-bottom:6px;background:var(--bg);
   }
   #tab-home .home-brand{
     display:flex;align-items:center;justify-content:center;margin:0;flex:none;
@@ -932,7 +932,7 @@
     height:calc(var(--head-inset-top) + var(--head-bar-h));
     min-height:calc(var(--head-inset-top) + var(--head-bar-h));
     box-sizing:border-box;
-    background:var(--summary-bg);
+    background:var(--bg);
     position:relative;
     z-index:2;
   }
