@@ -637,6 +637,44 @@
   @keyframes splashIn{0%{opacity:0;transform:scale(.8)}60%{opacity:1}100%{opacity:1;transform:scale(1)}}
   @keyframes splashGlow{0%,100%{opacity:.35;transform:scale(.88)}50%{opacity:.8;transform:scale(1.12)}}
 
+  /* first-run onboarding */
+  .onboard{position:fixed;inset:0;z-index:1500;background:var(--bg);display:flex;flex-direction:column;
+    max-width:440px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 20px calc(18px + env(safe-area-inset-bottom));box-sizing:border-box}
+  .onboard[hidden]{display:none}
+  .onboard.ob-out{animation:obFade .32s ease forwards}
+  @keyframes obFade{to{opacity:0;pointer-events:none}}
+  .ob-top{flex:none;padding:4px 0 18px}
+  .ob-dots{display:flex;gap:7px;justify-content:center}
+  .ob-dots span{width:7px;height:7px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);transition:all .25s}
+  .ob-dots span.on{background:var(--protein);border-color:var(--protein);box-shadow:0 0 8px color-mix(in srgb,var(--protein) 55%,transparent)}
+  .ob-dots span.done{background:color-mix(in srgb,var(--protein) 55%,var(--surface-2))}
+  .ob-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;justify-content:center}
+  .ob-step{animation:obStepIn .35s cubic-bezier(.2,.7,.2,1) both}
+  .ob-step[hidden]{display:none!important}
+  @keyframes obStepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .ob-step[data-step="welcome"],.ob-step[data-step="done"]{text-align:center;display:flex;flex-direction:column;align-items:center}
+  .ob-badge{width:min(38vw,150px);height:auto;display:block;margin:0 auto 22px;filter:drop-shadow(0 8px 26px color-mix(in srgb,var(--splash-accent) 40%,transparent))}
+  .ob-wordmark{width:min(58vw,250px);height:auto;display:block;margin:0 auto 18px}
+  .ob-lede{font-size:14.5px;line-height:1.5;color:var(--muted);max-width:320px;margin:0 auto}
+  .ob-h{font-family:var(--ff-ui);font-weight:800;font-size:23px;letter-spacing:-.01em;color:var(--text);margin-bottom:5px}
+  .ob-opt{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;vertical-align:middle;margin-left:6px}
+  .ob-sub{font-size:13.5px;line-height:1.45;color:var(--muted);margin-bottom:18px}
+  .ob-note{font-size:12px;color:var(--faint);margin-top:12px;line-height:1.4}
+  .ob-note b{color:var(--muted);font-weight:600}
+  .ob-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .ob-grid2{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;margin-top:10px}
+  .onboard .field label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:5px}
+  .onboard .field input,.onboard .field select{width:100%;box-sizing:border-box;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:12px;font-family:var(--ff-ui);font-size:16px;outline:none}
+  .onboard .field input:focus,.onboard .field select:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
+  .ob-rec{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .ob-rec-head{font-family:var(--ff-num);font-size:17px;font-weight:800;color:var(--text)}
+  .ob-rec-sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
+  .ob-foot{flex:none;display:flex;align-items:center;gap:12px;padding-top:16px}
+  .ob-skip{flex:0 0 auto;background:transparent;border:none;color:var(--muted);font-family:var(--ff-ui);font-weight:600;font-size:14px;padding:14px 8px;cursor:pointer}
+  .ob-skip:active{color:var(--text)}
+  .ob-next{flex:1;background:var(--grad);color:#2a0710;border:none;border-radius:13px;padding:15px;font-family:var(--ff-ui);font-weight:800;font-size:15px;letter-spacing:.02em;cursor:pointer;box-shadow:var(--glow)}
+  .ob-next:active{transform:scale(.99)}
+
   /* schedule / plan */
   #tab-plan .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
     position:sticky;top:calc(var(--head-inset-top) + var(--head-bar-h));z-index:19;
@@ -1196,6 +1234,93 @@
 </svg>
 
 <div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand/badge-crimson.png" alt="MásGains"><img class="splash-wordmark" src="assets/brand/wordmark-crimson.png" alt="MásGains"></div></div>
+
+<div class="onboard" id="onboard" hidden>
+  <div class="ob-top"><div class="ob-dots" id="obDots"></div></div>
+  <div class="ob-body" id="obBody">
+
+    <section class="ob-step" data-step="welcome">
+      <img class="ob-badge" src="assets/brand/badge-crimson.png" alt="">
+      <img class="ob-wordmark" src="assets/brand/wordmark-crimson.png" alt="MásGains">
+      <p class="ob-lede">More gains, less guesswork. Let's set you up in under a minute. You can skip any step and change it later in Settings.</p>
+    </section>
+
+    <section class="ob-step" data-step="profile" hidden>
+      <h2 class="ob-h">Your profile</h2>
+      <p class="ob-sub">Drives your calorie and macro targets.</p>
+      <div class="ob-grid3">
+        <div class="field"><label>Weight (kg)</label><input type="number" inputmode="decimal" id="obWeight"></div>
+        <div class="field"><label>Height (cm)</label><input type="number" inputmode="numeric" id="obHeight"></div>
+        <div class="field"><label>Age</label><input type="number" inputmode="numeric" id="obAge"></div>
+      </div>
+      <div class="ob-grid2">
+        <div class="field"><label>Sex</label><select id="obSex"><option value="male">Male</option><option value="female">Female</option></select></div>
+        <div class="field"><label>Activity</label><select id="obAct">
+          <option value="1.2">Sedentary</option>
+          <option value="1.375">Light (1-3 days)</option>
+          <option value="1.55">Moderate (3-5 days)</option>
+          <option value="1.725">Very active (6-7 days)</option>
+          <option value="1.9">Athlete (2x/day)</option>
+        </select></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>Goal weight (kg) - optional</label><input type="number" inputmode="decimal" id="obGoalW" placeholder="e.g. 82"></div>
+    </section>
+
+    <section class="ob-step" data-step="targets" hidden>
+      <h2 class="ob-h">Daily targets</h2>
+      <p class="ob-sub">Suggested from your profile. Fine-tune later in Settings.</p>
+      <div class="ob-rec">
+        <div class="ob-rec-head" id="obRecHead">-</div>
+        <div class="ob-rec-sub" id="obRecSub"></div>
+        <div class="field" style="margin-top:12px"><label>Pace</label><select id="obPace">
+          <option value="relaxed">Relaxed</option>
+          <option value="steady" selected>Steady</option>
+          <option value="aggressive">Aggressive</option>
+        </select></div>
+      </div>
+    </section>
+
+    <section class="ob-step" data-step="measure" hidden>
+      <h2 class="ob-h">Measurements</h2>
+      <p class="ob-sub">Optional. Powers body-fat and progress tracking. Add what you like.</p>
+      <div class="ob-grid3">
+        <div class="field"><label>Neck (cm)</label><input type="number" inputmode="decimal" id="obNeck"></div>
+        <div class="field"><label>Chest (cm)</label><input type="number" inputmode="decimal" id="obChest"></div>
+        <div class="field"><label>Waist (cm)</label><input type="number" inputmode="decimal" id="obWaist"></div>
+        <div class="field"><label>Hips (cm)</label><input type="number" inputmode="decimal" id="obHips"></div>
+        <div class="field"><label>Arms (cm)</label><input type="number" inputmode="decimal" id="obArms"></div>
+        <div class="field"><label>Thighs (cm)</label><input type="number" inputmode="decimal" id="obThighs"></div>
+      </div>
+      <div class="field" style="margin-top:2px"><label>Calves (cm)</label><input type="number" inputmode="decimal" id="obCalves"></div>
+    </section>
+
+    <section class="ob-step" data-step="ai" hidden>
+      <h2 class="ob-h">AI features <span class="ob-opt">optional</span></h2>
+      <p class="ob-sub">Powers the Coach, photo food scan and AI estimates. Uses your own OpenRouter key, stored only on this device.</p>
+      <div class="field"><label>OpenRouter API key</label><input type="password" id="obAiKey" placeholder="sk-or-..." autocomplete="off"></div>
+      <p class="ob-note">Get a free key at <b>openrouter.ai</b>. You can add this any time later.</p>
+    </section>
+
+    <section class="ob-step" data-step="sync" hidden>
+      <h2 class="ob-h">Cloud sync <span class="ob-opt">optional</span></h2>
+      <p class="ob-sub">Back up and sync your data across devices. Leave blank to keep everything on this device only.</p>
+      <div class="field"><label>Worker URL</label><input type="text" id="obSyncUrl" placeholder="https://your-worker.workers.dev" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field" style="margin-top:10px"><label>Sync token</label><input type="password" id="obSyncToken" placeholder="your secret token" autocomplete="off"></div>
+    </section>
+
+    <section class="ob-step" data-step="done" hidden>
+      <img class="ob-badge" src="assets/brand/badge-crimson.png" alt="">
+      <h2 class="ob-h" style="margin-top:18px">You're all set</h2>
+      <p class="ob-lede">Everything's ready. You can revisit any of this from Settings whenever you like. Time to make some gains.</p>
+    </section>
+
+  </div>
+  <div class="ob-foot">
+    <button type="button" class="ob-skip" id="obSkip">Skip</button>
+    <button type="button" class="ob-next" id="obNext">Continue</button>
+  </div>
+</div>
+
 <div class="app" id="app" style="display:none">
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
@@ -1692,6 +1817,7 @@
         <div class="field" style="margin-top:8px"><label>Goal weight (kg) - optional</label><input type="number" inputmode="decimal" id="pGoalW" placeholder="e.g. 82"></div>
         <div class="mono-note" style="text-align:left;margin:8px 2px 10px">Saving weight also logs it to today on the Body tab. Sex and activity drive the maintenance estimate.</div>
         <button type="button" class="ghost" id="saveProfile">Save profile</button>
+        <button type="button" class="ghost" id="obReplay" style="margin-top:8px">Run setup walkthrough</button>
       </div>
     </div>
 
@@ -2049,10 +2175,127 @@
   function wordmarkSrcFor(t){ return "assets/brand/wordmark-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function updateLogoSrc(){
     var badge=badgeSrcFor(theme), wm=wordmarkSrcFor(theme);
-    document.querySelectorAll(".htitle-logo, .splash-logo").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
-    document.querySelectorAll(".brand-logo, .splash-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
+    document.querySelectorAll(".htitle-logo, .splash-logo, .ob-badge").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
+    document.querySelectorAll(".brand-logo, .splash-wordmark, .ob-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
   }
   function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
+
+  /* ---------- first-run onboarding ---------- */
+  var ONBOARD_KEY="mt_onboarded", needsOnboard=false;
+  var OB_STEPS=["welcome","profile","targets","measure","ai","sync","done"], obIndex=0, obTargetsRec=null;
+  function obEl(id){ return document.getElementById(id); }
+  function obCopy(dst,src){ var d=obEl(dst),s=obEl(src); if(d&&s) d.value=s.value; }
+  function obHasData(){
+    try{ for(var k in log){ var d=log[k]; if(d&&((d.breakfast&&d.breakfast.length)||(d.lunch&&d.lunch.length)||(d.dinner&&d.dinner.length))) return true; } }catch(e){}
+    if(typeof workouts==="object" && Object.keys(workouts||{}).length) return true;
+    if(typeof schedule!=="undefined" && (schedule||[]).length) return true;
+    if(typeof aiKey!=="undefined" && aiKey) return true;
+    return false;
+  }
+  function obPrefill(){
+    var lw=(typeof latestFor==="function")?latestFor("weight"):null;
+    obEl("obWeight").value = lw ? r1(lw.v) : DEFAULT_WEIGHT;
+    obEl("obHeight").value = profile.height!=null?profile.height:"";
+    obEl("obAge").value = profile.age!=null?profile.age:"";
+    obEl("obSex").value = profile.sex||"male";
+    obEl("obAct").value = String(profile.activity||1.725);
+    obEl("obGoalW").value = profile.goalWeight!=null?profile.goalWeight:"";
+    var su=obEl("syncUrl"); if(su) obEl("obSyncUrl").value=su.value;
+  }
+  function obRenderDots(){
+    var wrap=obEl("obDots"); if(!wrap) return; var html="";
+    for(var i=1;i<OB_STEPS.length-1;i++){ html+="<span class='"+(i===obIndex?"on":(i<obIndex?"done":""))+"'></span>"; }
+    wrap.innerHTML=html;
+  }
+  function obRenderTargets(){
+    if(typeof recommendTargets!=="function") return;
+    var p=obEl("obPace"); var r=recommendTargets(p?p.value:"steady"); obTargetsRec=r;
+    obEl("obRecHead").textContent="≈"+r.cal.toLocaleString()+" kcal · P "+r.p+" · C "+r.c+" · F "+r.f+" g";
+    var bits=[(r.measured?"measured":"est.")+" maintenance ≈"+r.maint.toLocaleString()];
+    if(r.dir!==0){ bits.push((r.dir<0?"cut ":"lean bulk ")+r.kgWk+" kg/wk"); if(r.goal!=null) bits.push("goal "+r1(r.goal)+" kg"); }
+    else bits.push(r.goal==null?"add a goal weight in Profile to cut or bulk":"at goal, maintain");
+    obEl("obRecSub").textContent=bits.join(" · ");
+  }
+  function obShow(i){
+    obIndex=Math.max(0,Math.min(OB_STEPS.length-1,i));
+    var name=OB_STEPS[obIndex];
+    [].forEach.call(document.querySelectorAll("#obBody .ob-step"),function(s){ s.hidden=(s.getAttribute("data-step")!==name); });
+    var cur=document.querySelector('#obBody .ob-step[data-step="'+name+'"]');
+    if(cur){ cur.style.animation="none"; void cur.offsetWidth; cur.style.animation=""; }
+    obRenderDots();
+    var skip=obEl("obSkip"), next=obEl("obNext");
+    if(name==="welcome"){ skip.hidden=false; skip.textContent="Skip setup"; next.textContent="Get started"; }
+    else if(name==="done"){ skip.hidden=true; next.textContent="Start MásGains"; }
+    else { skip.hidden=false; skip.textContent="Skip"; next.textContent="Continue"; }
+    if(name==="targets") obRenderTargets();
+    var body=obEl("obBody"); if(body) body.scrollTop=0;
+  }
+  function obCommitProfile(){
+    obCopy("pWeight","obWeight"); obCopy("pHeight","obHeight"); obCopy("pAge","obAge");
+    obCopy("pSex","obSex"); obCopy("pAct","obAct"); obCopy("pGoalW","obGoalW");
+    var b=obEl("saveProfile"); if(b) b.click();
+  }
+  function obCommitTargets(){
+    var r=obTargetsRec||(typeof recommendTargets==="function"?recommendTargets("steady"):null); if(!r) return;
+    targets={cal:r.cal,p:r.p,c:r.c,f:r.f,waterL:(targets&&targets.waterL)||0};
+    if(typeof saveTargetsStore==="function") saveTargetsStore();
+    if(typeof renderSummary==="function") renderSummary();
+    if(typeof renderToday==="function") renderToday();
+  }
+  function obCommitMeasure(){
+    var today=keyOf(new Date()); if(!body[today]) body[today]={};
+    function m(id,site){ var v=num(obEl(id).value); if(v>0) body[today][site]=r1(v); }
+    m("obNeck","neck"); m("obChest","chest"); m("obWaist","waist"); m("obHips","hips");
+    var arms=num(obEl("obArms").value); if(arms>0){ body[today].armL=r1(arms); body[today].armR=r1(arms); }
+    var th=num(obEl("obThighs").value); if(th>0){ body[today].thighL=r1(th); body[today].thighR=r1(th); }
+    var ca=num(obEl("obCalves").value); if(ca>0){ body[today].calfL=r1(ca); body[today].calfR=r1(ca); }
+    if(typeof saveBody==="function") saveBody();
+    if(typeof renderBody==="function") renderBody();
+  }
+  function obCommitAi(){
+    var v=obEl("obAiKey").value.trim(); if(!v) return;
+    var k=obEl("aiKey"); if(k){ k.value=v; var b=obEl("saveAI"); if(b) b.click(); }
+  }
+  function obCommitSync(){
+    var url=obEl("obSyncUrl").value.trim(), tok=obEl("obSyncToken").value.trim();
+    if(!tok) return;   // need a token to sync
+    var su=obEl("syncUrl"), st=obEl("syncToken");
+    if(su&&url) su.value=url; if(st) st.value=tok;
+    var b=obEl("saveSync"); if(b) b.click();
+  }
+  function obNext(){
+    var name=OB_STEPS[obIndex];
+    try{
+      if(name==="profile") obCommitProfile();
+      else if(name==="targets") obCommitTargets();
+      else if(name==="measure") obCommitMeasure();
+      else if(name==="ai") obCommitAi();
+      else if(name==="sync") obCommitSync();
+    }catch(e){}
+    if(name==="done"){ obFinish(); return; }
+    obShow(obIndex+1);
+  }
+  function obSkip(){ if(OB_STEPS[obIndex]==="welcome"){ obFinish(); return; } obShow(obIndex+1); }
+  function obFinish(){
+    sSet(ONBOARD_KEY,"1");
+    var ov=obEl("onboard"); if(!ov) return;
+    ov.classList.add("ob-out");
+    setTimeout(function(){ ov.setAttribute("hidden",""); ov.classList.remove("ob-out"); },340);
+    if(typeof renderAll==="function") renderAll();
+    if(typeof renderHome==="function") renderHome();
+    if(typeof renderBody==="function") renderBody();
+  }
+  function startOnboarding(){
+    var ov=obEl("onboard"); if(!ov) return;
+    updateLogoSrc(); obPrefill(); obIndex=0; obShow(0);
+    ov.removeAttribute("hidden");
+    var nx=obEl("obNext"), sk=obEl("obSkip"), pace=obEl("obPace");
+    if(nx&&!nx._w){ nx._w=1; nx.addEventListener("click",obNext); }
+    if(sk&&!sk._w){ sk._w=1; sk.addEventListener("click",obSkip); }
+    if(pace&&!pace._w){ pace._w=1; pace.addEventListener("change",obRenderTargets); }
+  }
+  window.__runOnboarding=startOnboarding;
+  (function(){ var b=document.getElementById("obReplay"); if(b) b.addEventListener("click",function(){ if(typeof closeSheets==="function") closeSheets(); startOnboarding(); }); })();
 
   /* ---------- state ---------- */
   var FOODS_KEY="mt_foods", TARGETS_KEY="mt_targets", LOG_KEY="mt_log";
@@ -5606,11 +5849,15 @@
     renderWorkout();
     renderHome();
     updateBadges();
+    var obFlag=await sGet(ONBOARD_KEY);
+    if(!obFlag && obHasData()){ sSet(ONBOARD_KEY,"1"); obFlag="1"; }   // existing users skip it
+    needsOnboard = !obFlag;
     hideSplash();
   }
   var splashT0=Date.now();
   function hideSplash(){
     var el=document.getElementById("loading"); if(!el) return;
+    if(needsOnboard){ try{ startOnboarding(); }catch(e){} }   // reveal onboarding beneath the splash
     var wait=Math.max(0, 1300-(Date.now()-splashT0));   // let the entry animation breathe
     setTimeout(function(){
       el.classList.add("splash-hide");
