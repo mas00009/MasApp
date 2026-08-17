@@ -4108,18 +4108,65 @@
       });
     }
   }
+  // common gym shorthand -> the words that actually appear in exercise names
+  var EX_ABBR={db:"dumbbell",dbs:"dumbbell",bb:"barbell",kb:"kettlebell",
+    ohp:"overhead press",rdl:"romanian deadlift",sldl:"stiff leg deadlift",
+    bp:"bench press",gm:"good morning",ez:"ez bar",pushup:"push up",pullup:"pull up",
+    situp:"sit up",chinup:"chin up",bws:"bodyweight",bw:"bodyweight"};
+  function exTokens(q){
+    var out=[];
+    q.split(/[^a-z0-9]+/).forEach(function(p){
+      if(!p) return;
+      if(EX_ABBR[p]) EX_ABBR[p].split(" ").forEach(function(w){ if(w) out.push(w); });
+      else out.push(p);
+    });
+    return out;
+  }
+  function exStem(x){ return (x.length>3 && x.charAt(x.length-1)==="s") ? x.slice(0,-1) : x; }
+  // relevance score for one exercise against the query tokens; -1 means "no match"
+  function exScore(hay, words, tokens, rawq){
+    var score=0;
+    for(var i=0;i<tokens.length;i++){
+      var t=tokens[i], ts=exStem(t), best=-1;
+      for(var w=0;w<words.length;w++){
+        var word=words[w], ws=exStem(word);
+        if(word===t){ best=Math.max(best,130-w); break; }        // exact whole word
+        else if(ws===ts) best=Math.max(best,120-w);              // same word, plural/singular
+        else if(word.indexOf(t)===0) best=Math.max(best,95-w);   // word starts with token
+        else if(ws.indexOf(ts)===0) best=Math.max(best,85-w);    // stemmed prefix
+      }
+      if(best<0){ var idx=hay.indexOf(t); if(idx>=0) best=30-Math.min(idx,20); else return -1; } // must appear somewhere
+      score+=best;
+    }
+    if(hay===rawq) score+=1000;
+    else if(hay.indexOf(rawq)===0) score+=200;
+    score += Math.max(0,44-hay.length)*0.6;                       // nudge shorter, canonical names up
+    return score;
+  }
   function renderExList(q){
     var box=document.getElementById("exList"); q=(q||"").trim().toLowerCase();
     var raw=document.getElementById("exSearch").value.trim(), html="";
-    exMatches=[];
     var names=allExNames();
+    exMatches=[];
     if(raw && !names.some(function(n){return n.toLowerCase()===q || exDisplay(n).toLowerCase()===q;})){
       html+="<button class='exopt custom' data-exc='1'>+ Add \u201c"+esc(raw)+"\u201d</button>";
     }
     if(q){
-      exMatches=names.filter(function(n){ return n.toLowerCase().indexOf(q)>=0 || exDisplay(n).toLowerCase().indexOf(q)>=0; });
-      // favourites first, keeping original order within each group
-      exMatches.sort(function(a,b){ return (isFav(a)?0:1)-(isFav(b)?0:1); });
+      var toks=exTokens(q);
+      if(!toks.length) toks=[q];
+      var scored=[];
+      names.forEach(function(n){
+        var hay=exDisplay(n).toLowerCase();
+        var words=hay.split(/[^a-z0-9]+/).filter(Boolean);
+        var s=exScore(hay, words, toks, q);
+        if(s<0 && n.toLowerCase()!==hay){                          // also try the raw stored name
+          var h2=n.toLowerCase(), w2=h2.split(/[^a-z0-9]+/).filter(Boolean);
+          s=exScore(h2, w2, toks, q);
+        }
+        if(s>=0){ if(isFav(n)) s+=400; scored.push({n:n,s:s,len:hay.length}); }
+      });
+      scored.sort(function(a,b){ return b.s-a.s || a.len-b.len || (a.n<b.n?-1:a.n>b.n?1:0); });
+      exMatches=scored.slice(0,60).map(function(x){ return x.n; });
       html+=exMatches.map(exOptHTML).join("");
       box.innerHTML=html || "<div class='wk-empty'>No matches. Type a custom name above.</div>";
       return;
