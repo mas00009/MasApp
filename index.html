@@ -938,7 +938,32 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     animation:restfadein .22s ease}
   .restbar[hidden]{display:none}
   @keyframes restfadein{from{opacity:0}to{opacity:1}}
-  .rest-inner{display:flex;flex-direction:column;align-items:center;gap:26px;width:100%;max-width:440px}
+  .rest-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:26px;width:100%;max-width:440px}
+  .rest-min{position:absolute;top:-8px;right:2px;width:44px;height:44px;display:grid;place-items:center;background:transparent;border:none;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .rest-min svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .rest-min:active{color:var(--text)}
+  /* minimized: a compact pill above the tab bar, app stays usable behind it */
+  .rest-mini{display:none}
+  .restbar.mini{position:fixed;inset:auto 0 0 0;top:auto;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;pointer-events:none;animation:none;display:block}
+  .restbar.mini .rest-inner{display:none}
+  .restbar.mini .rest-mini{display:flex;align-items:center;gap:12px;pointer-events:auto;position:fixed;left:10px;right:10px;bottom:calc(84px + env(safe-area-inset-bottom));
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:9px 12px;box-shadow:0 8px 26px rgba(0,0,0,.4);cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:left;
+    animation:restMiniIn .28s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes restMiniIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .rest-mini .rm-ring{position:relative;width:40px;height:40px;flex:none}
+  .rest-mini .rm-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .rest-mini .rm-ring .rt{fill:none;stroke:var(--surface-2);stroke-width:3}
+  .rest-mini .rm-ring .ra{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .3s}
+  .rest-mini .rm-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--ff-num);font-size:11px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+  .rest-mini .rm-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+  .rest-mini .rm-lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);font-weight:800}
+  .rest-mini .rm-name{font-size:12.5px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rest-mini .rm-skip{flex:none;color:var(--muted);font-family:var(--ff-ui);font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;background:var(--surface-2)}
+  .rest-mini .rm-skip:active{background:var(--border)}
+  .restbar.mini.ending .rest-mini .ra,.restbar.mini.ending .rm-lbl{stroke:var(--carbs)}
+  .restbar.mini.ending .rest-mini .rm-lbl{color:var(--carbs)}
+  .restbar.mini.done .rest-mini .ra{stroke:var(--brand);stroke-dashoffset:0!important}
+  .restbar.mini.done .rest-mini .rm-lbl,.restbar.mini.done .rest-mini .rm-t{color:var(--brand)}
   .rl{font-family:var(--ff-ui);font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--blue);font-weight:800}
   .rest-ring{position:relative;width:min(68vw,290px);height:min(68vw,290px);flex:none}
   .rest-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -1688,6 +1713,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   <div class="restbar" id="restBar" hidden>
     <div class="rest-inner">
+      <button type="button" class="rest-min" id="restMin" aria-label="Minimize timer"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="rl">Rest</div>
       <div class="rest-ring">
         <svg viewBox="0 0 48 48"><circle class="rt" cx="24" cy="24" r="20"/><circle class="ra" id="restArc" cx="24" cy="24" r="20"/></svg>
@@ -1700,6 +1726,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
         <button class="skip" id="restSkip">Skip</button>
       </div>
     </div>
+    <button type="button" class="rest-mini" id="restMiniPill">
+      <span class="rm-ring"><svg viewBox="0 0 44 44"><circle class="rt" cx="22" cy="22" r="19"/><circle class="ra" id="restArcMini" cx="22" cy="22" r="19"/></svg><span class="rm-t" id="restTimeMini">0:00</span></span>
+      <span class="rm-mid"><span class="rm-lbl">Rest</span><span class="rm-name" id="restSubMini"></span></span>
+      <span class="rm-skip" id="restSkipMini" role="button">Skip</span>
+    </button>
   </div>
 
   <nav class="tabbar">
@@ -4948,7 +4979,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     restStopTimers(); restEnd=0; restDoneAt=0;
     try{ localStorage.removeItem("restlive"); }catch(e){}
     var bar=document.getElementById("restBar");
-    if(bar){ bar.classList.remove("done","ending"); bar.setAttribute("hidden",""); }
+    if(bar){ bar.classList.remove("done","ending","mini"); bar.setAttribute("hidden",""); }
   }
   function restComplete(announce){
     var bar=document.getElementById("restBar"); if(!bar) return;
@@ -4956,6 +4987,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(!restDoneAt) restDoneAt=Date.now();
     bar.classList.remove("ending"); bar.classList.add("done"); bar.removeAttribute("hidden");
     var rt=document.getElementById("restTime"); if(rt) rt.textContent="✓";
+    var rtm=document.getElementById("restTimeMini"); if(rtm) rtm.textContent="✓";
     saveRestLive();
     if(announce){ try{ if(navigator.vibrate) navigator.vibrate([120,60,120,60,200]); }catch(e){} restBeep(); }
     var left=REST_DONE_MS-(Date.now()-restDoneAt);
@@ -4970,6 +5002,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     restEnd=st.end; restTotal=st.total||restDefault; restSub=st.sub||""; restDoneAt=st.doneAt||0;
     var bar=document.getElementById("restBar"); if(!bar) return;
     var subEl=document.getElementById("restSub"); if(subEl) subEl.textContent=restSub;
+    var subM=document.getElementById("restSubMini"); if(subM) subM.textContent=restSub;
     restStopTimers();
     var now=Date.now();
     if(restDoneAt || restEnd<=now){
@@ -4999,12 +5032,14 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     }catch(e){}
   }
   function fmtClock(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+  function restSetArc(id, r, frac){ var a=document.getElementById(id); if(a){ var C=2*Math.PI*r; a.style.strokeDasharray=C.toFixed(1); a.style.strokeDashoffset=(C*(1-frac)).toFixed(1); } }
   function restTick(){
     var bar=document.getElementById("restBar"); if(!bar) return;
-    var rem=(restEnd-Date.now())/1000, C=2*Math.PI*20, frac=restTotal>0?Math.max(0,Math.min(1,rem/restTotal)):0;
-    var arc=document.getElementById("restArc");
-    if(arc){ arc.style.strokeDasharray=C.toFixed(1); arc.style.strokeDashoffset=(C*(1-frac)).toFixed(1); }
-    document.getElementById("restTime").textContent=fmtClock(rem);
+    var rem=(restEnd-Date.now())/1000, frac=restTotal>0?Math.max(0,Math.min(1,rem/restTotal)):0;
+    restSetArc("restArc",20,frac); restSetArc("restArcMini",19,frac);
+    var clk=fmtClock(rem);
+    var rt=document.getElementById("restTime"); if(rt) rt.textContent=clk;
+    var rtm=document.getElementById("restTimeMini"); if(rtm) rtm.textContent=clk;
     if(rem>0 && rem<=5){ bar.classList.add("ending"); } else { bar.classList.remove("ending"); }
     if(rem<=0){ restComplete(true); }
   }
@@ -5013,14 +5048,18 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     try{ var Ctx=window.AudioContext||window.webkitAudioContext; if(Ctx){ if(!_audioCtx) _audioCtx=new Ctx(); if(_audioCtx.state==="suspended") _audioCtx.resume(); } }catch(e){}
     restStopTimers();
     restTotal=restDefault; restEnd=Date.now()+restDefault*1000; restDoneAt=0; restSub=exName+" · Set "+setNo;
-    bar.classList.remove("done","ending"); bar.removeAttribute("hidden");
+    bar.classList.remove("done","ending","mini"); bar.removeAttribute("hidden");
     document.getElementById("restSub").textContent=restSub;
+    var sm=document.getElementById("restSubMini"); if(sm) sm.textContent=restSub;
     saveRestLive();
     restTick(); restTimer=setInterval(restTick,250);
   }
   document.getElementById("restMinus").addEventListener("click", function(){ if(restDoneAt) return; restEnd-=15000; if(restEnd<Date.now()) restEnd=Date.now(); saveRestLive(); restTick(); });
   document.getElementById("restPlus").addEventListener("click", function(){ restEnd+=15000; restTotal+=15; restDoneAt=0; var b=document.getElementById("restBar"); b.classList.remove("done","ending"); restStopTimers(); restTimer=setInterval(restTick,250); saveRestLive(); restTick(); });
   document.getElementById("restSkip").addEventListener("click", restDismiss);
+  document.getElementById("restMin").addEventListener("click", function(){ document.getElementById("restBar").classList.add("mini"); });
+  document.getElementById("restMiniPill").addEventListener("click", function(){ document.getElementById("restBar").classList.remove("mini"); });
+  document.getElementById("restSkipMini").addEventListener("click", function(e){ e.stopPropagation(); restDismiss(); });
   document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") resumeRest(); });
   resumeRest();
 
