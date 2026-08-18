@@ -482,6 +482,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .theme-select{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:12px;font-family:var(--ff-ui);font-size:15px;font-weight:600;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
     background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) center,calc(100% - 13px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
   .theme-select:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{background:var(--surface-2);border:1px solid var(--border);color:var(--muted);border-radius:999px;padding:8px 13px;font-family:var(--ff-ui);font-weight:600;font-size:12.5px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .chip.on{background:color-mix(in srgb,var(--protein) 16%,transparent);border-color:color-mix(in srgb,var(--protein) 55%,var(--border));color:var(--protein)}
+  .chip:active{transform:scale(.97)}
+  #manageSheet textarea,.field textarea,.sheet textarea{width:100%;box-sizing:border-box;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:11px;font-family:var(--ff-ui);font-size:15px;line-height:1.4;outline:none;resize:vertical}
+  #manageSheet textarea:focus,.sheet textarea:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
   .theme-sw{position:relative;width:38px;height:38px;border-radius:9px;flex:none;overflow:hidden;border:1px solid rgba(255,255,255,.08);display:block}
   .theme-sw i{position:absolute;border-radius:2px;display:block}
   .theme-sw i.a{width:16px;height:5px;left:7px;bottom:13px}
@@ -916,6 +922,27 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #plansList .plan-item .pi-start{flex:none;background:var(--grad);color:var(--on-accent);border:none;border-radius:10px;padding:9px 15px;font-family:var(--ff-ui);font-weight:700;font-size:12px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;box-shadow:var(--glow)}
   #plansList .plan-item .pi-start:active{filter:brightness(.94)}
   #plansList .plan-empty{text-align:center;color:var(--faint);font-size:12.5px;padding:14px 0;line-height:1.6}
+  /* AI planner */
+  .ai-plan-cta{width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,color-mix(in srgb,var(--protein) 20%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));border-radius:14px;padding:13px 14px;cursor:pointer;text-align:left;margin-bottom:12px;-webkit-tap-highlight-color:transparent}
+  .ai-plan-cta:active{filter:brightness(.97)}
+  .ai-plan-cta .apc-spark{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--grad);color:var(--on-accent);font-size:16px;box-shadow:var(--glow)}
+  .ai-plan-cta .apc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .ai-plan-cta .apc-txt b{font-size:14px;font-weight:700;color:var(--text)}
+  .ai-plan-cta .apc-txt i{font-style:normal;font-size:11.5px;color:var(--muted)}
+  .ai-plan-cta .apc-go{flex:none;color:var(--protein);font-size:22px;font-weight:700}
+  .apl-lbl{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 2px 8px}
+  #aiPlanResult .apr-head{margin:0 2px 10px}
+  #aiPlanResult .apr-title{font-family:var(--ff-ui);font-weight:800;font-size:18px;color:var(--text)}
+  #aiPlanResult .apr-why{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:5px}
+  .apr-ex{display:flex;gap:11px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:11px 12px;margin-bottom:8px}
+  .apr-ex .apr-n{flex:none;width:24px;height:24px;border-radius:7px;background:var(--surface-2);color:var(--muted);font-family:var(--ff-num);font-weight:700;font-size:12px;display:grid;place-items:center;margin-top:1px}
+  .apr-ex .apr-main{flex:1;min-width:0}
+  .apr-ex .apr-name{font-weight:700;font-size:14px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .apr-ex .apr-sets{font-family:var(--ff-num);font-size:12px;color:var(--protein);font-weight:700;margin-top:2px}
+  .apr-ex .apr-note{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .apr-ex .apr-swap{flex:none;color:var(--faint);font-size:10px;font-family:var(--ff-num);align-self:center}
+  .apr-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .apr-actions .ghost{margin:0}
   #plansNew{width:100%;background:transparent;border:1px dashed var(--border);color:var(--protein);border-radius:12px;padding:13px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;letter-spacing:.02em}
   #plansNew:active{background:var(--surface-2)}
   #planExRows{display:flex;flex-direction:column;gap:7px;margin-top:2px}
@@ -1884,7 +1911,24 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
           </select></div>
         </div>
         <div class="field" style="margin-top:8px"><label>Goal weight (kg) - optional</label><input type="number" inputmode="decimal" id="pGoalW" placeholder="e.g. 82"></div>
-        <div class="mono-note" style="text-align:left;margin:8px 2px 10px">Saving weight also logs it to today on the Body tab. Sex and activity drive the maintenance estimate.</div>
+        <div class="field" style="margin-top:10px"><label>Training experience</label><select id="pExp">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select></div>
+        <div style="margin-top:12px"><label style="display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:7px">Equipment you have</label>
+          <div class="chips" id="pEquip">
+            <button type="button" class="chip" data-equip="barbell">Barbell</button>
+            <button type="button" class="chip" data-equip="dumbbell">Dumbbells</button>
+            <button type="button" class="chip" data-equip="machine">Machines</button>
+            <button type="button" class="chip" data-equip="cable">Cables</button>
+            <button type="button" class="chip" data-equip="bodyweight">Bodyweight</button>
+            <button type="button" class="chip" data-equip="kettlebell">Kettlebells</button>
+            <button type="button" class="chip" data-equip="bands">Bands</button>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Preferences / anything to avoid</label><textarea id="pTrainNotes" rows="2" placeholder="e.g. no heavy lower-back loading, prefer machines for legs, bad right shoulder"></textarea></div>
+        <div class="mono-note" style="text-align:left;margin:8px 2px 10px">Saving weight also logs it to today on the Body tab. Experience, equipment and preferences guide the AI workout planner.</div>
         <button type="button" class="ghost" id="saveProfile">Save profile</button>
         <button type="button" class="ghost" id="obReplay" style="margin-top:8px">Run setup walkthrough</button>
       </div>
@@ -2141,9 +2185,64 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <button class="close" data-close>Close</button>
   </div>
   <div class="sheet-body">
+    <button type="button" class="ai-plan-cta" id="aiPlanOpen"><span class="apc-spark">✦</span><span class="apc-txt"><b>Build a plan with AI</b><i>Tailored to your history, goals and preferences</i></span><span class="apc-go">›</span></button>
     <div class="mono-note" style="text-align:left;margin:0 4px 10px">Build a plan once - its exercises, sets and target reps. Then load it onto any day and just punch in the weight.</div>
     <div id="plansList"></div>
     <button id="plansNew">+ New plan</button>
+  </div>
+</div>
+
+<div class="sheet" id="aiPlanSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2>AI Workout Planner</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body">
+    <div id="aiPlanSetup">
+      <div class="mono-note" style="text-align:left;margin:0 2px 12px">Pick what you want to train. The planner reads your past workouts, goals, age and preferences (set in Profile) and builds today's session - exercises, order, sets and reps.</div>
+      <label class="apl-lbl">Quick split</label>
+      <div class="chips" id="aiPresets" style="margin-bottom:14px">
+        <button type="button" class="chip" data-preset="push">Push</button>
+        <button type="button" class="chip" data-preset="pull">Pull</button>
+        <button type="button" class="chip" data-preset="legs">Legs</button>
+        <button type="button" class="chip" data-preset="upper">Upper</button>
+        <button type="button" class="chip" data-preset="lower">Lower</button>
+        <button type="button" class="chip" data-preset="full">Full body</button>
+      </div>
+      <label class="apl-lbl">Muscle groups</label>
+      <div class="chips" id="aiParts" style="margin-bottom:14px">
+        <button type="button" class="chip" data-part="chest">Chest</button>
+        <button type="button" class="chip" data-part="back">Back</button>
+        <button type="button" class="chip" data-part="shoulders">Shoulders</button>
+        <button type="button" class="chip" data-part="biceps">Biceps</button>
+        <button type="button" class="chip" data-part="triceps">Triceps</button>
+        <button type="button" class="chip" data-part="quads">Quads</button>
+        <button type="button" class="chip" data-part="hamstrings">Hamstrings</button>
+        <button type="button" class="chip" data-part="glutes">Glutes</button>
+        <button type="button" class="chip" data-part="calves">Calves</button>
+        <button type="button" class="chip" data-part="core">Core</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Focus</label><select id="aiFocus">
+          <option value="auto" selected>Auto (from goal)</option>
+          <option value="strength">Strength</option>
+          <option value="hypertrophy">Hypertrophy</option>
+          <option value="endurance">Endurance</option>
+        </select></div>
+        <div class="field"><label>Exercises</label><select id="aiCount">
+          <option value="auto" selected>Auto</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select></div>
+      </div>
+      <div class="photo-tray-status" id="aiPlanStatus" style="margin:10px 2px 0"></div>
+      <button type="button" class="primary" id="aiPlanBuild" style="margin-top:14px">Build my plan</button>
+    </div>
+    <div id="aiPlanResult" hidden></div>
   </div>
 </div>
 
@@ -2753,7 +2852,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- sheet open/close ---------- */
   var backdrop=document.getElementById("backdrop");
-  var ALL_SHEETS=["addSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","stackSheet","stackItemSheet","formSheet"];
+  var ALL_SHEETS=["addSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
   function openSheet(id){
     ALL_SHEETS.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove("open"); });
     backdrop.classList.add("open");
@@ -3012,7 +3111,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     document.getElementById("pSex").value = profile.sex || "male";
     document.getElementById("pAct").value = String(profile.activity || 1.725);
     var gw=document.getElementById("pGoalW"); if(gw) gw.value = (profile.goalWeight!=null)?profile.goalWeight:"";
+    var exp=document.getElementById("pExp"); if(exp) exp.value=profile.experience||"intermediate";
+    var eq=document.getElementById("pEquip");
+    if(eq){ var have=profile.equip||["barbell","dumbbell","machine","cable","bodyweight"];
+      [].forEach.call(eq.querySelectorAll("[data-equip]"),function(b){ b.classList.toggle("on", have.indexOf(b.getAttribute("data-equip"))>=0); }); }
+    var tn=document.getElementById("pTrainNotes"); if(tn) tn.value=profile.trainNotes||"";
   }
+  (function(){ var eq=document.getElementById("pEquip"); if(eq) eq.addEventListener("click",function(e){ var b=e.target.closest("[data-equip]"); if(b) b.classList.toggle("on"); }); })();
   document.getElementById("saveProfile").addEventListener("click",function(){
     var h=r0(num(document.getElementById("pHeight").value)), a=r0(num(document.getElementById("pAge").value));
     if(h>0) profile.height=h;
@@ -3020,6 +3125,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     profile.sex=document.getElementById("pSex").value;
     profile.activity=parseFloat(document.getElementById("pAct").value)||1.725;
     var gw=num(document.getElementById("pGoalW").value); profile.goalWeight = gw>0 ? r1(gw) : null;
+    var exp=document.getElementById("pExp"); if(exp) profile.experience=exp.value;
+    var eq=document.getElementById("pEquip");
+    if(eq) profile.equip=[].filter.call(eq.querySelectorAll("[data-equip]"),function(b){return b.classList.contains("on");}).map(function(b){return b.getAttribute("data-equip");});
+    var tn=document.getElementById("pTrainNotes"); if(tn) profile.trainNotes=tn.value.trim();
     saveProfile();
     var w=num(document.getElementById("pWeight").value);
     if(w>0){ var today=keyOf(new Date()); if(!body[today]) body[today]={}; body[today].weight=r1(w); saveBody(); }
@@ -4941,6 +5050,142 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(!exs.length) return;
     openPlanEditor(null, {name:"", exercises:exs});   // pre-filled editor: name it, tweak, save
   }
+  /* ---------- AI workout planner ---------- */
+  var EX_BP=(function(){ var m={}; EX_DB.forEach(function(r){ m[r[0].toLowerCase()]=r[1]; }); return m; })();
+  var AI_PRESET_PARTS={
+    push:["chest","shoulders","triceps"], pull:["back","biceps"],
+    legs:["quads","hamstrings","glutes","calves"],
+    upper:["chest","back","shoulders","biceps","triceps"],
+    lower:["quads","hamstrings","glutes","calves"],
+    full:["chest","back","shoulders","quads","hamstrings","core"]
+  };
+  var aiPlanParts=[], aiPlanDraft=null;
+  function aiSetStatus(m,cls){ var el=document.getElementById("aiPlanStatus"); if(el){ el.textContent=m||""; el.className="photo-tray-status"+(cls?(" "+cls):""); } }
+  function aiRepsNum(s){ var m=String(s).match(/\d+/); return m?parseInt(m[0],10):10; }
+  // best DB match for an AI-suggested name (reuses the smart exercise search scorer)
+  function bestExMatch(name){
+    var q=String(name||"").toLowerCase().trim(); if(!q) return name;
+    var toks=exTokens(q); if(!toks.length) toks=[q];
+    var best=name, bestS=-1;
+    for(var i=0;i<EX_DB_NAMES.length;i++){
+      var n=EX_DB_NAMES[i], hay=n.toLowerCase(), words=hay.split(/[^a-z0-9]+/).filter(Boolean);
+      var s=exScore(hay, words, toks, q);
+      if(s>bestS){ bestS=s; best=n; }
+    }
+    return bestS>=95 ? best : name;
+  }
+  function aiTrainingSummary(){
+    var keys=Object.keys(workouts).filter(function(k){ return (workouts[k].exercises||[]).length; }).sort();
+    if(!keys.length) return "No previous workouts logged yet - this is a fresh start.";
+    var recent=keys.slice(-10), lines=[];
+    recent.slice().reverse().forEach(function(k){
+      var exs=(workouts[k].exercises||[]).map(function(e){
+        var done=(e.sets||[]).filter(function(s){return s.done;}); var use=done.length?done:(e.sets||[]);
+        var top=null; use.forEach(function(s){ var w=num(s.w),r=num(s.reps); if(w>0&&(!top||w>top.w)) top={w:w,r:r}; });
+        return e.name+(top?(" "+top.w+"x"+top.r):"");
+      });
+      lines.push(k+": "+exs.join(", "));
+    });
+    var today=new Date(); today.setHours(0,0,0,0); var lastByBp={};
+    keys.forEach(function(k){ (workouts[k].exercises||[]).forEach(function(e){ var bp=EX_BP[e.name.toLowerCase()]; if(bp && (!lastByBp[bp]||k>lastByBp[bp])) lastByBp[bp]=k; }); });
+    var fresh=Object.keys(lastByBp).map(function(bp){ return bp+" "+Math.round((today-dateFromKey(lastByBp[bp]))/86400000)+"d ago"; });
+    return "Recent sessions (newest first):\n"+lines.join("\n")+(fresh.length?("\n\nLast trained: "+fresh.join(", ")):"");
+  }
+  function aiGoalLine(){
+    try{ var r=recommendTargets("steady"); var dir=r.dir<0?"fat loss / cut":(r.dir>0?"lean muscle gain":"maintain / recomp");
+      return "Goal: "+dir+(r.goal!=null?(" toward "+r1(r.goal)+"kg"):"")+"."; }catch(e){ return ""; }
+  }
+  function aiBuildPrompt(){
+    var focus=document.getElementById("aiFocus").value, count=document.getElementById("aiCount").value;
+    var equip=(profile.equip&&profile.equip.length)?profile.equip.join(", "):"barbell, dumbbell, machine, cable, bodyweight";
+    var sys="You are an expert strength and hypertrophy coach building ONE gym session. "+
+      "Return ONLY strict minified JSON, no prose or markdown. Shape: "+
+      '{"name":"short session title","summary":"1-2 sentence rationale","exercises":[{"name":"standard exercise name","sets":number,"reps":"target e.g. 8-10 or 5","rest":"e.g. 90s","why":"short reason"}]}. '+
+      "Order compound/heavier lifts first, isolation later. Use common standard exercise names (so they map to a database). "+
+      "Only use equipment the athlete has. Respect their preferences and anything to avoid. Match sets/reps to the focus and experience level. Progress from their history without overtraining recently-worked areas.";
+    var user="Build today's session.\n"+
+      "Muscle groups: "+(aiPlanParts.length?aiPlanParts.join(", "):"balanced full body")+".\n"+
+      "Focus: "+focus+". Exercises: "+(count==="auto"?"pick a sensible number, usually 4-6":count)+".\n"+
+      "Athlete: age "+(profile.age!=null?profile.age:"unknown")+", sex "+(profile.sex||"unknown")+", experience "+(profile.experience||"intermediate")+". "+aiGoalLine()+"\n"+
+      "Equipment available: "+equip+".\n"+
+      (profile.trainNotes?("Preferences / avoid: "+profile.trainNotes+"\n"):"")+
+      "\nTraining history:\n"+aiTrainingSummary()+"\n\nReturn the JSON only.";
+    return {sys:sys, user:user};
+  }
+  function aiParsePlan(txt){
+    var raw=String(txt).replace(/```json/gi,"").replace(/```/g,"").trim();
+    var s=raw.indexOf("{"); if(s>=0) raw=raw.slice(s);
+    var e=raw.lastIndexOf("}"); if(e>=0) raw=raw.slice(0,e+1);
+    var o=null; try{ o=JSON.parse(raw); }catch(_){ o=null; }
+    if(!o||!o.exercises||!o.exercises.length) return null;
+    var exs=o.exercises.map(function(x){
+      var nm=bestExMatch(x.name);
+      return {name:nm, aiName:x.name, sets:Math.max(1,parseInt(x.sets,10)||3), reps:(x.reps!=null?String(x.reps):"10"), rest:x.rest||"", why:x.why||""};
+    });
+    return {name:o.name||"AI session", summary:o.summary||"", exercises:exs};
+  }
+  function aiRenderPlan(plan){
+    aiPlanDraft=plan;
+    var html="<div class='apr-head'><div class='apr-title'>"+esc(plan.name)+"</div>"+(plan.summary?"<div class='apr-why'>"+esc(plan.summary)+"</div>":"")+"</div>";
+    html+=plan.exercises.map(function(e,i){
+      var swap=(e.aiName && e.aiName.toLowerCase()!==e.name.toLowerCase())?"<span class='apr-swap'>matched</span>":"";
+      return "<div class='apr-ex'><span class='apr-n'>"+(i+1)+"</span><div class='apr-main'><div class='apr-name'>"+esc(e.name)+"</div>"+
+        "<div class='apr-sets'>"+e.sets+" × "+esc(e.reps)+(e.rest?(" · "+esc(e.rest)+" rest"):"")+"</div>"+
+        (e.why?"<div class='apr-note'>"+esc(e.why)+"</div>":"")+"</div>"+swap+"</div>";
+    }).join("");
+    html+="<div class='apr-actions'><button type='button' class='ghost' id='aiPlanRegen'>Regenerate</button><button type='button' class='ghost' id='aiPlanSave'>Save as plan</button></div>"+
+      "<button type='button' class='primary' id='aiPlanStart' style='margin-top:9px'>Start this workout</button>";
+    var box=document.getElementById("aiPlanResult"); box.innerHTML=html; box.hidden=false;
+    document.getElementById("aiPlanSetup").hidden=true;
+  }
+  function aiPlanToPlanObj(){
+    if(!aiPlanDraft) return null;
+    return {name:aiPlanDraft.name, exercises:aiPlanDraft.exercises.map(function(e){ return {name:e.name, sets:e.sets, reps:aiRepsNum(e.reps)}; })};
+  }
+  async function aiRunPlanner(){
+    document.getElementById("aiPlanResult").hidden=true;
+    document.getElementById("aiPlanSetup").hidden=false;
+    aiSetStatus("Building your plan…");
+    var btn=document.getElementById("aiPlanBuild"); if(btn){ btn.disabled=true; btn.textContent="Thinking…"; }
+    try{
+      var p=aiBuildPrompt();
+      var out=await aiComplete([{role:"user",content:p.user}], 900, p.sys);
+      if(out==null){ aiSetStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+      var plan=aiParsePlan(out);
+      if(!plan){ aiSetStatus("Couldn't read a plan from the response. Try again.","err"); return; }
+      aiSetStatus(""); aiRenderPlan(plan);
+    }catch(err){ aiSetStatus("Error: "+(err.message||err),"err"); }
+    finally{ if(btn){ btn.disabled=false; btn.textContent="Build my plan"; } }
+  }
+  function openAiPlanner(){
+    aiPlanParts=[]; aiPlanDraft=null;
+    var res=document.getElementById("aiPlanResult"); res.hidden=true; res.innerHTML="";
+    document.getElementById("aiPlanSetup").hidden=false;
+    [].forEach.call(document.querySelectorAll("#aiParts .chip, #aiPresets .chip"),function(c){ c.classList.remove("on"); });
+    aiSetStatus("");
+    openSheet("aiPlanSheet");
+  }
+  document.getElementById("aiPlanOpen").addEventListener("click", openAiPlanner);
+  document.getElementById("aiPresets").addEventListener("click", function(e){
+    var b=e.target.closest("[data-preset]"); if(!b) return;
+    var parts=AI_PRESET_PARTS[b.getAttribute("data-preset")]||[]; aiPlanParts=parts.slice();
+    [].forEach.call(document.querySelectorAll("#aiParts .chip"),function(c){ c.classList.toggle("on", parts.indexOf(c.getAttribute("data-part"))>=0); });
+    [].forEach.call(document.querySelectorAll("#aiPresets .chip"),function(c){ c.classList.toggle("on", c===b); });
+  });
+  document.getElementById("aiParts").addEventListener("click", function(e){
+    var b=e.target.closest("[data-part]"); if(!b) return;
+    var part=b.getAttribute("data-part"), i=aiPlanParts.indexOf(part);
+    if(i>=0) aiPlanParts.splice(i,1); else aiPlanParts.push(part);
+    b.classList.toggle("on", aiPlanParts.indexOf(part)>=0);
+    [].forEach.call(document.querySelectorAll("#aiPresets .chip"),function(c){ c.classList.remove("on"); });
+  });
+  document.getElementById("aiPlanBuild").addEventListener("click", aiRunPlanner);
+  document.getElementById("aiPlanResult").addEventListener("click", function(e){
+    if(e.target.closest("#aiPlanRegen")){ aiRunPlanner(); return; }
+    if(e.target.closest("#aiPlanSave")){ var po=aiPlanToPlanObj(); if(po){ openPlanEditor(null, po); } return; }
+    if(e.target.closest("#aiPlanStart")){ var po=aiPlanToPlanObj(); if(po){ applyPlan(po); closeSheets(); var t=document.querySelector('.tabbtn[data-tab="lift"]'); if(t) t.click(); } return; }
+  });
+
   document.getElementById("wkPlansBtn").addEventListener("click", openPlans);
   document.getElementById("plansNew").addEventListener("click", function(){ openPlanEditor(null); });
   document.getElementById("plansList").addEventListener("click", function(e){
