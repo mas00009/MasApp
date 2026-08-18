@@ -943,6 +943,28 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .apr-ex .apr-swap{flex:none;color:var(--faint);font-size:10px;font-family:var(--ff-num);align-self:center}
   .apr-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
   .apr-actions .ghost{margin:0}
+  /* Ask AI (conversational food) */
+  .ask-ai-cta{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:linear-gradient(120deg,color-mix(in srgb,var(--protein) 18%,var(--surface-2)),var(--surface-2));border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));border-radius:13px;padding:11px 46px 11px 14px;cursor:pointer;margin-bottom:9px;position:relative;-webkit-tap-highlight-color:transparent;text-align:left}
+  .ask-ai-cta:active{filter:brightness(.97)}
+  .ask-ai-cta .aac-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:8px;background:var(--grad);color:var(--on-accent);display:grid;place-items:center;font-size:15px;box-shadow:var(--glow)}
+  .ask-ai-cta .aac-txt{font-weight:700;font-size:14.5px;color:var(--text)}
+  .ask-ai-cta .aac-sub{font-size:11.5px;color:var(--muted)}
+  .aichat-body{display:flex;flex-direction:column;height:72vh;max-height:calc(92vh - 56px);padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .aichat-msgs{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;padding:4px 2px 2px}
+  .aic-msg{max-width:86%;padding:10px 13px;border-radius:15px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+  .aic-msg.user{align-self:flex-end;background:var(--grad);color:var(--on-accent);font-weight:500;border-bottom-right-radius:5px}
+  .aic-msg.ai{align-self:flex-start;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:5px}
+  .aic-msg.think{align-self:flex-start;color:var(--muted);font-style:italic;background:transparent;border:none;padding-left:4px}
+  .aic-empty{margin:auto;text-align:center;color:var(--faint);font-size:13px;line-height:1.5;padding:0 20px}
+  .aichat-status{font-size:12px;color:var(--muted);padding:4px 2px}
+  .aichat-status.err{color:var(--danger)}
+  .aichat-use{margin:8px 0 0}
+  .aichat-inputbar{flex:none;display:flex;align-items:flex-end;gap:8px;padding-top:10px;margin-top:6px;border-top:1px solid var(--border)}
+  .aichat-inputbar textarea{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:16px;padding:11px 14px;font-family:var(--ff-ui);font-size:15px;line-height:1.35;outline:none;resize:none;max-height:120px}
+  .aichat-inputbar textarea:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
+  .aichat-inputbar button{flex:none;width:44px;height:44px;border-radius:50%;background:var(--grad);border:none;color:var(--on-accent);display:grid;place-items:center;cursor:pointer;box-shadow:var(--glow)}
+  .aichat-inputbar button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .aichat-inputbar button:disabled{opacity:.5}
   #plansNew{width:100%;background:transparent;border:1px dashed var(--border);color:var(--protein);border-radius:12px;padding:13px;font-family:var(--ff-ui);font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;letter-spacing:.02em}
   #plansNew:active{background:var(--surface-2)}
   #planExRows{display:flex;flex-direction:column;gap:7px;margin-top:2px}
@@ -1824,8 +1846,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div class="sheet-body">
     <div class="newfood">
       <div class="subhead">Add New Food</div>
+      <button type="button" class="ask-ai-cta" id="askAiOpen"><span class="aac-ic">✦</span><span class="aac-txt">Ask AI</span><span class="aac-sub">Chat to work out the calories, then log it</span></button>
       <div class="methods">
-        <button class="method" id="mMeal"><span class="mic">✦</span>AI estimate</button>
+        <button class="method" id="mMeal"><span class="mic">◎</span>Photo estimate</button>
         <button class="method" id="mManual"><span class="mic">✎</span>Enter it yourself</button>
       </div>
       <div class="method-status" id="methodStatus"></div>
@@ -1864,6 +1887,23 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     </div>
     <div class="subhead nf-list-head">Your foods</div>
     <div id="foodList"></div>
+  </div>
+</div>
+
+<div class="sheet" id="aiChatSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2>Ask AI</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body aichat-body">
+    <div class="aichat-msgs" id="aiChatMsgs"></div>
+    <div class="aichat-status" id="aiChatStatus"></div>
+    <button type="button" class="primary aichat-use" id="aiChatUse" hidden>Add this to my log</button>
+    <div class="aichat-inputbar">
+      <textarea id="aiChatInput" rows="1" placeholder="e.g. calories in a flat white and a banana?"></textarea>
+      <button type="button" id="aiChatSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+    </div>
   </div>
 </div>
 
@@ -2852,7 +2892,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- sheet open/close ---------- */
   var backdrop=document.getElementById("backdrop");
-  var ALL_SHEETS=["addSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
+  var ALL_SHEETS=["addSheet","aiChatSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
   function openSheet(id){
     ALL_SHEETS.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove("open"); });
     backdrop.classList.add("open");
@@ -3309,6 +3349,66 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var box=document.getElementById("nfManual");
     showManualForm(box && box.hidden, {toEnd:true});
   });
+
+  /* ---------- Ask AI: conversational food logging ---------- */
+  var aiChatMsgs=[];
+  var AICHAT_SYS="You are a friendly, concise nutrition assistant inside a food-logging app. Help the user work out the calories and macros (protein, carbs, fat) of foods and meals through a short back-and-forth. Ask a brief clarifying question only when you really need to (portion size, brand, cooking method). When you give an estimate, clearly state approximate calories and protein/carbs/fat for the portion discussed. Keep replies short - a few sentences. Use everyday units. Do not output JSON or code unless asked.";
+  function aiChatRender(){
+    var box=document.getElementById("aiChatMsgs"); if(!box) return;
+    if(!aiChatMsgs.length){ box.innerHTML="<div class='aic-empty'>Ask me anything about a food or meal - portion sizes, restaurant items, recipes. When the numbers look right, tap <b>Add this to my log</b>.</div>"; return; }
+    box.innerHTML=aiChatMsgs.map(function(m){ return "<div class='aic-msg "+(m.role==="user"?"user":"ai")+"'>"+esc(m.content)+"</div>"; }).join("");
+    box.scrollTop=box.scrollHeight;
+  }
+  function aiChatStatus(m,cls){ var el=document.getElementById("aiChatStatus"); if(el){ el.textContent=m||""; el.className="aichat-status"+(cls?(" "+cls):""); } }
+  function aiChatThinking(on){
+    var box=document.getElementById("aiChatMsgs"); var ex=document.getElementById("aiChatThinking");
+    if(on){ if(!ex){ var d=document.createElement("div"); d.className="aic-msg think"; d.id="aiChatThinking"; d.textContent="Thinking…"; box.appendChild(d); box.scrollTop=box.scrollHeight; } }
+    else if(ex){ ex.remove(); }
+  }
+  function openAiChat(){
+    aiChatMsgs=[]; aiChatRender(); aiChatStatus("");
+    document.getElementById("aiChatUse").hidden=true;
+    var inp=document.getElementById("aiChatInput"); if(inp){ inp.value=""; inp.style.height="auto"; }
+    openSheet("aiChatSheet");
+    setTimeout(function(){ if(inp) inp.focus(); }, 260);
+  }
+  async function aiChatSend(){
+    var inp=document.getElementById("aiChatInput"); var txt=(inp.value||"").trim(); if(!txt) return;
+    if(!aiKey){ aiChatStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+    inp.value=""; inp.style.height="auto";
+    aiChatMsgs.push({role:"user",content:txt}); aiChatRender();
+    var send=document.getElementById("aiChatSend"); if(send) send.disabled=true;
+    aiChatStatus(""); aiChatThinking(true);
+    try{
+      var out=await aiComplete(aiChatMsgs.slice(), 600, AICHAT_SYS);
+      aiChatThinking(false);
+      if(out==null){ aiChatStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+      aiChatMsgs.push({role:"assistant",content:String(out).trim()}); aiChatRender();
+      document.getElementById("aiChatUse").hidden=false;
+    }catch(e){ aiChatThinking(false); aiChatStatus("Error: "+((e&&e.message)||e),"err"); }
+    finally{ if(send) send.disabled=false; }
+  }
+  async function aiChatUseItem(){
+    if(!aiChatMsgs.length) return;
+    if(!aiKey){ aiChatStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+    var btn=document.getElementById("aiChatUse"); if(btn){ btn.disabled=true; btn.textContent="Reading…"; }
+    aiChatStatus("");
+    try{
+      var extract={role:"user",content:"Based on our conversation, give the single food/meal item to log with the best agreed values. Reply with ONLY a JSON object, no prose or markdown: {\"name\":short name,\"serving\":portion text e.g. \"1 medium (120g)\",\"servingG\":grams in one serving as a number or 0,\"cal\":number kcal,\"protein\":grams,\"carbs\":grams,\"fat\":grams}."};
+      var out=await aiComplete(aiChatMsgs.concat([extract]), 400, AICHAT_SYS);
+      if(out==null){ aiChatStatus("Couldn't read the item. Try again.","err"); return; }
+      var o=parseMacroJSON(out);
+      if(!o || !(num(o.cal)>0)){ aiChatStatus("Couldn't pull the numbers yet - ask it to confirm the calories, then try again.","err"); return; }
+      closeSheets(); openSheet("addSheet"); fillNewFood(o);
+      setStatus("From your chat. Check the numbers, set the amount, then add.","ok");
+    }catch(e){ aiChatStatus("Error: "+((e&&e.message)||e),"err"); }
+    finally{ if(btn){ btn.disabled=false; btn.textContent="Add this to my log"; } }
+  }
+  document.getElementById("askAiOpen").addEventListener("click", openAiChat);
+  document.getElementById("aiChatSend").addEventListener("click", aiChatSend);
+  document.getElementById("aiChatUse").addEventListener("click", aiChatUseItem);
+  document.getElementById("aiChatInput").addEventListener("keydown", function(e){ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); aiChatSend(); } });
+  document.getElementById("aiChatInput").addEventListener("input", function(){ this.style.height="auto"; this.style.height=Math.min(120,this.scrollHeight)+"px"; });
 
   /* OpenRouter (needs your key) */
   function resolveAiModel(model){
