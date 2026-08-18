@@ -14,14 +14,19 @@
   }catch(e){}
 })();
 </script>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22M%C3%A1sGains%22%2C%22short_name%22%3A%22M%C3%A1sGains%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%230B0B10%22%2C%22theme_color%22%3A%22%230B0B10%22%2C%22start_url%22%3A%22./%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22assets/icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<link rel="manifest" href="manifest.webmanifest">
 <title>MásGains</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="MásGains">
-<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="icon" type="image/png" href="assets/icon.png">
+<script>
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -676,6 +681,10 @@
   .onboard .field label{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:5px}
   .onboard .field input,.onboard .field select{width:100%;box-sizing:border-box;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:12px;font-family:var(--ff-ui);font-size:16px;outline:none}
   .onboard .field input:focus,.onboard .field select:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
+  .ob-themes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ob-theme{display:flex;align-items:center;gap:11px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;font-family:var(--ff-ui);font-weight:600;font-size:13.5px;color:var(--text)}
+  .ob-theme:active{background:var(--border)}
+  .ob-theme.selected{border-color:var(--protein);box-shadow:0 0 0 1px var(--protein)}
   .ob-rec{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
   .ob-rec-head{font-family:var(--ff-num);font-size:17px;font-weight:800;color:var(--text)}
   .ob-rec-sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
@@ -1253,6 +1262,18 @@
       <img class="ob-badge" src="assets/brand/badge-electric.png" alt="">
       <img class="ob-wordmark" src="assets/brand/wordmark-electric.png" alt="MásGains">
       <p class="ob-lede">More gains, less guesswork. Let's set you up in under a minute. You can skip any step and change it later in Settings.</p>
+    </section>
+
+    <section class="ob-step" data-step="theme" hidden>
+      <h2 class="ob-h">Choose your look</h2>
+      <p class="ob-sub">Pick a theme. You can change it any time in Settings.</p>
+      <div class="ob-themes" id="obThemes">
+        <button type="button" class="ob-theme" data-ob-theme="midnight"><span class="theme-sw sw-midnight"><i class="a"></i><i class="b"></i></span><span class="obt-name">Midnight</span></button>
+        <button type="button" class="ob-theme" data-ob-theme="crimson"><span class="theme-sw sw-crimson"><i class="a"></i><i class="b"></i></span><span class="obt-name">Crimson</span></button>
+        <button type="button" class="ob-theme" data-ob-theme="daylight"><span class="theme-sw sw-daylight"><i class="a"></i><i class="b"></i></span><span class="obt-name">Daylight</span></button>
+        <button type="button" class="ob-theme" data-ob-theme="blossom"><span class="theme-sw sw-blossom"><i class="a"></i><i class="b"></i></span><span class="obt-name">Blossom</span></button>
+        <button type="button" class="ob-theme" data-ob-theme="grape"><span class="theme-sw sw-grape"><i class="a"></i><i class="b"></i></span><span class="obt-name">Grape</span></button>
+      </div>
     </section>
 
     <section class="ob-step" data-step="profile" hidden>
@@ -2196,7 +2217,7 @@
 
   /* ---------- first-run onboarding ---------- */
   var ONBOARD_KEY="mt_onboarded", needsOnboard=false;
-  var OB_STEPS=["welcome","profile","targets","measure","ai","sync","done"], obIndex=0, obTargetsRec=null;
+  var OB_STEPS=["welcome","theme","profile","targets","measure","ai","sync","done"], obIndex=0, obTargetsRec=null;
   function obEl(id){ return document.getElementById(id); }
   function obCopy(dst,src){ var d=obEl(dst),s=obEl(src); if(d&&s) d.value=s.value; }
   function obHasData(){
@@ -2242,7 +2263,12 @@
     else if(name==="done"){ skip.hidden=true; next.textContent="Start MásGains"; }
     else { skip.hidden=false; skip.textContent="Skip"; next.textContent="Continue"; }
     if(name==="targets") obRenderTargets();
+    if(name==="theme") obMarkTheme();
     var body=obEl("obBody"); if(body) body.scrollTop=0;
+  }
+  function obMarkTheme(){
+    var wrap=obEl("obThemes"); if(!wrap) return;
+    [].forEach.call(wrap.querySelectorAll("[data-ob-theme]"),function(b){ b.classList.toggle("selected", b.getAttribute("data-ob-theme")===theme); });
   }
   function obCommitProfile(){
     obCopy("pWeight","obWeight"); obCopy("pHeight","obHeight"); obCopy("pAge","obAge");
@@ -2307,6 +2333,8 @@
     if(nx&&!nx._w){ nx._w=1; nx.addEventListener("click",obNext); }
     if(sk&&!sk._w){ sk._w=1; sk.addEventListener("click",obSkip); }
     if(pace&&!pace._w){ pace._w=1; pace.addEventListener("change",obRenderTargets); }
+    var tw=obEl("obThemes");
+    if(tw&&!tw._w){ tw._w=1; tw.addEventListener("click",function(e){ var b=e.target.closest("[data-ob-theme]"); if(b){ setTheme(b.getAttribute("data-ob-theme")); obMarkTheme(); } }); }
   }
   window.__runOnboarding=startOnboarding;
   (function(){ var b=document.getElementById("obReplay"); if(b) b.addEventListener("click",function(){ if(typeof closeSheets==="function") closeSheets(); startOnboarding(); }); })();
