@@ -4666,7 +4666,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
           placed=true; break;
         }
       }
-      if(!placed && list.lastElementChild!==dragging) list.appendChild(dragging);
+      if(!placed){
+        // keep the dragged card above the trailing "Save as plan" button
+        var anchor=list.querySelector("[data-save-plan]");
+        if(anchor){ if(dragging.nextElementSibling!==anchor) list.insertBefore(dragging, anchor); }
+        else if(list.lastElementChild!==dragging){ list.appendChild(dragging); }
+      }
     }
     function endDrag(){
       if(!drag) return;
@@ -4677,6 +4682,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       drag.card.classList.remove("exc-dragging");
       document.body.classList.remove("exc-reordering");
       drag=null;
+      renderWorkout();   // rebuild cleanly so the button stays last and nothing gets stuck
     }
     list.addEventListener("pointerdown", function(e){
       if(e.pointerType==="mouse" && e.button!==0) return;
