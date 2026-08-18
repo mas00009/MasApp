@@ -1079,8 +1079,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     position:relative;
     z-index:2;
   }
-  #tab-home .brand-mark{display:flex;align-items:center;justify-content:center}
-  #tab-home .brand-logo{height:26px;width:auto;display:block}
+  #tab-home .brand-mark{display:flex;align-items:center;justify-content:center;gap:9px}
+  #tab-home .brand-badge{height:34px;width:auto;display:block;flex:none}
+  #tab-home .brand-logo{height:22px;width:auto;display:block}
   /* hero ring */
   #tab-home .hero{position:relative;background:var(--summary-bg);border:none;border-radius:20px;padding:22px 12px 6px;margin-bottom:0;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:none;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;isolation:isolate}
   #tab-home .hero::before{display:none}
@@ -1329,7 +1330,19 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   </symbol>
 </svg>
 
-<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" src="assets/brand/badge-electric.png" alt="MásGains"><img class="splash-wordmark" src="assets/brand/wordmark-electric.png" alt="MásGains"></div></div>
+<div class="loading" id="loading"><div class="splash-inner"><img class="splash-logo" alt="MásGains"><img class="splash-wordmark" alt="MásGains"></div></div>
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem("mt_theme")||"midnight";
+    var cw={midnight:"electric",daylight:"blue",blossom:"violet",grape:"gold",crimson:"crimson"}[t]||"electric";
+    var el=document.getElementById("loading");
+    var b=el.querySelector(".splash-logo"), w=el.querySelector(".splash-wordmark");
+    if(b) b.src="assets/brand/badge-"+cw+".png";
+    if(w) w.src="assets/brand/wordmark-"+cw+".png";
+  }catch(e){}
+})();
+</script>
 
 <div class="onboard" id="onboard" hidden>
   <div class="ob-top"><div class="ob-dots" id="obDots"></div></div>
@@ -1433,6 +1446,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
       <span class="brand-mark">
+      <img class="brand-badge" src="assets/brand/badge-electric.png" alt="">
       <img class="brand-logo" src="assets/brand/wordmark-electric.png" alt="MásGains">
 </span>
     </div>
@@ -2383,7 +2397,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function wordmarkSrcFor(t){ return "assets/brand/wordmark-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function updateLogoSrc(){
     var badge=badgeSrcFor(theme), wm=wordmarkSrcFor(theme);
-    document.querySelectorAll(".htitle-logo, .splash-logo, .ob-badge").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
+    document.querySelectorAll(".htitle-logo, .splash-logo, .ob-badge, .brand-badge").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
     document.querySelectorAll(".brand-logo, .splash-wordmark, .ob-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
   }
   function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
