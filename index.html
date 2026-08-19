@@ -4577,7 +4577,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
         "<span class='exc-thumb' data-form='"+encodeURIComponent(e.name)+"' role='button' tabindex='0' aria-label='View exercise animation'>"+thumbImg+"</span>"+
         "<div class='exc-main'>"+
           "<div class='exc-row1'>"+
-            "<span class='exc-title' data-ex-collapse='"+e.id+"'><span class='exc-chev' aria-hidden='true'><svg viewBox='0 0 24 24'><polyline points='9 6 15 12 9 18'/></svg></span><span class='en'>"+esc(e.name)+"</span></span>"+
+            "<span class='exc-title' data-ex-collapse='"+e.id+"'><span class='exc-chev' aria-hidden='true'><svg viewBox='0 0 24 24'><polyline points='9 6 15 12 9 18'/></svg></span><span class='en'>"+esc(exDisplay(e.name))+"</span></span>"+
             "<span class='exc-actions'>"+
               "<button class='exc-hist' data-hist='"+encodeURIComponent(e.name)+"' aria-label='History'><svg viewBox='0 0 24 24'><path d='M5 19V10M12 19V5M19 19v-6'/></svg></button>"+
               "<button class='exc-x' data-remove-ex='"+e.id+"' aria-label='Remove exercise'>\u00d7</button>"+
@@ -4655,6 +4655,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(!val || val===orig) delete EX_RENAMES[orig]; else EX_RENAMES[orig]=val;
     saveExRenames();
     renderExList(document.getElementById("exSearch").value);
+    if(typeof renderWorkout==="function") renderWorkout();   // update already-added cards + history label everywhere
   }
   function startRenameRow(row, orig){
     if(!row) return;
@@ -5110,7 +5111,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var rows=document.getElementById("planExRows"); if(!rows||!planDraft) return;
     rows.innerHTML = (planDraft.exercises||[]).length ? planDraft.exercises.map(function(e,i){
       return "<div class='pe-row' data-pe='"+i+"'>"+
-        "<span class='pe-name'>"+esc(e.name)+"</span>"+
+        "<span class='pe-name'>"+esc(exDisplay(e.name))+"</span>"+
         "<span class='pe-fld'><input type='number' inputmode='numeric' class='pe-sets' data-pe-i='"+i+"' value='"+(e.sets||"")+"'><span class='u'>sets</span></span>"+
         "<span class='pe-fld'><input type='number' inputmode='numeric' class='pe-reps' data-pe-i='"+i+"' value='"+(e.reps||"")+"'><span class='u'>reps</span></span>"+
         "<button class='pe-x' data-pe-x='"+i+"' aria-label='Remove'>\u00d7</button></div>";
@@ -5749,7 +5750,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- per-exercise history ---------- */
   function openExHist(name){
-    document.getElementById("exHistTitle").textContent=name;
+    document.getElementById("exHistTitle").textContent=exDisplay(name);
     var box=document.getElementById("exHistBody");
     var ds=Object.keys(workouts).filter(function(k){ return (workouts[k].exercises||[]).some(function(e){return e.name===name;}); }).sort();
     if(!ds.length){ box.innerHTML="<div class='wk-empty'>No history yet for this lift.</div>"; openSheet("exHistSheet"); return; }
