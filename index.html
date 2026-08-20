@@ -2075,7 +2075,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 20 Aug 2026, 8:15 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 9:18 AM</div>
   </div>
 </div>
 
@@ -3829,19 +3829,22 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     for(var i=29;i>=0;i--){
       var k=offKey(i), w=workouts[k];
       if(!w||!w.exercises||!w.exercises.length) continue;
-      var vol=0, sd=0, st=0, exNames=[], plan=null;
+      var vol=0, sd=0, st=0, exNames=[], plan=null, cKm=0, cMin=0;
       w.exercises.forEach(function(e){
         exNames.push(e.name); if(e.fromPlan) plan=e.fromPlan;
-        (e.sets||[]).forEach(function(s){ st++; if(s.done){ sd++; vol+=num(s.w)*num(s.reps); } });
+        var isC=isCardioEx(e);
+        (e.sets||[]).forEach(function(s){ st++; if(s.done){ sd++; if(isC){ cKm+=num(s.w); cMin+=num(s.reps); } else vol+=num(s.w)*num(s.reps); } });
       });
       vol=Math.round(vol);
-      var row={date:k, volumeKg:vol, setsCompleted:sd, setsPlanned:st, durationMin:wkDurationMin(w)||null, exercises:exNames, plan:plan};
+      var row={date:k, volumeKg:vol, setsCompleted:sd, setsPlanned:st, durationMin:wkDurationMin(w)||null, exercises:exNames, plan:plan,
+        cardioKm:cKm?Math.round(cKm*100)/100:null, cardioMin:cMin?Math.round(cMin):null};
       days30.push(row);
       if(k>=since7){ days7.push(row); totalVol7+=vol; sessions7++; setsDone+=sd; setsTotal+=st; }
     }
     var recentBest={}, priorBest={};
     Object.keys(workouts).forEach(function(k){
       (workouts[k].exercises||[]).forEach(function(e){
+        if(isCardioEx(e)) return;                 // km/min are not weight/reps PRs
         (e.sets||[]).forEach(function(s){ var wv=num(s.w), rv=num(s.reps); if(wv<=0||rv<=0) return;
           var rec=(k>=since7)?recentBest:priorBest, cur=rec[e.name];
           if(!cur||wv>cur.w||wv===cur.w&&rv>cur.r) rec[e.name]={w:wv,r:rv,date:k};
@@ -4447,18 +4450,28 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     return "Bands & other"; }
   var EX_ID={}; EX_DB.forEach(function(r){ if(!EX_ID[r[0]]) EX_ID[r[0]]=r[3]; });
   var EX_BW={}; EX_DB.forEach(function(r){ if(r[2]==="body weight") EX_BW[r[0]]=1; });
+  // exercises tagged "cardio" in the library (Run, Cycle, Treadmill, etc.) log
+  // duration + distance rather than weight/reps.
+  var EX_CARDIO={}; EX_DB.forEach(function(r){ if(r[1]==="cardio") EX_CARDIO[r[0]]=1; });
+  function exIsCardio(name){ return !!EX_CARDIO[name]; }
   // time-based holds (log seconds) vs rep-based bodyweight moves (log reps, optional added weight).
   // \bhang\b matches "Dead Hang"/"Bar Hang" but not "Hanging Leg Raise" (a rep move).
   function exIsDur(name){ return /plank|hold|carry|wall ?sit|\bhang\b/i.test(name); }
   function exIsBodyweight(name){ return !exIsDur(name) && !!EX_BW[name]; }
   // Per-exercise logging-type override (persisted + synced), for when the
   // auto-detection guesses wrong. Modes: 'std' (kg x reps), 'bw' (reps + optional
-  // added kg), 'time' (seconds).
+  // added kg), 'time' (seconds), 'cardio' (duration + distance).
   var EXMODE_KEY="mt_ex_modes", EX_MODE={};
   function saveExModes(){ sSet(EXMODE_KEY, JSON.stringify(EX_MODE)); }
-  function exModeFor(name){ if(EX_MODE[name]) return EX_MODE[name]; if(exIsDur(name)) return "time"; if(exIsBodyweight(name)) return "bw"; return "std"; }
-  function exModeFlags(name){ var m=exModeFor(name); return {dur:m==="time", bw:m==="bw"}; }
-  function exModeLabel(e){ return e.dur?"SEC":(e.bw?"BW":"WT"); }
+  function exModeFor(name){ if(EX_MODE[name]) return EX_MODE[name]; if(exIsCardio(name)) return "cardio"; if(exIsDur(name)) return "time"; if(exIsBodyweight(name)) return "bw"; return "std"; }
+  function exModeFlags(name){ var m=exModeFor(name); return {dur:m==="time", bw:m==="bw", cardio:m==="cardio"}; }
+  function exModeLabel(e){ return e.cardio?"CARDIO":(e.dur?"SEC":(e.bw?"BW":"WT")); }
+  // logged exercises saved before cardio mode existed have no .cardio flag, so
+  // fall back to the current mode for the name.
+  function isCardioEx(e){ return e ? (e.cardio!=null ? !!e.cardio : exModeFor(e.name)==="cardio") : false; }
+  // cardio sets hold km/min, not kg/reps, so they contribute no lifting volume.
+  function exVolume(e, allSets){ if(isCardioEx(e)) return 0; var v=0; (e.sets||[]).forEach(function(st){ if(allSets||st.done) v+=num(st.w)*num(st.reps); }); return v; }
+  function exCardioTotals(e){ var km=0, min=0; (e.sets||[]).forEach(function(st){ km+=num(st.w); min+=num(st.reps); }); return {km:km, min:min}; }
   // User-added custom exercises (names), persisted + synced.
   var EXCUSTOM_KEY="mt_ex_custom", EX_CUSTOM=[];
   function saveExCustom(){ sSet(EXCUSTOM_KEY, JSON.stringify(EX_CUSTOM)); }
@@ -4501,7 +4514,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   }
   function wkStats(){
     var s=wSession(), done=0, tot=0, top=0, topEx="";
-    s.exercises.forEach(function(e){ (e.sets||[]).forEach(function(st){ tot++; if(st.done){ done++; var w=num(st.w); if(w>top){ top=w; topEx=e.name||""; } } }); });
+    s.exercises.forEach(function(e){ var isC=isCardioEx(e);
+      (e.sets||[]).forEach(function(st){ tot++; if(st.done){ done++; if(isC) return;   // km is not a top-set weight
+        var w=num(st.w); if(w>top){ top=w; topEx=e.name||""; } } }); });
     return {done:done, tot:tot, ex:s.exercises.length, top:top, topEx:topEx};
   }
   function setWkTop(stt){
@@ -4522,8 +4537,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     return days[d.getDay()]+" "+d.getDate()+" "+mon[d.getMonth()];
   }
   function setRow(e, st, i){
-    var exId=e.id, isDur=!!e.dur, isBw=!!e.bw && !isDur;
+    var exId=e.id, isCardio=isCardioEx(e), isDur=!isCardio&&!!e.dur, isBw=!isCardio&&!!e.bw&&!isDur;
     var wv=(st.w!==""&&st.w!=null)?st.w:"", rv=(st.reps!==""&&st.reps!=null)?st.reps:"";
+    if(isCardio){
+      // cardio: log distance (km) and duration (min) instead of weight/reps
+      return "<div class='set-row cardio"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
+        "<span class='set-n'>"+(i+1)+"</span>"+
+        "<span class='set-fld'><input class='set-w' type='number' inputmode='decimal' value='"+wv+"' placeholder='0'><span class='u'>km</span></span>"+
+        "<span class='set-fld'><input class='set-r' type='number' inputmode='decimal' value='"+rv+"' placeholder='0'><span class='u'>min</span></span>"+
+        "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
+        "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
+    }
     if(isBw){
       // bodyweight: log reps, with an optional small "+kg" added-load field
       return "<div class='set-row bw"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
@@ -4554,16 +4578,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   var WKCOLLAPSE_KEY="mt_wk_collapsed";
   function saveCollapsed(){ try{ sSet(WKCOLLAPSE_KEY, JSON.stringify(collapsedExc)); }catch(e){} }
   function excCard(e){
-    var vol=0; (e.sets||[]).forEach(function(st){ if(st.done) vol+=num(st.w)*num(st.reps); });
+    var vol=exVolume(e);
     var setsHtml=(e.sets||[]).map(function(st,i){ return setRow(e,st,i); }).join("");
-    var last=lastExerciseBefore(e.name, wKey()), pb=exercisePB(e.name);
+    var isCardio=isCardioEx(e);
+    var last=lastExerciseBefore(e.name, wKey()), pb=isCardio?null:exercisePB(e.name);
     var lastLine="";
     if(last){
       // prefer completed sets (matches PB); fall back to all logged sets for
       // older sessions where nothing was ticked done
       var doneSets=(last.sets||[]).filter(function(s){return s.done;});
       var prevSets=doneSets.length?doneSets:last.sets;
-      var ls=fmtSetsCompact(prevSets); if(ls) lastLine="<span class='exc-last'>"+esc(ls)+"</span>";
+      var ls=isCardio?fmtCardioSetsCompact(prevSets):fmtSetsCompact(prevSets); if(ls) lastLine="<span class='exc-last'>"+esc(ls)+"</span>";
     }
     var pbBadge = pb ? "<span class='exc-pb'>PB "+(pb.bw?(pb.r+" reps"):(pb.w+"\u00d7"+pb.r))+"</span>" : "";
     var collapsed = isToday(wCurrent) ? !!collapsedExc[e.id] : !pastOpen[e.id];
@@ -4585,7 +4610,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
           "</div>"+
           "<div class='exc-metarow'>"+lastLine+pbBadge+"</div>"+
           "<div class='exc-row2'>"+
-            "<button type='button' class='exc-mode' data-mode-cycle='"+e.id+"' aria-label='Change logging type' title='Logging type: tap to switch weights / bodyweight / time'>"+exModeLabel(e)+"</button>"+
+            "<button type='button' class='exc-mode' data-mode-cycle='"+e.id+"' aria-label='Change logging type' title='Logging type: tap to switch weights / bodyweight / time / cardio'>"+exModeLabel(e)+"</button>"+
             "<button type='button' class='exc-rest' data-rest-cycle aria-label='Rest timer length'>"+restDefault+"s</button>"+
             "<button class='set-add' data-add-set='"+e.id+"' aria-label='Add set'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 6v12M6 12h12'/></svg></button>"+
           "</div>"+
@@ -4796,7 +4821,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     requestAnimationFrame(function(){ toTop(); requestAnimationFrame(toTop); });
     setTimeout(toTop, 320);
   }
-  function addExercise(name){ if(!name) return; var f=exModeFlags(name); wSession().exercises.push({id:uid(),name:name,dur:f.dur,bw:f.bw,sets:[{w:"",reps:"",done:false}]}); saveWorkouts(); renderWorkout(); }
+  function addExercise(name){ if(!name) return; var f=exModeFlags(name); wSession().exercises.push({id:uid(),name:name,dur:f.dur,bw:f.bw,cardio:f.cardio,sets:[{w:"",reps:"",done:false}]}); saveWorkouts(); renderWorkout(); }
 
   document.getElementById("wkList").addEventListener("click", function(e){
     var coll=e.target.closest("[data-ex-collapse]");
@@ -4825,10 +4850,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(mc){
       var exm=exById(mc.getAttribute("data-mode-cycle"));
       if(exm){
-        var order=["std","bw","time"], cur=exm.dur?"time":(exm.bw?"bw":"std");
+        var order=["std","bw","time","cardio"], cur=exm.cardio?"cardio":(exm.dur?"time":(exm.bw?"bw":"std"));
         var next=order[(order.indexOf(cur)+1)%order.length];
         EX_MODE[exm.name]=next; saveExModes();
-        var f=exModeFlags(exm.name); exm.dur=f.dur; exm.bw=f.bw;
+        var f=exModeFlags(exm.name); exm.dur=f.dur; exm.bw=f.bw; exm.cardio=f.cardio;
         saveWorkouts(); renderWorkout();
       }
       return;
@@ -5110,10 +5135,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function renderPlanEditor(){
     var rows=document.getElementById("planExRows"); if(!rows||!planDraft) return;
     rows.innerHTML = (planDraft.exercises||[]).length ? planDraft.exercises.map(function(e,i){
+      var peUnit=exModeFor(e.name)==="cardio"?"min":"reps";
       return "<div class='pe-row' data-pe='"+i+"'>"+
         "<span class='pe-name'>"+esc(exDisplay(e.name))+"</span>"+
         "<span class='pe-fld'><input type='number' inputmode='numeric' class='pe-sets' data-pe-i='"+i+"' value='"+(e.sets||"")+"'><span class='u'>sets</span></span>"+
-        "<span class='pe-fld'><input type='number' inputmode='numeric' class='pe-reps' data-pe-i='"+i+"' value='"+(e.reps||"")+"'><span class='u'>reps</span></span>"+
+        "<span class='pe-fld'><input type='number' inputmode='numeric' class='pe-reps' data-pe-i='"+i+"' value='"+(e.reps||"")+"'><span class='u'>"+peUnit+"</span></span>"+
         "<button class='pe-x' data-pe-x='"+i+"' aria-label='Remove'>\u00d7</button></div>";
     }).join("") : "<div class='pe-empty'>Add exercises below.</div>";
   }
@@ -5133,7 +5159,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   }
   function planAddExercise(){
     var inp=document.getElementById("planExInput"), name=inp.value.trim(); if(!name||!planDraft) return;
-    planDraft.exercises.push({name:name,sets:3,reps:10});
+    var isC=exModeFor(name)==="cardio";
+    planDraft.exercises.push(isC?{name:name,sets:1,reps:20}:{name:name,sets:3,reps:10});
     inp.value=""; renderPlanEditor(); inp.focus();
   }
   function applyPlan(plan){
@@ -5142,7 +5169,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       var n=Math.max(1, parseInt(pe.sets,10)||1), sets=[];
       for(var i=0;i<n;i++) sets.push({w:"", reps:(pe.reps!==""&&pe.reps!=null)?pe.reps:"", done:false});
       var pf=exModeFlags(pe.name);
-      sess.exercises.push({id:uid(), name:pe.name, note:"", dur:pf.dur, bw:pf.bw, sets:sets, fromPlan:plan.name});
+      sess.exercises.push({id:uid(), name:pe.name, note:"", dur:pf.dur, bw:pf.bw, cardio:pf.cardio, sets:sets, fromPlan:plan.name});
     });
     saveWorkouts(); renderWorkout();
   }
@@ -5196,6 +5223,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     recent.slice().reverse().forEach(function(k){
       var exs=(workouts[k].exercises||[]).map(function(e){
         var done=(e.sets||[]).filter(function(s){return s.done;}); var use=done.length?done:(e.sets||[]);
+        if(isCardioEx(e)){                       // report cardio as distance/time, not as a load
+          var ck=0, cm=0; use.forEach(function(s){ ck+=num(s.w); cm+=num(s.reps); });
+          var cp=[]; if(ck>0) cp.push((Math.round(ck*100)/100)+"km"); if(cm>0) cp.push(Math.round(cm)+"min");
+          return e.name+(cp.length?(" "+cp.join("/")):"");
+        }
         var top=null; use.forEach(function(s){ var w=num(s.w),r=num(s.reps); if(w>0&&(!top||w>top.w)) top={w:w,r:r}; });
         return e.name+(top?(" "+top.w+"x"+top.r):"");
       });
@@ -5245,7 +5277,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     html+=plan.exercises.map(function(e,i){
       var swap=(e.aiName && e.aiName.toLowerCase()!==e.name.toLowerCase())?"<span class='apr-swap'>matched</span>":"";
       return "<div class='apr-ex'><span class='apr-n'>"+(i+1)+"</span><div class='apr-main'><div class='apr-name'>"+esc(e.name)+"</div>"+
-        "<div class='apr-sets'>"+e.sets+" × "+esc(e.reps)+(e.rest?(" · "+esc(e.rest)+" rest"):"")+"</div>"+
+        "<div class='apr-sets'>"+(exModeFor(e.name)==="cardio" ? (esc(e.reps)+" min"+(e.sets>1?(" × "+e.sets):"")) : (e.sets+" × "+esc(e.reps)))+(e.rest?(" · "+esc(e.rest)+" rest"):"")+"</div>"+
         (e.why?"<div class='apr-note'>"+esc(e.why)+"</div>":"")+"</div>"+swap+"</div>";
     }).join("");
     html+="<div class='apr-actions'><button type='button' class='ghost' id='aiPlanRegen'>Regenerate</button><button type='button' class='ghost' id='aiPlanSave'>Save as plan</button></div>"+
@@ -5485,7 +5517,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   // (then reps); pure bodyweight exercises (no weight logged) rank by reps.
   function exercisePB(name){
     var bestW=null, bestReps=null;
-    Object.keys(workouts).forEach(function(k){ (workouts[k].exercises||[]).forEach(function(e){ if(e.name!==name) return; (e.sets||[]).forEach(function(st){
+    Object.keys(workouts).forEach(function(k){ (workouts[k].exercises||[]).forEach(function(e){ if(e.name!==name||isCardioEx(e)) return; (e.sets||[]).forEach(function(st){
       if(!st.done) return;                       // only sets marked done count
       var w=num(st.w), r=num(st.reps); if(r<=0) return;
       if(w>0){ if(!bestW||w>bestW.w||(w===bestW.w&&r>bestW.r)) bestW={w:w,r:r}; }
@@ -5496,6 +5528,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     return null;
   }
   function fmtSetLabel(s){ var w=num(s.w), r=num(s.reps); return w>0 ? (w+"\u00d7"+r) : String(r); }
+  // cardio sets read as "5 km / 28 min", dropping whichever half was left blank
+  function fmtCardioSetLabel(s){ var km=num(s.w), mn=num(s.reps), parts=[];
+    if(km>0) parts.push(km+" km"); if(mn>0) parts.push(mn+" min"); return parts.join(" / "); }
+  function fmtCardioSets(sets){ return (sets||[]).map(fmtCardioSetLabel).filter(function(x){return !!x;}).join(", "); }
+  function fmtCardioSetsCompact(sets){ return fmtCardioSets(sets); }
   function fmtSets(sets){ return sets.filter(function(s){return num(s.w)>0||num(s.reps)>0;}).map(fmtSetLabel).join(", "); }
   function fmtSetsCompact(sets){
     var rows=(sets||[]).filter(function(s){return num(s.w)>0||num(s.reps)>0;}).map(fmtSetLabel);
@@ -5531,12 +5568,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function lastWorkoutBefore(beforeKey){ var ds=wDatesWith().filter(function(k){return k<beforeKey;}); return ds.length?ds[ds.length-1]:null; }
   function repeatWorkout(fromKey){
     var src=workouts[fromKey]; if(!src||!src.exercises) return;
-    wSession().exercises = src.exercises.map(function(e){ var rf=exModeFlags(e.name); return {id:uid(), name:e.name, note:e.note||"", dur:rf.dur, bw:rf.bw, sets:(e.sets||[]).map(function(s){ return {w:s.w,reps:s.reps,done:false}; })}; });
+    wSession().exercises = src.exercises.map(function(e){ var rf=exModeFlags(e.name); return {id:uid(), name:e.name, note:e.note||"", dur:rf.dur, bw:rf.bw, cardio:rf.cardio, sets:(e.sets||[]).map(function(s){ return {w:s.w,reps:s.reps,done:false}; })}; });
     saveWorkouts(); renderWorkout();
   }
 
   /* ---------- training trends ---------- */
-  function volumeForKey(k){ var w=workouts[k]; if(!w||!w.exercises) return 0; var v=0; w.exercises.forEach(function(e){ (e.sets||[]).forEach(function(st){ if(st.done) v+=num(st.w)*num(st.reps); }); }); return Math.round(v); }
+  function volumeForKey(k){ var w=workouts[k]; if(!w||!w.exercises) return 0; var v=0; w.exercises.forEach(function(e){ v+=exVolume(e); }); return Math.round(v); }
   // Map an exercise name to a muscle group (keyword-based, order matters).
   function muscleFor(name){
     var n=String(name||"").toLowerCase();
@@ -5553,7 +5590,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function muscleVolumeLast7(){
     var groups={}, keys=last7().map(keyOf);
     keys.forEach(function(k){ var w=workouts[k]; if(!w||!w.exercises) return;
-      w.exercises.forEach(function(e){ var g=muscleFor(e.name), v=0; (e.sets||[]).forEach(function(st){ if(st.done) v+=num(st.w)*num(st.reps); });
+      w.exercises.forEach(function(e){ var g=muscleFor(e.name), v=exVolume(e);
         if(v>0) groups[g]=(groups[g]||0)+v; });
     });
     return groups;
@@ -5575,11 +5612,15 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var wkVols=days.map(function(d){return volumeForKey(keyOf(d));}).filter(function(v){return v>0;});
     var avgVol=wkVols.length?Math.round(wkVols.reduce(function(a,b){return a+b;},0)/wkVols.length):0;
     var wkTotal=wkVols.reduce(function(a,b){return a+b;},0);
+    // count any day with a completed set, so cardio-only and bodyweight-only
+    // days still register as sessions even though they carry no tonnage
+    var wkSessions=days.filter(function(d){ var w=workouts[keyOf(d)];
+      return !!w && (w.exercises||[]).some(function(e){ return (e.sets||[]).some(function(st){ return st.done; }); }); }).length;
     var t=new Date(), mk=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-";
     var mo=wDatesWith().filter(function(k){return k.indexOf(mk)===0;});
     var moVol=mo.map(volumeForKey).reduce(function(a,b){return a+b;},0);
     return "<div class='subhead'>Last 7 days · volume (kg)</div>"+chart+
-      "<div class='stat-row'>"+statTile("Sessions",wkVols.length)+statTile("Weekly tonnage",wkTotal.toLocaleString()+"<em>kg</em>")+"</div>"+
+      "<div class='stat-row'>"+statTile("Sessions",wkSessions)+statTile("Weekly tonnage",wkTotal.toLocaleString()+"<em>kg</em>")+"</div>"+
       "<div class='stat-row' style='margin-top:8px'>"+statTile("Avg / session",avgVol.toLocaleString()+"<em>kg</em>")+statTile("This month",moVol.toLocaleString()+"<em>kg</em>")+"</div>"+
       buildMuscleBars()+
       "<div class='subhead' style='margin-top:18px'>This month</div>"+
@@ -5754,12 +5795,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var box=document.getElementById("exHistBody");
     var ds=Object.keys(workouts).filter(function(k){ return (workouts[k].exercises||[]).some(function(e){return e.name===name;}); }).sort();
     if(!ds.length){ box.innerHTML="<div class='wk-empty'>No history yet for this lift.</div>"; openSheet("exHistSheet"); return; }
-    var vols=ds.map(function(k){ var ex=(workouts[k].exercises||[]).filter(function(e){return e.name===name;})[0]; var v=0; (ex.sets||[]).forEach(function(st){ v+=num(st.w)*num(st.reps); }); return Math.round(v); });
+    var isC=exModeFor(name)==="cardio";
+    function exOn(k){ return (workouts[k].exercises||[]).filter(function(e){return e.name===name;})[0]; }
+    // cardio charts total minutes per session; everything else charts kg volume
+    var vols=ds.map(function(k){ var ex=exOn(k); if(isC) return Math.round(exCardioTotals(ex).min); var v=0; (ex.sets||[]).forEach(function(st){ v+=num(st.w)*num(st.reps); }); return Math.round(v); });
     var chart = vols.length>=2 ? lineChart(vols) : "";
     var sess="";
-    ds.slice().reverse().forEach(function(k){ var ex=(workouts[k].exercises||[]).filter(function(e){return e.name===name;})[0]; var v=0; (ex.sets||[]).forEach(function(st){ v+=num(st.w)*num(st.reps); });
-      sess+="<div class='eh-sess'><div class='eh-d'><span class='eh-date'>"+esc(fmtShort(k))+"</span><span class='eh-vol'>"+Math.round(v)+" kg</span></div><div class='eh-sets'>"+esc(fmtSets(ex.sets)||"-")+"</div></div>"; });
-    box.innerHTML=(chart?("<div class='subhead'>Volume over time</div>"+chart):"")+
+    ds.slice().reverse().forEach(function(k){ var ex=exOn(k), tot="";
+      if(isC){ var ct=exCardioTotals(ex); tot=(ct.km>0?(Math.round(ct.km*100)/100+" km"):"")+(ct.km>0&&ct.min>0?" \u00b7 ":"")+(ct.min>0?(Math.round(ct.min)+" min"):""); }
+      else { var v=0; (ex.sets||[]).forEach(function(st){ v+=num(st.w)*num(st.reps); }); tot=Math.round(v)+" kg"; }
+      sess+="<div class='eh-sess'><div class='eh-d'><span class='eh-date'>"+esc(fmtShort(k))+"</span><span class='eh-vol'>"+esc(tot)+"</span></div><div class='eh-sets'>"+esc((isC?fmtCardioSets(ex.sets):fmtSets(ex.sets))||"-")+"</div></div>"; });
+    box.innerHTML=(chart?("<div class='subhead'>"+(isC?"Minutes over time":"Volume over time")+"</div>"+chart):"")+
       "<div class='subhead' style='margin-top:14px'>Sessions · "+ds.length+"</div>"+sess;
     openSheet("exHistSheet");
   }
