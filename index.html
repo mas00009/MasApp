@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1D1D1F">
 <script>
+/* Fresh-start / share mode: adding ?fresh=1 to the URL forces the new-user setup
+   flow and skips the owner's personal seeds (starter foods, supplement stack,
+   body stats, sync worker URL). The plain URL is unaffected. */
+window.__MG_FRESH = (function(){
+  try{ return /(?:^|[?&])fresh=1(?:&|$)/.test(location.search); }catch(e){ return false; }
+})();
+</script>
+<script>
 (function(){
   try{
     var t=localStorage.getItem("mt_theme")||"midnight";
@@ -2075,7 +2083,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 9:18 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 9:35 AM</div>
   </div>
 </div>
 
@@ -2404,6 +2412,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- first-run onboarding ---------- */
   var ONBOARD_KEY="mt_onboarded", needsOnboard=false;
+  var FRESH=!!(window.__MG_FRESH);   // ?fresh=1 share build: always run setup, no personal seeds
   var OB_STEPS=["welcome","theme","profile","targets","measure","ai","sync","done"], obIndex=0, obTargetsRec=null;
   function obEl(id){ return document.getElementById(id); }
   function obCopy(dst,src){ var d=obEl(dst),s=obEl(src); if(d&&s) d.value=s.value; }
@@ -2572,6 +2581,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     {name:"Smart Sweets Gummies",serving:"Low-calorie gummy confectionery",cal:50,p:0,c:2.5,f:0},
     {name:"Mini Babybel Cheese",serving:"20g cheese snack",cal:62,p:4.6,c:0,f:4.8},
   ];
+  var STARTER_GENERIC=[
+    {name:"Chicken breast (100g)",serving:"Raw, skinless",cal:120,p:22.5,c:0,f:2.6},
+    {name:"Eggs (2 large)",serving:"2 x 50g eggs",cal:143,p:12.6,c:0.7,f:9.5},
+    {name:"Rolled oats (50g)",serving:"Dry weight",cal:189,p:6.6,c:31.5,f:3.5},
+    {name:"White rice, cooked (150g)",serving:"Cooked weight",cal:195,p:4.1,c:42.2,f:0.4},
+    {name:"Banana (medium)",serving:"~118g",cal:105,p:1.3,c:27,f:0.4},
+    {name:"Greek yoghurt, plain (170g)",serving:"Single tub",cal:100,p:17,c:6,f:0.7},
+    {name:"Whey protein (1 scoop)",serving:"~30g scoop",cal:120,p:24,c:3,f:1.5},
+    {name:"Olive oil (1 tbsp)",serving:"15 mL",cal:119,p:0,c:0,f:13.5}
+  ];
+  function starterFoods(){ return (window.__MG_FRESH?STARTER_GENERIC:STARTER); }
   var MEALS=["breakfast","lunch","dinner"];
 
   /* ---------- helpers ---------- */
@@ -3623,7 +3643,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- body / measurements ---------- */
   var BODY_KEY="mt_body", body={}, measSite=null;
-  var PROFILE_KEY="mt_profile", profile={height:171,age:41,sex:"male",activity:1.725}, DEFAULT_WEIGHT=86;
+  var PROFILE_KEY="mt_profile", profile=(window.__MG_FRESH?{sex:"male",activity:1.725}:{height:171,age:41,sex:"male",activity:1.725}), DEFAULT_WEIGHT=(window.__MG_FRESH?75:86);
   function saveProfile(){ sSet(PROFILE_KEY, JSON.stringify(profile)); }
   var SITES=[{k:"neck",label:"Neck"},{k:"shoulders",label:"Shoulders"},{k:"chest",label:"Chest"},
     {k:"armL",label:"Left arm"},{k:"armR",label:"Right arm"},{k:"waist",label:"Waist"},{k:"hips",label:"Hips"},
@@ -6303,8 +6323,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var fRaw=await sGet(FOODS_KEY);
     if(fRaw){ try{ foods=JSON.parse(fRaw); }catch(e){ foods=[]; } }
     var fvRaw=await sGet(FOODVER_KEY);
-    if(String(fvRaw)!==String(FOOD_VERSION)){ foods=STARTER.map(function(f){ return Object.assign({id:uid()},f); }); await saveFoods(); await sSet(FOODVER_KEY, String(FOOD_VERSION)); }
-    if(!foods || !foods.length){ foods=STARTER.map(function(f){ return Object.assign({id:uid()},f); }); await saveFoods(); }
+    if(String(fvRaw)!==String(FOOD_VERSION)){ foods=starterFoods().map(function(f){ return Object.assign({id:uid()},f); }); await saveFoods(); await sSet(FOODVER_KEY, String(FOOD_VERSION)); }
+    if(!foods || !foods.length){ foods=starterFoods().map(function(f){ return Object.assign({id:uid()},f); }); await saveFoods(); }
     var tRaw=await sGet(TARGETS_KEY); if(tRaw){ try{ targets=JSON.parse(tRaw); }catch(e){} }
     var lRaw=await sGet(LOG_KEY); if(lRaw){ try{ log=JSON.parse(lRaw); }catch(e){ log={}; } }
     var lrRaw=await sGet(LOGRESET_KEY);
@@ -6346,8 +6366,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     renderHome();
     updateBadges();
     var obFlag=await sGet(ONBOARD_KEY);
-    if(!obFlag && obHasData()){ sSet(ONBOARD_KEY,"1"); obFlag="1"; }   // existing users skip it
-    needsOnboard = !obFlag;
+    if(!obFlag && !FRESH && obHasData()){ sSet(ONBOARD_KEY,"1"); obFlag="1"; }   // existing users skip it
+    needsOnboard = FRESH || !obFlag;
     hideSplash();
   }
   var splashT0=Date.now();
@@ -6483,7 +6503,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function loadStack(){
     var raw=ls(STACK_KEY);
     if(raw){ try{ var o=JSON.parse(raw); if(o&&o.phases&&o.phases.length){ stack=o; return; } }catch(e){} }
-    stack=defaultStack(); saveStack();
+    stack=(window.__MG_FRESH?[]:defaultStack()); saveStack();
   }
   function saveStack(){ lset(STACK_KEY, JSON.stringify(stack)); }
 
@@ -6748,7 +6768,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
    so logging on phone and laptop the same day no longer wipes one device. */
 (function(){
   var URL_K="mt_syncurl", TOK_K="mt_synctoken", AUTO_K="mt_syncauto", META_K="mt_sync_meta";
-  var DEFAULT_URL="https://masapp-sync.mmohammad.workers.dev";
+  var DEFAULT_URL=(window.__MG_FRESH?"":"https://masapp-sync.mmohammad.workers.dev");
   // Secrets / device-local flags stay off the cloud. Everything else under mt_ / stack- syncs.
   var EXCLUDE={ "mt_aikey":1, "mt_syncurl":1, "mt_synctoken":1, "mt_syncauto":1, "mt_sync_meta":1, "mt_lastexport":1, "mt_freshreset_2":1 };
   // Known app keys - always considered so a missing local key can still be filled from cloud.
