@@ -669,6 +669,77 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   @keyframes splashIn{0%{opacity:0;transform:scale(.8)}60%{opacity:1}100%{opacity:1;transform:scale(1)}}
   @keyframes splashGlow{0%,100%{opacity:.35;transform:scale(.88)}50%{opacity:.8;transform:scale(1.12)}}
 
+  /* contextual AI entry points */
+  .addways{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 10px}
+  .addway{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:7px 9px;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;font-family:var(--ff-ui)}
+  .addway:last-child:nth-child(odd){grid-column:1/-1}
+  .addway:active{background:var(--border)}
+  .addway.ai{border-color:color-mix(in srgb,var(--protein) 38%,var(--border));background:linear-gradient(140deg,color-mix(in srgb,var(--protein) 11%,var(--surface-2)),var(--surface-2))}
+  .addway.on{border-color:var(--protein);box-shadow:0 0 0 1px var(--protein)}
+  .addway .aw-ic{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:color-mix(in srgb,var(--protein) 16%,transparent)}
+  .addway .aw-ic svg{width:13px;height:13px;fill:none;stroke:var(--protein);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .addway:not(.ai) .aw-ic{background:var(--surface);}
+  .addway:not(.ai) .aw-ic svg{stroke:var(--muted)}
+  .addway .aw-t{flex:1;min-width:0;display:block;font-size:11.5px;font-weight:700;color:var(--text);letter-spacing:-.01em;line-height:1.15}
+  .addway .aw-t i{display:block;font-style:normal;font-size:9.5px;font-weight:500;color:var(--muted);margin-top:2px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ai-tag{display:inline-block;margin-left:4px;font-size:7.5px;font-weight:800;letter-spacing:.1em;color:var(--protein);border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));border-radius:4px;padding:1px 3px;vertical-align:1px;flex:none}
+  .primary .ai-tag{color:var(--on-accent);border-color:color-mix(in srgb,var(--on-accent) 40%,transparent);opacity:.85}
+  .ideas-btn{flex:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(140deg,color-mix(in srgb,var(--protein) 16%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));color:var(--protein);border-radius:12px;padding:0 12px;font-family:var(--ff-ui);font-weight:700;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ideas-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .ideas-btn:active{filter:brightness(.95)}
+  #tab-lift .exc-swap{flex:none;width:26px;height:26px;display:grid;place-items:center;background:transparent;border:none;color:var(--faint);cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+  #tab-lift .exc-swap svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #tab-lift .exc-swap:active{color:var(--protein)}
+  #tab-lift .wk-aitools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  #tab-lift .wk-aitool{display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(140deg,color-mix(in srgb,var(--protein) 12%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 38%,var(--border));color:var(--protein);border-radius:12px;padding:11px 8px;font-family:var(--ff-ui);font-weight:700;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #tab-lift .wk-aitool svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #tab-lift .wk-aitool:active{filter:brightness(.95)}
+  #tab-coach .coach-aitools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+  #tab-coach .coach-aitool{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--surface-2);border:1px solid color-mix(in srgb,var(--protein) 34%,var(--border));color:var(--protein);border-radius:12px;padding:11px 8px;font-family:var(--ff-ui);font-weight:700;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #tab-coach .coach-aitool svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #tab-coach .coach-aitool:active{background:var(--border)}
+  #tab-body .bstat .ai-tag.bstat-ai{margin-left:auto;font-size:7px;padding:0 3px;letter-spacing:.08em}
+  /* AI Lab */
+  .ailab-cta{width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,color-mix(in srgb,var(--protein) 20%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));border-radius:14px;padding:13px 14px;cursor:pointer;text-align:left;margin:0 0 12px;-webkit-tap-highlight-color:transparent}
+  .ailab-cta:active{filter:brightness(.97)}
+  .ailab-cta .alc-ic{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--grad);color:var(--on-accent);font-size:16px;font-weight:800;box-shadow:var(--glow)}
+  .ailab-cta .alc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .ailab-cta .alc-txt b{display:block;font-size:14px;font-weight:700;color:var(--text)}
+  .ailab-cta .alc-txt i{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}
+  .ailab-cta .alc-go{flex:none;color:var(--protein);font-size:22px;font-weight:700}
+  #aiLabList{display:flex;flex-direction:column;gap:8px}
+  .alt-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .alt-row:active{background:var(--surface-2)}
+  .alt-row .altr-ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--border)}
+  .alt-row .altr-ic svg{width:16px;height:16px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .alt-row .altr-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .alt-row .altr-n{display:block;font-size:13.5px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+  .alt-row .altr-d{display:block;font-size:11px;color:var(--muted);line-height:1.35}
+  .alt-row .altr-go{flex:none;color:var(--faint);font-size:18px}
+  .ailab-back{background:transparent;border:none;color:var(--muted);font-family:var(--ff-ui);font-weight:600;font-size:13px;padding:2px 0 12px;cursor:pointer}
+  .ailab-back:active{color:var(--text)}
+  #aiLabToolHead .alth-n{font-family:var(--ff-ui);font-weight:800;font-size:19px;color:var(--text);letter-spacing:-.01em}
+  #aiLabToolHead .alth-d{font-size:12.5px;color:var(--muted);line-height:1.45;margin:5px 0 14px}
+  #aiLabOut{margin-top:14px}
+  .alo-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 14px;margin-bottom:9px}
+  .alo-card .aloc-h{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+  .alo-card .aloc-n{font-size:14px;font-weight:700;color:var(--text);flex:1;min-width:0}
+  .alo-card .aloc-m{font-family:var(--ff-num);font-size:11.5px;font-weight:700;color:var(--protein);white-space:nowrap}
+  .alo-card .aloc-b{font-size:12px;color:var(--muted);line-height:1.5}
+  .alo-card .aloc-b b{color:var(--text);font-weight:600}
+  .alo-add{width:100%;margin-top:10px;background:transparent;border:1px dashed color-mix(in srgb,var(--protein) 45%,var(--border));color:var(--protein);border-radius:10px;padding:9px;font-family:var(--ff-ui);font-weight:700;font-size:12px;cursor:pointer}
+  .alo-add:active{background:var(--surface-2)}
+  .alo-add.done{border-style:solid;border-color:var(--ok);color:var(--ok)}
+  .alo-prose{font-size:13.5px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+  .alo-sec{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:16px 2px 8px}
+  .alo-bar{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .alo-bar .alob-n{flex:0 0 78px;font-size:11.5px;color:var(--muted);text-transform:capitalize}
+  .alo-bar .alob-t{flex:1;height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+  .alo-bar .alob-f{height:100%;border-radius:4px;background:var(--grad)}
+  .alo-bar .alob-v{flex:none;font-family:var(--ff-num);font-size:11px;font-weight:700;color:var(--text);min-width:44px;text-align:right}
+  .alo-mic{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;border:none;background:var(--surface-2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+  .alo-mic.on{background:var(--protein);color:var(--on-accent);box-shadow:var(--glow)}
+  .alo-mic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   /* first-run onboarding */
   .onboard{position:fixed;inset:0;z-index:1500;background:var(--bg);display:flex;flex-direction:column;
     max-width:440px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 20px calc(18px + env(safe-area-inset-bottom));box-sizing:border-box}
@@ -1652,8 +1723,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
         <div class="bstat-v" id="wNow">-<span>kg</span></div>
         <div class="bstat-sub" id="wDelta">no data yet</div>
       </button>
-      <button class="bstat alt" id="maintCard" data-settings aria-label="Maintenance estimate, edit profile">
-        <div class="bstat-l"><span>Maint</span><span class="pen">&#9998;</span></div>
+      <button class="bstat alt" id="maintCard" aria-label="Maintenance calories, measured from your own data">
+        <div class="bstat-l"><span>Maint</span><span class="ai-tag bstat-ai">AI</span></div>
         <div class="bstat-v" id="maintNow">-<span>kcal</span></div>
         <div class="bstat-sub" id="maintSub"></div>
       </button>
@@ -1761,6 +1832,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <div class="coach-intro">
       <div class="coach-lede">Analyses everything you've logged: weight, measurements, food, supplements, workouts, schedule and notes, and gives practical advice based on the full picture.</div>
       <button class="primary" id="coachGen">Get advice</button>
+      <div class="coach-aitools">
+        <button type="button" class="coach-aitool" data-al-open="digest"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>Review week<span class="ai-tag">AI</span></button>
+        <button type="button" class="coach-aitool" data-al-open="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>Ask history<span class="ai-tag">AI</span></button>
+      </div>
       <input class="coach-journal" id="coachJournal" type="text" placeholder="Ask your coach anything…" autocomplete="off">
       <div class="coach-note" id="coachNote"></div>
     </div>
@@ -1868,10 +1943,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div class="sheet-body">
     <div class="newfood">
       <div class="subhead">Add New Food</div>
-      <button type="button" class="ask-ai-cta" id="askAiOpen"><span class="aac-ic">✦</span><span class="aac-txt">Ask AI</span><span class="aac-sub">Chat to work out the calories, then log it</span></button>
-      <div class="methods">
-        <button class="method" id="mMeal"><span class="mic">◎</span>Photo estimate</button>
-        <button class="method" id="mManual"><span class="mic">✎</span>Enter it yourself</button>
+      <div class="addways">
+        <button type="button" class="addway ai" id="alFoodIdeas"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7 4.9 19.1M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="3.4"/></svg></span><span class="aw-t">Ideas<span class="ai-tag">AI</span><i>what fits in what's left</i></span></button>
+        <button type="button" class="addway ai" id="alFoodQuick"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><span class="aw-t">Speak<span class="ai-tag">AI</span><i>a whole meal at once</i></span></button>
+        <button type="button" class="addway ai" id="askAiOpen"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5v-8Z"/></svg></span><span class="aw-t">Ask<span class="ai-tag">AI</span><i>chat it out first</i></span></button>
+        <button type="button" class="addway ai" id="mMeal"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l1-1.6A1.5 1.5 0 0 1 10.5 4.7h3a1.5 1.5 0 0 1 1.3.7l1 1.6h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="12.5" r="3.2"/></svg></span><span class="aw-t">Photo<span class="ai-tag">AI</span><i>label or meal</i></span></button>
+        <button type="button" class="addway ai" id="alFoodRecipe"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5"/></svg></span><span class="aw-t">Recipe<span class="ai-tag">AI</span><i>per-serving macros</i></span></button>
+        <button type="button" class="addway" id="mManual"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><span class="aw-t">Enter it myself<i>type the numbers</i></span></button>
       </div>
       <div class="method-status" id="methodStatus"></div>
       <input type="file" id="mealFile" accept="image/*" style="display:none">
@@ -1925,6 +2003,28 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <div class="aichat-inputbar">
       <textarea id="aiChatInput" rows="1" placeholder="e.g. calories in a flat white and a banana?"></textarea>
       <button type="button" id="aiChatSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="aiLabSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2 id="aiLabTitle">AI Lab</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body">
+    <div id="aiLabMenu">
+      <div class="mono-note" style="text-align:left;margin:0 2px 12px">Beta tools that read what you have already logged. Nothing here changes your data unless you tap an Add or Apply button.</div>
+      <div id="aiLabList"></div>
+    </div>
+    <div id="aiLabTool" hidden>
+      <button type="button" class="ailab-back" id="aiLabBack">‹ All tools</button>
+      <div id="aiLabToolHead"></div>
+      <div id="aiLabToolBody"></div>
+      <div class="photo-tray-status" id="aiLabStatus" style="margin:10px 2px 0"></div>
+      <button type="button" class="primary" id="aiLabRun" style="margin-top:12px">Run</button>
+      <div id="aiLabOut"></div>
     </div>
   </div>
 </div>
@@ -2083,7 +2183,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 9:35 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 1:09 PM</div>
   </div>
 </div>
 
@@ -2926,7 +3026,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- sheet open/close ---------- */
   var backdrop=document.getElementById("backdrop");
-  var ALL_SHEETS=["addSheet","aiChatSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
+  var ALL_SHEETS=["addSheet","aiChatSheet","aiLabSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
   function openSheet(id){
     ALL_SHEETS.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove("open"); });
     backdrop.classList.add("open");
@@ -3833,6 +3933,36 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       .map(function(n){ return {name:n, servings:Math.round(topFoods[n]*10)/10}; });
     return {daysLogged:logged, dailyTotals:daily, topFoods:top, mealCounts:mealCounts};
   }
+  // what is actually in the supplement stack, so advice can be specific
+  function collectStackDetail(){
+    try{
+      var raw=localStorage.getItem("mt_supps_stack"); if(!raw) return null;
+      var st=JSON.parse(raw); var phases=(st&&st.phases)||[]; var out=[];
+      phases.forEach(function(ph){
+        (ph.items||[]).forEach(function(it){
+          out.push({name:it.name, dose:it.dose||null, timing:ph.name||null, timeWindow:ph.time||null,
+                    everyNDays:it.freq||1, takenWith:it.with||null, note:it.note||null});
+        });
+      });
+      return out.length?out:null;
+    }catch(e){ return null; }
+  }
+  // completed sets per body part, so the coach can judge training balance
+  function muscleVolume(days){
+    try{
+      var out={};
+      for(var i=days-1;i>=0;i--){
+        var dt=new Date(); dt.setDate(dt.getDate()-i);
+        var w=workouts[keyOf(dt)]; if(!w) continue;
+        (w.exercises||[]).forEach(function(e){
+          var done=(e.sets||[]).filter(function(x){return x.done;}).length; if(!done) return;
+          var bp=(typeof EX_BP!=="undefined" && EX_BP[String(e.name).toLowerCase()])||"other";
+          out[bp]=(out[bp]||0)+done;
+        });
+      }
+      return Object.keys(out).length?out:null;
+    }catch(e){ return null; }
+  }
   function collectMeasurementTrend(){
     var out={};
     SITES.forEach(function(s){
@@ -3925,15 +4055,20 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var journalNote=document.getElementById("coachJournal");
     var contextNote=journalNote?journalNote.value.trim():"";
     return {
-      profile:{sex:profile.sex,age:profile.age,heightCm:profile.height,activity:ACT_LABEL[String(profile.activity)]||profile.activity,weightKg:lw?lw.v:null,goalWeightKg:(profile.goalWeight!=null?profile.goalWeight:null)},
+      profile:{sex:profile.sex,age:profile.age,heightCm:profile.height,activity:ACT_LABEL[String(profile.activity)]||profile.activity,weightKg:lw?lw.v:null,goalWeightKg:(profile.goalWeight!=null?profile.goalWeight:null),
+        trainingExperience:(profile.experience||null),
+        equipmentAvailable:((profile.equip&&profile.equip.length)?profile.equip:null),
+        preferencesAndInjuries:(profile.trainNotes||null)},
       maintenanceKcal:m.tdee, bmrKcal:m.bmr, measuredMaintenanceKcal:(function(){ var a=computeAdaptiveTDEE(); return a?a.tdee:null; })(),
       targets:{calories:targets.cal,protein:targets.p,carbs:targets.c,fat:targets.f},
       nutrition:{last7:collectFoodWindow(7), last30:collectFoodWindow(30), weeklyAverage:avgWindow(7), monthlyAverage:avgWindow(30)},
       weight:{currentKg:lw?lw.v:null, thirtyDayChangeKg:monthChange, history:wtrend},
       measurements:collectMeasurementTrend(),
       bodyComposition:(function(){ var c=computeBodyFat(); return c?{bodyFatPct:r1(c.bf), leanKg:c.lean!=null?r1(c.lean):null, fatKg:c.fat!=null?r1(c.fat):null}:null; })(),
-      supplements:{sevenDayAdherence:suppAdh(7), thirtyDayAdherence:suppAdh(30), stackSize:suppTotal},
+      supplements:{sevenDayAdherence:suppAdh(7), thirtyDayAdherence:suppAdh(30), stackSize:suppTotal, stack:collectStackDetail()},
       training:collectTraining(),
+      trainingBalance:{setsByMuscleLast7:muscleVolume(7), setsByMuscleLast28:muscleVolume(28)},
+      savedPlans:((typeof plans!=="undefined"&&plans.length)?plans.map(function(pl){ return {name:pl.name, exercises:(pl.exercises||[]).length}; }):null),
       weeklySchedule:collectSchedule(),
       hydration:collectWaterWindow(30),
       notes:collectJournalHistory(),
@@ -4002,7 +4137,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var introEl=document.querySelector("#tab-coach .coach-intro"); if(introEl) introEl.style.display="none";
     var data=collectData();
     var sys="You are a supportive, practical personal health and fitness coach built into the user's own tracking app. "+
-      "You receive a JSON snapshot of everything they have logged: profile and maintenance estimates, macro targets, nutrition history (7 and 30 days with daily totals, top foods and meal patterns), weight history, body measurements over time, body composition, supplement adherence (7 and 30 days), training (7 and 30 days of sessions with volume, sets, exercises, session duration in minutes where recorded, PRs), their weekly schedule (gym, basketball, swimming, each with planned duration and, for gym, actual tracked duration where logged), hydration over 30 days, journal notes, and any userContext they typed before asking. "+
+      "You receive a JSON snapshot of everything they have logged: profile (including training experience, available equipment, and preferencesAndInjuries) and maintenance estimates, macro targets, nutrition history (7 and 30 days with daily totals, top foods and meal patterns), weight history, body measurements over time, body composition, supplement adherence AND the actual stack contents with doses and timing, training (7 and 30 days of sessions with volume, sets, exercises, session duration, PRs), trainingBalance (completed sets per muscle group over 7 and 28 days), savedPlans, their weekly schedule, hydration over 30 days, journal notes, and any userContext they typed before asking. "+
+      "Work through EVERY section of the snapshot before answering and do not ignore any of it: if a field is present, it is relevant. Where a field is null or a window has few logged days, say so plainly and treat it as low confidence rather than inventing a conclusion. "+
+      "Judge everything against their stated targets and goal weight: for each area say whether it is on track for those targets and what specifically to change. Use trainingBalance to call out under-trained or over-trained muscle groups by name. Respect preferencesAndInjuries absolutely - never recommend anything they have said to avoid - and only recommend exercises their equipment allows. Reference their actual supplements by name when relevant. "+
       "Your job is to give ADVICE, not a recap. Do not simply restate what the numbers say. Interpret patterns, identify what is working and what is not, and tell them what to change. Compare 7-day vs 30-day windows, spot trends in weight and measurements, comment on food variety and protein consistency, judge whether training volume and session length support their goal, relate schedule to recovery, and factor in notes about sleep or soreness. "+
       "If measuredMaintenanceKcal is present, prefer it over the formula estimate. Use body composition when available. Be specific with numbers but always translate them into actionable guidance. "+
       "Never promote extreme restriction or unsafe practices. For medical concerns, suggest a qualified professional; do not diagnose. "+
@@ -4624,6 +4761,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
           "<div class='exc-row1'>"+
             "<span class='exc-title' data-ex-collapse='"+e.id+"'><span class='exc-chev' aria-hidden='true'><svg viewBox='0 0 24 24'><polyline points='9 6 15 12 9 18'/></svg></span><span class='en'>"+esc(exDisplay(e.name))+"</span></span>"+
             "<span class='exc-actions'>"+
+              "<button class='exc-swap' data-al-swap='"+encodeURIComponent(e.name)+"' aria-label='Swap this exercise'><svg viewBox='0 0 24 24'><path d='M4 8h13l-3-3M20 16H7l3 3'/></svg></button>"+
               "<button class='exc-hist' data-hist='"+encodeURIComponent(e.name)+"' aria-label='History'><svg viewBox='0 0 24 24'><path d='M5 19V10M12 19V5M19 19v-6'/></svg></button>"+
               "<button class='exc-x' data-remove-ex='"+e.id+"' aria-label='Remove exercise'>\u00d7</button>"+
             "</span>"+
@@ -4654,7 +4792,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var durEl=document.getElementById("wkDur"); if(durEl) durEl.textContent=fmtDur(wkDurationMin(s));
     var durStat=document.getElementById("wkDurStat"); if(durStat) durStat.classList.toggle("manual", typeof s.durMin==="number" && s.durMin>0);
     setWkTop(stt);
-    list.innerHTML = s.exercises.length ? (s.exercises.map(excCard).join("")+"<button type='button' class='wk-saveplan' data-save-plan>Save as plan</button>") : (function(){
+    list.innerHTML = s.exercises.length ? (s.exercises.map(excCard).join("")+
+      "<div class='wk-aitools'>"+
+        "<button type='button' class='wk-aitool' data-al-open='recap'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 12a8 8 0 1 1 2.3 5.6'/><polyline points='4 20 4 14 10 14'/></svg>Recap"+TAG_AI+"</button>"+
+        "<button type='button' class='wk-aitool' data-al-open='audit'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M5 19V10M12 19V5M19 19v-6'/></svg>Audit"+TAG_AI+"</button>"+
+      "</div>"+
+      "<button type='button' class='wk-saveplan' data-save-plan>Save as plan</button>") : (function(){
       var past=wDatesWith().filter(function(k){ return k<wKey(); }).reverse();  // most recent first
       var repHtml="";
       if(past.length){
@@ -5352,6 +5495,482 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(e.target.closest("#aiPlanSave")){ var po=aiPlanToPlanObj(); if(po){ openPlanEditor(null, po); } return; }
     if(e.target.closest("#aiPlanStart")){ var po=aiPlanToPlanObj(); if(po){ applyPlan(po); closeSheets(); var t=document.querySelector('.tabbtn[data-tab="lift"]'); if(t) t.click(); } return; }
   });
+
+
+  /* ================= AI tools =================
+     Nine tools that read what is already logged. Deterministic maths is done in
+     JS; the model is only asked to interpret, suggest or parse. */
+  var AL_cur=null, AL_lastOut=null, AL_rec=null, AL_swapSeed=null;
+  var TAG_AI="<span class='ai-tag'>AI</span>";
+  function alEl(id){ return document.getElementById(id); }
+  function alStat(m,cls){ var e=alEl("aiLabStatus"); if(e){ e.textContent=m||""; e.className="photo-tray-status"+(cls?(" "+cls):""); } }
+  function alJSON(txt){
+    var raw=String(txt||"").replace(/```json/gi,"").replace(/```/g,"").trim();
+    var i=raw.indexOf("{"), j=raw.lastIndexOf("}");
+    if(i<0||j<i) return null;
+    try{ return JSON.parse(raw.slice(i,j+1)); }catch(e){ return null; }
+  }
+  function alDays(n){ var t=new Date(); t.setHours(0,0,0,0); var out=[]; for(var i=n-1;i>=0;i--){ var d=new Date(t); d.setDate(d.getDate()-i); out.push(keyOf(d)); } return out; }
+
+  /* ---- deterministic digests ---- */
+  function alRemaining(){
+    var t=dayTotals();
+    return { cal:Math.max(0,r0((targets.cal||0)-t.cal)), p:Math.max(0,r0((targets.p||0)-t.p)),
+             c:Math.max(0,r0((targets.c||0)-t.c)), f:Math.max(0,r0((targets.f||0)-t.f)),
+             usedCal:r0(t.cal), usedP:r0(t.p) };
+  }
+  function alFoodsDigest(limit){
+    return (foods||[]).slice(0,limit||70).map(function(f){
+      return f.name+" ["+r0(f.cal)+"kcal "+r1(f.p)+"P "+r1(f.c)+"C "+r1(f.f)+"F]";
+    }).join("; ");
+  }
+  function alIntake(days){
+    var ks=alDays(days), n=0, cal=0, p=0;
+    ks.forEach(function(k){ var t=totalsForKey(k); if(t.cal>0){ n++; cal+=t.cal; p+=t.p; } });
+    return { loggedDays:n, avgCal:n?r0(cal/n):0, avgP:n?r0(p/n):0 };
+  }
+  function alWeights(days){
+    var ks=alDays(days), pts=[];
+    ks.forEach(function(k){ var v=body[k]&&body[k].weight; if(v!=null&&isFinite(v)) pts.push({k:k,v:Number(v)}); });
+    if(pts.length<2) return null;
+    var first=pts[0], last=pts[pts.length-1];
+    var spanDays=Math.max(1,(dateFromKey(last.k)-dateFromKey(first.k))/86400000);
+    var raw=(last.v-first.v)/spanDays*7;
+    return { first:first, last:last, change:r1(last.v-first.v), perWeek:r1(raw), perWeekRaw:raw, n:pts.length };
+  }
+  // sets per body part from the exercise DB, over the last n days
+  function alVolume(days){
+    var ks=alDays(days), m={}, total=0;
+    ks.forEach(function(k){
+      var w=workouts[k]; if(!w) return;
+      (w.exercises||[]).forEach(function(e){
+        var done=(e.sets||[]).filter(function(s){return s.done;}).length;
+        if(!done) return;
+        var bp=EX_BP[String(e.name).toLowerCase()]||"other";
+        m[bp]=(m[bp]||0)+done; total+=done;
+      });
+    });
+    return { byPart:m, total:total };
+  }
+  function alTrainingDigest(days){
+    var ks=alDays(days), lines=[];
+    ks.slice().reverse().forEach(function(k){
+      var w=workouts[k]; if(!w||!(w.exercises||[]).length) return;
+      var exs=(w.exercises||[]).map(function(e){
+        var use=(e.sets||[]).filter(function(s){return s.done;});
+        if(!use.length) use=e.sets||[];
+        var top=null; use.forEach(function(s){ var wt=num(s.w),rp=num(s.reps); if(wt>0&&(!top||wt>top.w)) top={w:wt,r:rp}; });
+        return exDisplay(e.name)+(top?(" "+top.w+"x"+top.r):" "+use.length+" sets");
+      });
+      lines.push(fmtShort(k)+": "+exs.join(", "));
+    });
+    return lines.length?lines.join("\n"):"No sessions logged in this window.";
+  }
+  function alLastSession(){
+    var ks=Object.keys(workouts).filter(function(k){ return (workouts[k].exercises||[]).some(function(e){ return (e.sets||[]).some(function(s){return s.done;}); }); }).sort();
+    return ks.length?ks[ks.length-1]:null;
+  }
+  function alProfileLine(){
+    var lw=latestFor("weight");
+    var bits=["age "+(profile.age!=null?profile.age:"?"), (profile.sex||"?"), "experience "+(profile.experience||"intermediate")];
+    if(lw) bits.push("weight "+r1(lw.v)+"kg");
+    if(profile.goalWeight!=null) bits.push("goal "+r1(profile.goalWeight)+"kg");
+    if(profile.trainNotes) bits.push("prefs/avoid: "+profile.trainNotes);
+    if(profile.equip&&profile.equip.length) bits.push("equipment: "+profile.equip.join("/"));
+    return bits.join(", ");
+  }
+  function alGoalDir(){
+    try{ var r=recommendTargets("steady"); return r.dir<0?"fat loss":(r.dir>0?"muscle gain":"maintenance"); }catch(e){ return "unknown"; }
+  }
+
+  /* ---- shared renderers ---- */
+  function alProse(txt){ return "<div class='alo-card'><div class='aloc-b alo-prose' style='color:var(--text)'>"+esc(String(txt||"").trim())+"</div></div>"; }
+  function alFoodCard(it,i){
+    var m=r0(it.cal)+" kcal · "+r1(it.protein)+"P "+r1(it.carbs)+"C "+r1(it.fat)+"F";
+    return "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>"+esc(it.name)+"</span><span class='aloc-m'>"+m+"</span></div>"+
+      (it.why?"<div class='aloc-b'>"+esc(it.why)+"</div>":"")+
+      (it.serving?"<div class='aloc-b' style='margin-top:3px'>"+esc(it.serving)+"</div>":"")+
+      "<button type='button' class='alo-add' data-al-add='"+i+"'>Add to "+esc(addMeal)+"</button></div>";
+  }
+  function alAddItem(it){
+    var food={ id:uid(), name:it.name||"AI item", serving:it.serving||"", servingG:num(it.servingG)||0,
+      cal:r0(num(it.cal)), p:r1(num(it.protein)), c:r1(num(it.carbs)), f:r1(num(it.fat)) };
+    var qty=num(it.qty); if(!(qty>0)) qty=1;
+    var d=dayLog();
+    d[addMeal].push({ id:uid(), foodId:food.id, name:food.name, serving:food.serving, servingG:food.servingG,
+      cal:food.cal, p:food.p, c:food.c, f:food.f, qty:qty });
+    saveLog(); renderAll();
+  }
+
+  /* ---- the tools ---- */
+  var AL_ICON={
+    meals:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M6 3v7M9 3v7M6 10a1.5 1.5 0 0 0 3 0M7.5 10v11M17 3c-1.5 1-2.5 3-2.5 5.5S15.5 13 17 13v8'/></svg>",
+    quicklog:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M12 4v10M8.5 10.5 12 14l3.5-3.5M5 18h14'/></svg>",
+    recipe:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5'/></svg>",
+    audit:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M5 19V10M12 19V5M19 19v-6'/></svg>",
+    swap:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M4 8h13l-3-3M20 16H7l3 3'/></svg>",
+    recap:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M4 12a8 8 0 1 1 2.3 5.6'/><polyline points='4 20 4 14 10 14'/></svg>",
+    search:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l4 4'/></svg>",
+    tdee:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><path d='M12 20a8 8 0 1 0-8-8'/><path d='M12 12l5-3'/></svg>",
+    digest:"<svg viewBox='0 0 24 24' stroke='var(--protein)'><rect x='3.5' y='5' width='17' height='15' rx='2.5'/><path d='M3.5 9.5h17M8 3v4M16 3v4'/></svg>"
+  };
+  var AL_TOOLS=[
+  {
+    id:"meals", name:"What can I eat?", run:"Suggest meals",
+    desc:"Uses what is left of today's targets plus your own saved foods to suggest meals that actually fit.",
+    form:function(){
+      var rem=alRemaining();
+      return "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>Left today</span><span class='aloc-m'>"+rem.cal+" kcal</span></div>"+
+        "<div class='aloc-b'><b>"+rem.p+"g</b> protein · <b>"+rem.c+"g</b> carbs · <b>"+rem.f+"g</b> fat still available</div></div>"+
+        "<div class='field' style='margin-top:10px'><label>Any preference? (optional)</label><input type='text' id='alMealPref' placeholder='e.g. something quick, no dairy, high protein'></div>";
+    },
+    prompt:function(){
+      var rem=alRemaining(), pref=(alEl("alMealPref")||{}).value||"";
+      return {
+        sys:"You are a practical nutrition coach. Suggest meals that fit the remaining macros using mostly the foods the user already has saved. Return ONLY strict minified JSON: {\"options\":[{\"name\":\"meal name\",\"why\":\"one short line\",\"serving\":\"what it is made of, with amounts\",\"cal\":number,\"protein\":number,\"carbs\":number,\"fat\":number}]}. Give 3 options. Totals must be realistic and should not exceed the remaining calories by more than 10%.",
+        user:"Remaining today: "+rem.cal+" kcal, "+rem.p+"g protein, "+rem.c+"g carbs, "+rem.f+"g fat.\nGoal: "+alGoalDir()+".\n"+(pref?("Preference: "+pref+"\n"):"")+"My saved foods: "+alFoodsDigest(70)+"\n\nReturn the JSON only."
+      };
+    },
+    render:function(o){
+      if(!o||!o.options||!o.options.length) return null;
+      AL_lastOut=o.options;
+      return "<div class='alo-sec'>Suggestions</div>"+o.options.map(alFoodCard).join("");
+    }
+  },
+  {
+    id:"quicklog", name:"Quick log (talk or type)", run:"Read it",
+    desc:"Describe a whole meal in one go and it becomes separate log items. Tap the mic to speak instead of typing.",
+    form:function(){
+      return "<div class='field' style='position:relative'><label>What did you eat?</label>"+
+        "<textarea id='alQuick' rows='3' placeholder='two eggs, sourdough toast with butter and a flat white' style='padding-right:52px'></textarea>"+
+        "<button type='button' class='alo-mic' id='alMic' aria-label='Dictate'><svg viewBox='0 0 24 24'><path d='M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3z'/><path d='M6 11a6 6 0 0 0 12 0M12 17v3'/></svg></button></div>"+
+        "<div class='mono-note' style='text-align:left;margin:8px 2px 0'>Adds to <b>"+esc(addMeal)+"</b>. Check the numbers before adding.</div>";
+    },
+    prompt:function(){
+      var t=(alEl("alQuick")||{}).value||"";
+      return {
+        sys:"You convert a spoken or typed description of a meal into individual food log entries. Return ONLY strict minified JSON: {\"items\":[{\"name\":\"short food name\",\"serving\":\"portion description\",\"servingG\":number or 0,\"cal\":number,\"protein\":number,\"carbs\":number,\"fat\":number,\"qty\":number}]}. One entry per distinct food. Values are for ONE unit of that entry, with qty as the count. Estimate sensible portions when unstated.",
+        user:"Log this: "+t+"\n\nReturn the JSON only."
+      };
+    },
+    render:function(o){
+      if(!o||!o.items||!o.items.length) return null;
+      AL_lastOut=o.items;
+      var tot=o.items.reduce(function(a,x){ return a+num(x.cal)*(num(x.qty)||1); },0);
+      return "<div class='alo-sec'>"+o.items.length+" item"+(o.items.length===1?"":"s")+" · "+r0(tot)+" kcal total</div>"+
+        o.items.map(alFoodCard).join("")+
+        "<button type='button' class='primary' id='alAddAll' style='margin-top:4px'>Add all to "+esc(addMeal)+"</button>";
+    }
+  },
+  {
+    id:"recipe", name:"Recipe to food", run:"Work out macros",
+    desc:"Paste a recipe or ingredient list and get per-serving macros you can save as one of your foods.",
+    form:function(){
+      return "<div class='field'><label>Recipe or ingredients</label><textarea id='alRecipe' rows='5' placeholder='500g beef mince, 1 jar pasta sauce, 250g pasta, 100g cheese...'></textarea></div>"+
+        "<div class='field' style='margin-top:10px'><label>How many servings does it make?</label><input type='number' inputmode='numeric' id='alServings' value='4' min='1'></div>";
+    },
+    prompt:function(){
+      var t=(alEl("alRecipe")||{}).value||"", n=num((alEl("alServings")||{}).value)||4;
+      return {
+        sys:"You calculate nutrition for home recipes. Work out the whole recipe then divide by the serving count. Return ONLY strict minified JSON: {\"name\":\"dish name\",\"serving\":\"1 serving (approx Xg)\",\"servingG\":number or 0,\"cal\":number,\"protein\":number,\"carbs\":number,\"fat\":number,\"note\":\"one short line on assumptions\"} where the numbers are PER SERVING.",
+        user:"Recipe:\n"+t+"\n\nMakes "+n+" servings. Return the JSON only."
+      };
+    },
+    render:function(o){
+      if(!o||!(num(o.cal)>0)) return null;
+      AL_lastOut=[o];
+      return "<div class='alo-sec'>Per serving</div>"+
+        "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>"+esc(o.name||"Recipe")+"</span><span class='aloc-m'>"+r0(o.cal)+" kcal</span></div>"+
+        "<div class='aloc-b'><b>"+r1(o.protein)+"g</b> protein · <b>"+r1(o.carbs)+"g</b> carbs · <b>"+r1(o.fat)+"g</b> fat"+(o.serving?(" · "+esc(o.serving)):"")+"</div>"+
+        (o.note?"<div class='aloc-b' style='margin-top:5px'>"+esc(o.note)+"</div>":"")+
+        "<button type='button' class='alo-add' data-al-add='0'>Add to "+esc(addMeal)+"</button></div>"+
+        "<button type='button' class='ghost' id='alRecipeSave' style='margin-top:2px'>Save to my foods and edit</button>";
+    }
+  },
+  {
+    id:"audit", name:"Training audit", run:"Audit my training",
+    desc:"Counts your completed sets per muscle group and looks for imbalances and stalled lifts.",
+    form:function(){
+      var v=alVolume(28), parts=Object.keys(v.byPart).sort(function(a,b){ return v.byPart[b]-v.byPart[a]; });
+      if(!parts.length) return "<div class='alo-card'><div class='aloc-b'>No completed sets logged in the last 28 days, so there is nothing to audit yet.</div></div>";
+      var max=v.byPart[parts[0]]||1;
+      return "<div class='alo-sec'>Sets per area · last 28 days</div>"+parts.map(function(p){
+        return "<div class='alo-bar'><span class='alob-n'>"+esc(p)+"</span><span class='alob-t'><span class='alob-f' style='width:"+Math.round(v.byPart[p]/max*100)+"%'></span></span><span class='alob-v'>"+v.byPart[p]+"</span></div>";
+      }).join("");
+    },
+    prompt:function(){
+      var v28=alVolume(28), v7=alVolume(7);
+      function fmt(o){ return Object.keys(o.byPart).sort(function(a,b){return o.byPart[b]-o.byPart[a];}).map(function(k){ return k+" "+o.byPart[k]; }).join(", ")||"none"; }
+      return {
+        sys:"You are a strength coach auditing a training log. Be specific and brief. Cover: (1) volume balance across muscle groups and anything clearly under or over-trained, (2) any lift that looks stalled and what to change, (3) the single highest-priority fix for next week. Plain sentences, no markdown, no headings, under 180 words.",
+        user:"Athlete: "+alProfileLine()+". Goal: "+alGoalDir()+".\nCompleted sets last 7 days: "+fmt(v7)+" (total "+v7.total+").\nCompleted sets last 28 days: "+fmt(v28)+" (total "+v28.total+").\n\nRecent sessions:\n"+alTrainingDigest(28)
+      };
+    },
+    render:function(t){ return "<div class='alo-sec'>Coach read</div>"+alProse(t); },
+    raw:true
+  },
+  {
+    id:"swap", name:"Swap an exercise", run:"Find alternatives",
+    desc:"Machine taken, or something hurts? Get alternatives that hit the same thing, using your equipment and preferences.",
+    form:function(){
+      var s=wSession(), opts=(s.exercises||[]).map(function(e){ return "<option value=\""+esc(exDisplay(e.name))+"\">"+esc(exDisplay(e.name))+"</option>"; }).join("");
+      var seeded=AL_swapSeed?exDisplay(AL_swapSeed):"";
+      if(seeded) return "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>"+esc(seeded)+"</span></div><div class='aloc-b'>Finding alternatives for this exercise.</div></div>"+
+        "<input type='hidden' id='alSwapText' value=\""+esc(seeded)+"\">"+
+        "<div class='field' style='margin-top:10px'><label>Why swap?</label><input type='text' id='alSwapWhy' placeholder='e.g. rack is taken, shoulder is sore'></div>";
+      return (opts?("<div class='field'><label>Exercise from today</label><select id='alSwapPick'>"+opts+"</select></div>"):"")+
+        "<div class='field' style='margin-top:10px'><label>"+(opts?"Or type another":"Exercise")+"</label><input type='text' id='alSwapText' placeholder='e.g. Barbell Bench Press'></div>"+
+        "<div class='field' style='margin-top:10px'><label>Why swap?</label><input type='text' id='alSwapWhy' placeholder='e.g. rack is taken, shoulder is sore'></div>";
+    },
+    prompt:function(){
+      var pick=(alEl("alSwapPick")||{}).value||"", typed=((alEl("alSwapText")||{}).value||"").trim();
+      var ex=typed||pick, why=((alEl("alSwapWhy")||{}).value||"").trim();
+      return {
+        sys:"You are a strength coach suggesting exercise substitutions. Return ONLY strict minified JSON: {\"alternatives\":[{\"name\":\"standard exercise name\",\"why\":\"one short line on why it substitutes well\",\"sets\":number,\"reps\":\"e.g. 8-10\"}]}. Give 3, ordered best first. Use common standard exercise names. Respect the equipment available and anything to avoid.",
+        user:"Replace: "+ex+"\nReason: "+(why||"not stated")+"\nAthlete: "+alProfileLine()+"\n\nReturn the JSON only."
+      };
+    },
+    render:function(o){
+      if(!o||!o.alternatives||!o.alternatives.length) return null;
+      AL_lastOut=o.alternatives.map(function(a){ return { name:(typeof bestExMatch==="function"?bestExMatch(a.name):a.name), sets:a.sets, reps:a.reps, why:a.why }; });
+      return "<div class='alo-sec'>Alternatives</div>"+AL_lastOut.map(function(a,i){
+        return "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>"+esc(a.name)+"</span><span class='aloc-m'>"+(a.sets||3)+" × "+esc(a.reps||"8-10")+"</span></div>"+
+          (a.why?"<div class='aloc-b'>"+esc(a.why)+"</div>":"")+
+          "<button type='button' class='alo-add' data-al-ex='"+i+"'>Add to today's workout</button></div>";
+      }).join("");
+    }
+  },
+  {
+    id:"recap", name:"Session recap", run:"Recap my session",
+    desc:"Compares your latest session against the last time you trained those lifts and says what to do next.",
+    form:function(){
+      var k=alLastSession();
+      return "<div class='alo-card'><div class='aloc-b'>"+(k?("Latest session with completed sets: <b>"+esc(fmtShort(k))+"</b>"):"No completed sessions logged yet.")+"</div></div>";
+    },
+    prompt:function(){
+      var k=alLastSession();
+      var cur=k?("Session "+fmtShort(k)+":\n"+(function(){
+        return (workouts[k].exercises||[]).map(function(e){
+          var d=(e.sets||[]).filter(function(s){return s.done;});
+          return "  "+exDisplay(e.name)+": "+(d.map(function(s){ return num(s.w)+"x"+num(s.reps); }).join(", ")||"no sets ticked");
+        }).join("\n");
+      })()):"none";
+      return {
+        sys:"You are a strength coach writing a short post-session recap. Say what improved versus previous sessions, what went backwards or stalled, and exactly what to aim for next time on the main lifts. Plain sentences, no markdown, under 150 words.",
+        user:"Athlete: "+alProfileLine()+". Goal: "+alGoalDir()+".\n\nLatest:\n"+cur+"\n\nEarlier sessions for comparison:\n"+alTrainingDigest(42)
+      };
+    },
+    render:function(t){ return "<div class='alo-sec'>Recap</div>"+alProse(t); },
+    raw:true
+  },
+  {
+    id:"search", name:"Ask about my history", run:"Answer",
+    desc:"Plain-English questions about everything you have logged, like when you last hit a lift or your best protein week.",
+    form:function(){
+      return "<div class='field'><label>Your question</label><input type='text' id='alQ' placeholder='when did I last squat over 100kg?'></div>"+
+        "<div class='mono-note' style='text-align:left;margin:8px 2px 0'>Answers come from your logged data only.</div>";
+    },
+    prompt:function(){
+      var q=((alEl("alQ")||{}).value||"").trim();
+      var ks=alDays(120), fl=[];
+      ks.forEach(function(k){ var t=totalsForKey(k); if(t.cal>0) fl.push(fmtShort(k)+" "+r0(t.cal)+"kcal/"+r0(t.p)+"P"); });
+      var wl=[]; Object.keys(body).sort().slice(-60).forEach(function(k){ var v=body[k]&&body[k].weight; if(v!=null) wl.push(fmtShort(k)+" "+r1(v)+"kg"); });
+      return {
+        sys:"You answer questions about the user's own logged fitness data. Use ONLY the data provided. Be direct and specific, quote the numbers and dates that answer the question, and say plainly if the data does not contain the answer. Under 120 words, no markdown.",
+        user:"Question: "+q+"\n\nTRAINING (last 120 days):\n"+alTrainingDigest(120)+"\n\nDAILY INTAKE:\n"+(fl.join("; ")||"none")+"\n\nWEIGHT:\n"+(wl.join("; ")||"none")
+      };
+    },
+    render:function(t){ return "<div class='alo-sec'>Answer</div>"+alProse(t); },
+    raw:true
+  },
+  {
+    id:"tdee", name:"Real maintenance calories", run:"Recalculate",
+    desc:"Works out your true maintenance from what you actually ate versus how your weight actually moved, instead of a formula.",
+    form:function(){
+      var i=alIntake(28), w=alWeights(28);
+      var est=""; try{ est=r0(recommendTargets("steady").maint).toLocaleString(); }catch(e){}
+      var html="<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>Last 28 days</span><span class='aloc-m'>"+i.loggedDays+" days logged</span></div>"+
+        "<div class='aloc-b'>Average intake <b>"+(i.avgCal?i.avgCal.toLocaleString()+" kcal":"not enough data")+"</b>"+(i.avgP?(" · <b>"+i.avgP+"g</b> protein"):"")+"</div>"+
+        "<div class='aloc-b' style='margin-top:3px'>Weight change "+(w?("<b>"+(w.change>0?"+":"")+w.change+" kg</b> ("+(w.perWeek>0?"+":"")+w.perWeek+" kg/wk)"):"not enough weigh-ins")+"</div>"+
+        (est?("<div class='aloc-b' style='margin-top:3px'>Formula estimate <b>"+est+" kcal</b></div>"):"")+"</div>";
+      if(i.loggedDays>=10 && w){
+        var real=r0(i.avgCal-((w.perWeekRaw!=null?w.perWeekRaw:w.perWeek)*7700/7));
+        html+="<div class='alo-card' style='border-color:color-mix(in srgb,var(--protein) 45%,var(--border))'><div class='aloc-h'><span class='aloc-n'>Measured maintenance</span><span class='aloc-m'>"+real.toLocaleString()+" kcal</span></div><div class='aloc-b'>From your own intake and weight trend, using 7,700 kcal per kg.</div></div>";
+        AL_rec=real;
+      } else { AL_rec=null; html+="<div class='mono-note' style='text-align:left;margin:8px 2px 0'>Needs at least 10 logged days and two weigh-ins in the window for a measured figure.</div>"; }
+      return html;
+    },
+    prompt:function(){
+      var i=alIntake(28), w=alWeights(28), est="";
+      try{ est=r0(recommendTargets("steady").maint); }catch(e){}
+      return {
+        sys:"You are a nutrition coach interpreting a real-world energy balance calculation. Explain briefly whether the measured maintenance is trustworthy given the data quality, how it compares to the formula estimate, and what calorie target to actually use for the stated goal. Give one concrete number to aim for. Under 150 words, plain sentences, no markdown.",
+        user:"Goal: "+alGoalDir()+". Athlete: "+alProfileLine()+".\nLogged days in window: "+i.loggedDays+" of 28.\nAverage intake: "+i.avgCal+" kcal, "+i.avgP+"g protein.\nWeight trend: "+(w?(w.change+" kg over the window, "+w.perWeek+" kg/week, "+w.n+" weigh-ins"):"insufficient")+".\nMeasured maintenance: "+(AL_rec!=null?AL_rec:"could not compute")+" kcal. Formula estimate: "+est+" kcal.\nCurrent calorie target: "+(targets.cal||0)+" kcal."
+      };
+    },
+    render:function(t){ return "<div class='alo-sec'>What it means</div>"+alProse(t); },
+    raw:true
+  },
+  {
+    id:"digest", name:"Weekly review", run:"Review my week",
+    desc:"One summary of the past week across food, training, weight, water and supplements, with next week's focus.",
+    form:function(){
+      var i=alIntake(7), v=alVolume(7), w=alWeights(14);
+      return "<div class='alo-card'><div class='aloc-h'><span class='aloc-n'>Last 7 days</span><span class='aloc-m'>"+i.loggedDays+"/7 logged</span></div>"+
+        "<div class='aloc-b'>Avg <b>"+(i.avgCal||0).toLocaleString()+" kcal</b> · <b>"+(i.avgP||0)+"g</b> protein · <b>"+v.total+"</b> sets"+(w?(" · weight "+(w.perWeek>0?"+":"")+w.perWeek+" kg/wk"):"")+"</div></div>";
+    },
+    prompt:function(){
+      var i=alIntake(7), i28=alIntake(28), v=alVolume(7), w=alWeights(14);
+      function fmt(o){ return Object.keys(o.byPart).sort(function(a,b){return o.byPart[b]-o.byPart[a];}).map(function(k){ return k+" "+o.byPart[k]; }).join(", ")||"none"; }
+      return {
+        sys:"You are the user's coach writing their weekly review. Structure it as: one sentence on how the week went overall, then what went well, then what slipped, then the two or three things to focus on next week. Reference their actual numbers. No markdown or headings, under 220 words.",
+        user:"Athlete: "+alProfileLine()+". Goal: "+alGoalDir()+". Targets: "+(targets.cal||0)+" kcal, "+(targets.p||0)+"g protein.\nThis week: "+i.loggedDays+"/7 days logged, avg "+i.avgCal+" kcal and "+i.avgP+"g protein, "+v.total+" completed sets ("+fmt(v)+").\nLast 28 days for context: avg "+i28.avgCal+" kcal, "+i28.avgP+"g protein.\nWeight: "+(w?(w.perWeek+" kg/week over "+w.n+" weigh-ins"):"not enough weigh-ins")+".\n\nSessions this week:\n"+alTrainingDigest(7)
+      };
+    },
+    render:function(t){ return "<div class='alo-sec'>Your week</div>"+alProse(t); },
+    raw:true
+  }
+  ];
+  function alTool(id){ for(var i=0;i<AL_TOOLS.length;i++){ if(AL_TOOLS[i].id===id) return AL_TOOLS[i]; } return null; }
+
+  function alRenderMenu(){
+    var box=alEl("aiLabList"); if(!box) return;
+    box.innerHTML=AL_TOOLS.map(function(t){
+      return "<button type='button' class='alt-row' data-al-tool='"+t.id+"'>"+
+        "<span class='altr-ic'>"+(AL_ICON[t.id]||"")+"</span>"+
+        "<span class='altr-t'><span class='altr-n'>"+esc(t.name)+"</span><span class='altr-d'>"+esc(t.desc)+"</span></span>"+
+        "<span class='altr-go'>›</span></button>";
+    }).join("");
+  }
+  function alOpenTool(id){
+    var t=alTool(id); if(!t) return;
+    if(id!=="swap") AL_swapSeed=null;
+    AL_cur=t; AL_lastOut=null;
+    alEl("aiLabMenu").hidden=true; alEl("aiLabTool").hidden=false;
+    alEl("aiLabTitle").textContent=t.name;
+    alEl("aiLabToolHead").innerHTML="<div class='alth-n'>"+esc(t.name)+"</div><div class='alth-d'>"+esc(t.desc)+"</div>";
+    var bk=alEl("aiLabBack"); if(bk) bk.hidden=false;
+    alEl("aiLabToolBody").innerHTML=t.form?t.form():"";
+    alEl("aiLabOut").innerHTML=""; alStat("");
+    alEl("aiLabRun").innerHTML=esc(t.run||"Run")+TAG_AI;
+    alEl("aiLabRun").hidden=false;
+    var b=document.querySelector("#aiLabSheet .sheet-body"); if(b) b.scrollTop=0;
+    alWireMic();
+  }
+  function alBackToMenu(){
+    AL_cur=null; AL_lastOut=null; AL_swapSeed=null;
+    alEl("aiLabTool").hidden=true; alEl("aiLabMenu").hidden=false;
+    alEl("aiLabTitle").textContent="AI Lab";
+    alEl("aiLabOut").innerHTML=""; alStat("");
+    var b=document.querySelector("#aiLabSheet .sheet-body"); if(b) b.scrollTop=0;
+  }
+  function openAiLab(){
+    alRenderMenu(); alBackToMenu(); openSheet("aiLabSheet");
+  }
+  // Open one tool straight from its own section: no hub, no back link.
+  function alOpenDirect(id){
+    alRenderMenu(); alOpenTool(id);
+    var b=alEl("aiLabBack"); if(b) b.hidden=true;
+    openSheet("aiLabSheet");
+  }
+  window.__alOpen=alOpenDirect;
+  async function alRun(){
+    var t=AL_cur; if(!t) return;
+    if(!aiKey){ alStat("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+    var btn=alEl("aiLabRun"), label=btn.innerHTML;
+    btn.disabled=true; btn.textContent="Thinking…"; alStat(""); alEl("aiLabOut").innerHTML="";
+    try{
+      var p=t.prompt();
+      var out=await aiComplete([{role:"user",content:p.user}], t.raw?700:900, p.sys);
+      if(out==null){ alStat("Add your OpenRouter API key in Settings → AI features.","err"); return; }
+      var html;
+      if(t.raw){ html=t.render(String(out).trim()); }
+      else {
+        var o=alJSON(out);
+        html=o?t.render(o):null;
+        if(!html){ alStat("Could not read a clear result. Try running it again.","err"); return; }
+      }
+      alEl("aiLabOut").innerHTML=html||"";
+    }catch(e){ alStat("Error: "+((e&&e.message)||e),"err"); }
+    finally{ btn.disabled=false; btn.innerHTML=label; }
+  }
+  /* voice dictation for the quick-log box */
+  function alWireMic(){
+    var mic=alEl("alMic"), box=alEl("alQuick");
+    if(!mic||!box) return;
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){ mic.style.display="none"; return; }
+    var rec=null, on=false;
+    mic.addEventListener("click",function(){
+      if(on&&rec){ try{ rec.stop(); }catch(e){} return; }
+      try{
+        rec=new SR(); rec.lang="en-AU"; rec.interimResults=true; rec.continuous=false;
+        rec.onstart=function(){ on=true; mic.classList.add("on"); alStat("Listening…"); };
+        rec.onerror=function(ev){ on=false; mic.classList.remove("on"); alStat("Microphone: "+(ev.error||"unavailable"),"err"); };
+        rec.onend=function(){ on=false; mic.classList.remove("on"); alStat(""); };
+        rec.onresult=function(ev){
+          var txt="";
+          for(var i=ev.resultIndex;i<ev.results.length;i++) txt+=ev.results[i][0].transcript;
+          box.value=(box.value?box.value.replace(/\s*$/,"")+" ":"")+txt.trim();
+        };
+        rec.start();
+      }catch(e){ alStat("Could not start the microphone.","err"); }
+    });
+  }
+  (function(){
+    var back=alEl("aiLabBack"); if(back) back.addEventListener("click", alBackToMenu);
+    // Food
+    var fi=alEl("alFoodIdeas");   if(fi) fi.addEventListener("click", function(){ alOpenDirect("meals"); });
+    var fq=alEl("alFoodQuick");   if(fq) fq.addEventListener("click", function(){ alOpenDirect("quicklog"); });
+    var fr=alEl("alFoodRecipe");  if(fr) fr.addEventListener("click", function(){ alOpenDirect("recipe"); });
+    // Body: measured maintenance
+    var mc=alEl("maintCard");     if(mc) mc.addEventListener("click", function(){ alOpenDirect("tdee"); });
+    // Gym + Coach: [data-al-open] buttons, and per-exercise swap
+    document.addEventListener("click", function(e){
+      var o=e.target.closest("[data-al-open]");
+      if(o){ alOpenDirect(o.getAttribute("data-al-open")); return; }
+      var sw=e.target.closest("[data-al-swap]");
+      if(sw){
+        AL_swapSeed=decodeURIComponent(sw.getAttribute("data-al-swap"));
+        alOpenDirect("swap"); return;
+      }
+    });
+    var run=alEl("aiLabRun"); if(run) run.addEventListener("click", alRun);
+    var list=alEl("aiLabList");
+    if(list) list.addEventListener("click", function(e){ var r=e.target.closest("[data-al-tool]"); if(r) alOpenTool(r.getAttribute("data-al-tool")); });
+    var out=alEl("aiLabOut");
+    if(out) out.addEventListener("click", function(e){
+      var add=e.target.closest("[data-al-add]");
+      if(add){
+        var it=(AL_lastOut||[])[+add.getAttribute("data-al-add")];
+        if(it){ alAddItem(it); add.classList.add("done"); add.textContent="Added ✓"; }
+        return;
+      }
+      var exb=e.target.closest("[data-al-ex]");
+      if(exb){
+        var a2=(AL_lastOut||[])[+exb.getAttribute("data-al-ex")];
+        if(a2 && typeof applyPlan==="function"){
+          applyPlan({ name:"AI swap", exercises:[{ name:a2.name, sets:Math.max(1,parseInt(a2.sets,10)||3), reps:(function(){ var m=String(a2.reps||"10").match(/\d+/); return m?parseInt(m[0],10):10; })() }] });
+          exb.classList.add("done"); exb.textContent="Added to workout ✓";
+        }
+        return;
+      }
+      if(e.target.closest("#alAddAll")){
+        (AL_lastOut||[]).forEach(alAddItem);
+        var btn=e.target.closest("#alAddAll"); btn.textContent="All added ✓"; btn.disabled=true;
+        [].forEach.call(out.querySelectorAll("[data-al-add]"),function(x){ x.classList.add("done"); x.textContent="Added ✓"; });
+        return;
+      }
+      if(e.target.closest("#alRecipeSave")){
+        var r=(AL_lastOut||[])[0];
+        if(r){ closeSheets(); openSheet("addSheet"); fillNewFood({ name:r.name, serving:r.serving, servingG:r.servingG, cal:r.cal, p:r.protein, c:r.carbs, f:r.fat });
+          var cb=document.getElementById("nfSaveToList"); if(cb) cb.checked=true;
+          if(typeof setStatus==="function") setStatus("From your recipe. Check it, then add.","ok"); }
+        return;
+      }
+    });
+  })();
+  /* ================= end AI Lab ================= */
 
   document.getElementById("wkPlansBtn").addEventListener("click", openPlans);
   document.getElementById("plansNew").addEventListener("click", function(){ openPlanEditor(null); });
