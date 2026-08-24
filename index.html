@@ -324,10 +324,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .search input{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
     border-radius:12px;padding:12px 14px;font-family:var(--ff-ui);font-size:16px;outline:none}
   .search input:focus{border-color:var(--protein)}
-  .search-cam{flex:0 0 auto;width:48px;display:grid;place-items:center;background:var(--surface-2);
+  .search-cam{position:relative;flex:0 0 auto;width:48px;display:grid;place-items:center;background:var(--surface-2);
     border:1px solid var(--border);color:var(--text);border-radius:12px;cursor:pointer;padding:0}
   .search-cam:active{background:var(--border)}
   .search-cam svg{width:22px;height:22px;display:block}
+  .search-cam.ai{border-color:color-mix(in srgb,var(--protein) 40%,var(--border));color:var(--protein)}
+  .search-cam .cam-tag{position:absolute;top:-6px;right:-5px;margin:0;background:var(--bg);line-height:1.1}
   .photo-tray{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px}
   .photo-tray-thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
   .photo-thumb{position:relative;width:52px;height:52px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
@@ -378,7 +380,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .added-flash{color:var(--ok);font-family:var(--ff-num);font-size:11px}
 
   .newfood{margin-top:0;padding-top:2px}
-  .subhead.nf-list-head{border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
+  .subhead.nf-list-head{border-top:1px solid var(--border);margin-top:8px;padding-top:12px}
   .field{margin:0 4px 10px}
   .field label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600}
   .field input{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:11px;padding:11px 13px;font-family:var(--ff-ui);font-size:16px;outline:none}
@@ -475,6 +477,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .nf-top-opt:has(input:checked) .app-check{background:var(--protein);border-color:var(--protein)}
   .nf-top-opt:has(input:checked) .app-check svg{opacity:1}
   .method-status{font-family:var(--ff-num);font-size:12px;color:var(--muted);margin:0 6px;min-height:15px;line-height:1.3}
+  .method-status:empty{display:none;min-height:0}
+  .method-status:not(:empty){margin-top:9px}
   .method-status.err{color:var(--danger)}
   .method-status.ok{color:var(--ok)}
 
@@ -670,7 +674,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   @keyframes splashGlow{0%,100%{opacity:.35;transform:scale(.88)}50%{opacity:.8;transform:scale(1.12)}}
 
   /* contextual AI entry points */
-  .addways{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 10px}
+  .addways{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0}
   .addway{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:7px 9px;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;font-family:var(--ff-ui)}
   .addway:last-child:nth-child(odd){grid-column:1/-1}
   .addway:active{background:var(--border)}
@@ -945,6 +949,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   /* exercise picker */
   #exSheet .sheet-body{display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   #exSheet .sheet-body .field{flex:none;margin-bottom:8px}
+  .exs-row{display:flex;gap:8px;align-items:stretch}
+  .exs-row input{flex:1;min-width:0}
+  .exs-row .search-cam{height:auto}
   #exList{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;margin-top:2px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
   #exList > *{flex:0 0 auto}
   #exList .ex-grp{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden}
@@ -1002,13 +1009,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #plansList .plan-item .pi-start:active{filter:brightness(.94)}
   #plansList .plan-empty{text-align:center;color:var(--faint);font-size:12.5px;padding:14px 0;line-height:1.6}
   /* AI planner */
-  .ai-plan-cta{width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,color-mix(in srgb,var(--protein) 20%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 45%,var(--border));border-radius:14px;padding:13px 14px;cursor:pointer;text-align:left;margin-bottom:12px;-webkit-tap-highlight-color:transparent}
-  .ai-plan-cta:active{filter:brightness(.97)}
-  .ai-plan-cta .apc-spark{flex:none;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--grad);color:var(--on-accent);font-size:16px;box-shadow:var(--glow)}
-  .ai-plan-cta .apc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-  .ai-plan-cta .apc-txt b{font-size:14px;font-weight:700;color:var(--text)}
-  .ai-plan-cta .apc-txt i{font-style:normal;font-size:11.5px;color:var(--muted)}
-  .ai-plan-cta .apc-go{flex:none;color:var(--protein);font-size:22px;font-weight:700}
   .apl-lbl{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 2px 8px}
   #aiPlanResult .apr-head{margin:0 2px 10px}
   #aiPlanResult .apr-title{font-family:var(--ff-ui);font-weight:800;font-size:18px;color:var(--text)}
@@ -1038,7 +1038,24 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .aichat-status{font-size:12px;color:var(--muted);padding:4px 2px}
   .aichat-status.err{color:var(--danger)}
   .aichat-use{margin:8px 0 0}
+  .aichat-pend{flex:none;padding-top:9px;margin-top:6px;border-top:1px solid var(--border)}
+  .aichat-pend[hidden]{display:none!important}
+  .aichat-pend-thumbs{display:flex;gap:7px;flex-wrap:wrap}
+  .aic-shot{position:relative;width:48px;height:48px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+  .aic-shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .aic-shot .rm{position:absolute;top:-1px;right:-1px;width:17px;height:17px;border:none;border-radius:0 8px 0 8px;background:rgba(0,0,0,.62);color:#fff;font-size:12px;line-height:15px;cursor:pointer;padding:0}
+  .aichat-pend + .aichat-inputbar{border-top:none;padding-top:8px;margin-top:0}
+  .aic-msg-shots{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+  .aic-msg-shots img{width:56px;height:56px;object-fit:cover;border-radius:7px;display:block}
   .aichat-inputbar{flex:none;display:flex;align-items:flex-end;gap:8px;padding-top:10px;margin-top:6px;border-top:1px solid var(--border)}
+  .aichat-inputbar .aic-attach,.aichat-inputbar .aic-web{width:40px;height:40px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);box-shadow:none}
+  .aichat-inputbar .aic-attach{border-color:color-mix(in srgb,var(--protein) 38%,var(--border));color:var(--protein)}
+  .aichat-inputbar .aic-attach svg,.aichat-inputbar .aic-web svg{width:19px;height:19px;stroke-width:1.8}
+  .aichat-inputbar .aic-web.on{border-color:color-mix(in srgb,var(--protein) 38%,var(--border));color:var(--protein);background:color-mix(in srgb,var(--protein) 12%,var(--surface-2))}
+  .aic-cites{display:flex;flex-direction:column;gap:3px;margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+  .aic-cites a{font-size:10.5px;color:var(--muted);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .aic-cites a::before{content:"\2197\00a0";opacity:.7}
+  .aic-cites a:active{color:var(--protein)}
   .aichat-inputbar textarea{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:16px;padding:11px 14px;font-family:var(--ff-ui);font-size:15px;line-height:1.35;outline:none;resize:none;max-height:120px}
   .aichat-inputbar textarea:focus{border-color:color-mix(in srgb,var(--protein) 55%,var(--border))}
   .aichat-inputbar button{flex:none;width:44px;height:44px;border-radius:50%;background:var(--grad);border:none;color:var(--on-accent);display:grid;place-items:center;cursor:pointer;box-shadow:var(--glow)}
@@ -1303,6 +1320,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #tab-lift .wk-repeat-row:active{background:var(--surface-2)}
   #tab-lift .wrr-date{flex:none;min-width:56px;font-family:var(--ff-num);font-size:12px;font-weight:700;color:var(--text)}
   #tab-lift .wrr-ex{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #tab-lift .wk-repeat-more{display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:11px;padding:9px 13px;font-family:var(--ff-ui);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:14px;-webkit-tap-highlight-color:transparent}
+  #tab-lift .wk-repeat-more i{font-style:normal;font-family:var(--ff-num);font-size:11px;font-weight:700;color:var(--text);background:var(--surface-2);border-radius:99px;padding:1px 7px}
+  #tab-lift .wk-repeat-more .wrm-chev{margin-left:auto;display:flex;transition:transform .18s ease}
+  #tab-lift .wk-repeat-more .wrm-chev svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #tab-lift .wk-repeat-more.open .wrm-chev{transform:rotate(180deg)}
+  #tab-lift .wk-repeat-more.open{margin-bottom:6px}
+  #tab-lift .wk-repeat-list:has(+ .wk-repeat-more){margin-bottom:6px}
+  #tab-lift .wk-repeat-older[hidden]{display:none!important}
+  #tab-lift .wk-repeat-older{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:186px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px}
+  #tab-lift .wk-repeat-older::-webkit-scrollbar{width:4px}
+  #tab-lift .wk-repeat-older::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 
   /* water */
   #tab-food .water{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 7px 4px 11px;margin-bottom:0}
@@ -1926,8 +1954,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   </div>
   <div class="search">
     <input type="text" id="foodSearch" placeholder="Search foods" autocomplete="off">
-    <button type="button" class="search-cam" id="photoLog" aria-label="Log food from photos" title="Photograph label / nutrition info">
+    <button type="button" class="search-cam ai" id="photoLog" aria-label="Read food from photos with AI" title="Photograph the item and its nutrition label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l1-1.6A1.5 1.5 0 0 1 10.5 4.7h3a1.5 1.5 0 0 1 1.3.7l1 1.6h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="12.5" r="3.2"/></svg>
+      <span class="ai-tag cam-tag" aria-hidden="true">AI</span>
     </button>
   </div>
   <input type="file" id="photoLogFile" accept="image/*" multiple style="display:none">
@@ -1944,15 +1973,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <div class="newfood">
       <div class="subhead">Add New Food</div>
       <div class="addways">
-        <button type="button" class="addway ai" id="alFoodIdeas"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7 4.9 19.1M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="3.4"/></svg></span><span class="aw-t">Ideas<span class="ai-tag">AI</span><i>what fits in what's left</i></span></button>
-        <button type="button" class="addway ai" id="alFoodQuick"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><span class="aw-t">Speak<span class="ai-tag">AI</span><i>a whole meal at once</i></span></button>
-        <button type="button" class="addway ai" id="askAiOpen"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5v-8Z"/></svg></span><span class="aw-t">Ask<span class="ai-tag">AI</span><i>chat it out first</i></span></button>
-        <button type="button" class="addway ai" id="mMeal"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l1-1.6A1.5 1.5 0 0 1 10.5 4.7h3a1.5 1.5 0 0 1 1.3.7l1 1.6h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="12.5" r="3.2"/></svg></span><span class="aw-t">Photo<span class="ai-tag">AI</span><i>label or meal</i></span></button>
-        <button type="button" class="addway ai" id="alFoodRecipe"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5"/></svg></span><span class="aw-t">Recipe<span class="ai-tag">AI</span><i>per-serving macros</i></span></button>
+        <button type="button" class="addway ai" id="askAiOpen"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5v-8Z"/></svg></span><span class="aw-t">Ask<span class="ai-tag">AI</span><i>describe it, or send pics</i></span></button>
         <button type="button" class="addway" id="mManual"><span class="aw-ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><span class="aw-t">Enter it myself<i>type the numbers</i></span></button>
       </div>
       <div class="method-status" id="methodStatus"></div>
-      <input type="file" id="mealFile" accept="image/*" style="display:none">
       <div class="nf-manual" id="nfManual" hidden>
         <div class="field">
           <div class="nf-name-grid">
@@ -2000,8 +2024,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <div class="aichat-msgs" id="aiChatMsgs"></div>
     <div class="aichat-status" id="aiChatStatus"></div>
     <button type="button" class="primary aichat-use" id="aiChatUse" hidden>Add this to my log</button>
+    <input type="file" id="aiChatFile" accept="image/*" multiple style="display:none">
+    <div class="aichat-pend" id="aiChatPendWrap" hidden><div class="aichat-pend-thumbs" id="aiChatPendThumbs"></div></div>
     <div class="aichat-inputbar">
-      <textarea id="aiChatInput" rows="1" placeholder="e.g. calories in a flat white and a banana?"></textarea>
+      <button type="button" class="aic-web on" id="aiChatWeb" aria-pressed="true" aria-label="Search the web" title="Look it up online (uses a few search credits per message)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.2 3.6 8.5S14.4 18.2 12 20.5C9.6 18.2 8.4 15.3 8.4 12S9.6 5.8 12 3.5Z"/></svg></button>
+      <button type="button" class="aic-attach" id="aiChatAttach" aria-label="Attach photos or screenshots"><svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l1-1.6A1.5 1.5 0 0 1 10.5 4.7h3a1.5 1.5 0 0 1 1.3.7l1 1.6h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="12.5" r="3.2"/></svg></button>
+      <textarea id="aiChatInput" rows="1" placeholder="e.g. 20 blackberries"></textarea>
       <button type="button" id="aiChatSend" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
     </div>
   </div>
@@ -2183,7 +2211,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 21 Aug 2026, 1:12 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 24 Aug 2026, 10:21 AM</div>
   </div>
 </div>
 
@@ -2334,7 +2362,15 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <button class="close" data-close>Done</button>
   </div>
   <div class="sheet-body">
-    <div class="field"><label>Search or type a new one</label><input type="text" id="exSearch" placeholder="e.g. Bench press, Squat" autocomplete="off"></div>
+    <div class="field"><label for="exSearch">Search or type a new one</label>
+      <div class="exs-row">
+        <input type="text" id="exSearch" placeholder="e.g. Bench press, Squat" autocomplete="off">
+        <button type="button" class="search-cam ai" id="exAiPlan" aria-label="Build a workout with AI" title="Build a whole session with AI">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8.5v7M4 10v4M17.5 8.5v7M20 10v4M6.5 12h11"/></svg>
+          <span class="ai-tag cam-tag" aria-hidden="true">AI</span>
+        </button>
+      </div>
+    </div>
     <input type="file" id="exPhotoFile" accept="image/*" capture="environment" style="display:none">
     <div id="exList"></div>
   </div>
@@ -2347,7 +2383,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <button class="close" data-close>Close</button>
   </div>
   <div class="sheet-body">
-    <button type="button" class="ai-plan-cta" id="aiPlanOpen"><span class="apc-spark">✦</span><span class="apc-txt"><b>Build a plan with AI</b><i>Tailored to your history, goals and preferences</i></span><span class="apc-go">›</span></button>
     <div class="mono-note" style="text-align:left;margin:0 4px 10px">Build a plan once - its exercises, sets and target reps. Then load it onto any day and just punch in the weight.</div>
     <div id="plansList"></div>
     <button id="plansNew">+ New plan</button>
@@ -3485,39 +3520,78 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   });
 
   /* ---------- Ask AI: conversational food logging ---------- */
-  var aiChatMsgs=[];
-  var AICHAT_SYS="You are a friendly, concise nutrition assistant inside a food-logging app. Help the user work out the calories and macros (protein, carbs, fat) of foods and meals through a short back-and-forth. Ask a brief clarifying question only when you really need to (portion size, brand, cooking method). When you give an estimate, clearly state approximate calories and protein/carbs/fat for the portion discussed. Keep replies short - a few sentences. Use everyday units. Do not output JSON or code unless asked.";
+  var aiChatMsgs=[], aiChatShots=[];
+  var AICHAT_SYS="You are a friendly, concise nutrition assistant inside a food-logging app. Help the user work out the calories and macros (protein, carbs, fat) of foods and meals through a short back-and-forth. They will often describe a meal loosely and ingredient by ingredient (for example \"20 blackberries\" or \"a sandwich with 150g chicken, 2 slices of bread and a slice of cheese\") - work out each part, then give the combined total for the whole thing. They may also send photos or screenshots of nutrition labels and product packaging: read the per-serving values printed on them and use those in preference to generic estimates, scaling to the amount they said they used. When web search results are provided to you, use them: for named restaurants, chains and packaged brands (for example Oporto, Guzman y Gomez, a supermarket own-brand) prefer the figures published by the company itself or its official nutrition guide over any generic estimate, name the item exactly as it appears on their menu, and say briefly where the numbers came from. If you could not find the real figures, say so plainly and give your best estimate labelled as an estimate. Ask a brief clarifying question only when you really need to (portion size, brand, cooking method). Always state approximate calories and protein/carbs/fat for the portion discussed. Keep replies short. Use everyday units. Do not output JSON or code unless asked.";
   function aiChatRender(){
     var box=document.getElementById("aiChatMsgs"); if(!box) return;
-    if(!aiChatMsgs.length){ box.innerHTML="<div class='aic-empty'>Ask me anything about a food or meal - portion sizes, restaurant items, recipes. When the numbers look right, tap <b>Add this to my log</b>.</div>"; return; }
-    box.innerHTML=aiChatMsgs.map(function(m){ return "<div class='aic-msg "+(m.role==="user"?"user":"ai")+"'>"+esc(m.content)+"</div>"; }).join("");
+    if(!aiChatMsgs.length){ box.innerHTML="<div class='aic-empty'>Talk it through in plain words - \u201c20 blackberries\u201d, or \u201ca sandwich with 150g chicken, 2 slices of bread and a slice of cheese\u201d. Tap the camera to send photos of the labels you used, or name a restaurant like \u201cOporto\u201d and it will look the real menu numbers up online. When the numbers look right, tap <b>Add this to my log</b>.</div>"; return; }
+    box.innerHTML=aiChatMsgs.map(function(m){
+      var shots=(m.shots&&m.shots.length)?("<div class='aic-msg-shots'>"+m.shots.map(function(p){ return "<img src='data:"+p.media+";base64,"+p.b64+"' alt=''>"; }).join("")+"</div>"):"";
+      var cites=(m.cites&&m.cites.length)?("<div class='aic-cites'>"+m.cites.map(function(c){
+        return "<a href='"+esc(c.url)+"' target='_blank' rel='noopener noreferrer'>"+esc(c.title)+"</a>";
+      }).join("")+"</div>"):"";
+      return "<div class='aic-msg "+(m.role==="user"?"user":"ai")+"'>"+shots+esc(aiChatText(m))+cites+"</div>";
+    }).join("");
     box.scrollTop=box.scrollHeight;
+  }
+  // a message's content is either a plain string or a [images..., text] array
+  function aiChatText(m){
+    if(typeof m.content==="string") return m.content;
+    var t=""; (m.content||[]).forEach(function(part){ if(part && part.type==="text") t+=part.text; });
+    return t;
+  }
+  function aiChatWebOn(){ var b=document.getElementById("aiChatWeb"); return !!(b && b.classList.contains("on")); }
+  function aiChatRenderPend(){
+    var wrap=document.getElementById("aiChatPendWrap"), box=document.getElementById("aiChatPendThumbs");
+    if(!wrap||!box) return;
+    wrap.hidden=!aiChatShots.length;
+    box.innerHTML=aiChatShots.map(function(p,i){
+      return "<div class='aic-shot'><img src='data:"+p.media+";base64,"+p.b64+"' alt=''><button type='button' class='rm' data-shot-rm='"+i+"' aria-label='Remove photo'>\u00d7</button></div>";
+    }).join("");
+  }
+  async function aiChatAddShots(files){
+    var list=Array.prototype.slice.call(files);
+    for(var i=0;i<list.length;i++){
+      var f=list[i]; if(!f || String(f.type).indexOf("image")!==0) continue;
+      var r=await downscaleImage(f, 1280, 0.82);
+      if(r && r.b64) aiChatShots.push(r);
+    }
+    aiChatRenderPend();
   }
   function aiChatStatus(m,cls){ var el=document.getElementById("aiChatStatus"); if(el){ el.textContent=m||""; el.className="aichat-status"+(cls?(" "+cls):""); } }
   function aiChatThinking(on){
     var box=document.getElementById("aiChatMsgs"); var ex=document.getElementById("aiChatThinking");
-    if(on){ if(!ex){ var d=document.createElement("div"); d.className="aic-msg think"; d.id="aiChatThinking"; d.textContent="Thinking…"; box.appendChild(d); box.scrollTop=box.scrollHeight; } }
+    if(on){ if(!ex){ var d=document.createElement("div"); d.className="aic-msg think"; d.id="aiChatThinking"; d.textContent=aiChatWebOn()?"Searching the web…":"Thinking…"; box.appendChild(d); box.scrollTop=box.scrollHeight; } }
     else if(ex){ ex.remove(); }
   }
   function openAiChat(){
-    aiChatMsgs=[]; aiChatRender(); aiChatStatus("");
+    aiChatMsgs=[]; aiChatShots=[]; aiChatRender(); aiChatRenderPend(); aiChatStatus("");
     document.getElementById("aiChatUse").hidden=true;
     var inp=document.getElementById("aiChatInput"); if(inp){ inp.value=""; inp.style.height="auto"; }
     openSheet("aiChatSheet");
     setTimeout(function(){ if(inp) inp.focus(); }, 260);
   }
   async function aiChatSend(){
-    var inp=document.getElementById("aiChatInput"); var txt=(inp.value||"").trim(); if(!txt) return;
+    var inp=document.getElementById("aiChatInput"); var txt=(inp.value||"").trim();
+    if(!txt && !aiChatShots.length) return;
     if(!aiKey){ aiChatStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
     inp.value=""; inp.style.height="auto";
-    aiChatMsgs.push({role:"user",content:txt}); aiChatRender();
+    if(aiChatShots.length){
+      var shots=aiChatShots.slice(); aiChatShots=[]; aiChatRenderPend();
+      var content=shots.map(function(p){ return {type:"image",source:{type:"base64",media_type:p.media,data:p.b64}}; });
+      content.push({type:"text",text:txt||"These are photos of what I ate - product names and nutrition labels. Read them and work out the totals."});
+      aiChatMsgs.push({role:"user",content:content,shots:shots});
+    } else {
+      aiChatMsgs.push({role:"user",content:txt});
+    }
+    aiChatRender();
     var send=document.getElementById("aiChatSend"); if(send) send.disabled=true;
     aiChatStatus(""); aiChatThinking(true);
     try{
-      var out=await aiComplete(aiChatMsgs.slice(), 600, AICHAT_SYS);
+      var out=await aiComplete(aiChatMsgs.slice(), 700, AICHAT_SYS, {web:aiChatWebOn(), webResults:3});
       aiChatThinking(false);
       if(out==null){ aiChatStatus("Add your OpenRouter API key in Settings → AI features.","err"); return; }
-      aiChatMsgs.push({role:"assistant",content:String(out).trim()}); aiChatRender();
+      aiChatMsgs.push({role:"assistant",content:String(out).trim(),cites:aiLastCitations.slice()}); aiChatRender();
       document.getElementById("aiChatUse").hidden=false;
     }catch(e){ aiChatThinking(false); aiChatStatus("Error: "+((e&&e.message)||e),"err"); }
     finally{ if(send) send.disabled=false; }
@@ -3529,7 +3603,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     aiChatStatus("");
     try{
       var extract={role:"user",content:"Based on our conversation, give the single food/meal item to log with the best agreed values. Reply with ONLY a JSON object, no prose or markdown: {\"name\":short name,\"serving\":portion text e.g. \"1 medium (120g)\",\"servingG\":grams in one serving as a number or 0,\"cal\":number kcal,\"protein\":grams,\"carbs\":grams,\"fat\":grams}."};
-      var out=await aiComplete(aiChatMsgs.concat([extract]), 400, AICHAT_SYS);
+      var flat=aiChatMsgs.map(function(m){ return {role:m.role, content:aiChatText(m)||"(photos)"}; });
+      var out=await aiComplete(flat.concat([extract]), 400, AICHAT_SYS);
       if(out==null){ aiChatStatus("Couldn't read the item. Try again.","err"); return; }
       var o=parseMacroJSON(out);
       if(!o || !(num(o.cal)>0)){ aiChatStatus("Couldn't pull the numbers yet - ask it to confirm the calories, then try again.","err"); return; }
@@ -3540,6 +3615,17 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   }
   document.getElementById("askAiOpen").addEventListener("click", openAiChat);
   document.getElementById("aiChatSend").addEventListener("click", aiChatSend);
+  document.getElementById("aiChatWeb").addEventListener("click", function(){
+    var on=!this.classList.contains("on");
+    this.classList.toggle("on",on); this.setAttribute("aria-pressed",on?"true":"false");
+    aiChatStatus(on?"Web search on - it will look up brands and restaurant menus." : "Web search off - estimates from the model's own knowledge.");
+  });
+  document.getElementById("aiChatAttach").addEventListener("click", function(){ document.getElementById("aiChatFile").click(); });
+  document.getElementById("aiChatFile").addEventListener("change", function(e){ var fs=e.target.files; if(fs&&fs.length) aiChatAddShots(fs); e.target.value=""; });
+  document.getElementById("aiChatPendThumbs").addEventListener("click", function(e){
+    var b=e.target.closest("[data-shot-rm]"); if(!b) return;
+    aiChatShots.splice(+b.getAttribute("data-shot-rm"),1); aiChatRenderPend();
+  });
   document.getElementById("aiChatUse").addEventListener("click", aiChatUseItem);
   document.getElementById("aiChatInput").addEventListener("keydown", function(e){ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); aiChatSend(); } });
   document.getElementById("aiChatInput").addEventListener("input", function(){ this.style.height="auto"; this.style.height=Math.min(120,this.scrollHeight)+"px"; });
@@ -3574,14 +3660,22 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(kEl){ var k=kEl.value.trim(); if(k && k!==aiKey){ aiKey=k; sSet(AIKEY_KEY,aiKey); } }
     try{ var m=readAiModelFromUI(); if(m && m!==aiModel){ aiModel=m; sSet(AIMODEL_KEY,aiModel); } }catch(e){}
   }
-  async function aiComplete(messages,maxTokens,system){
+  // Citations from the last call that used web search (OpenRouter url_citation annotations).
+  var aiLastCitations=[];
+  async function aiComplete(messages,maxTokens,system,opts){
     syncAiFromUI();
     if(!aiKey){ setStatus("Add your OpenRouter API key in settings (\u2699) to use AI.","err"); return null; }
+    aiLastCitations=[];
     var payload={
       model:resolveAiModel(aiModel),
       max_tokens:maxTokens||500,
       messages:toOpenRouterMessages(messages,system)
     };
+    // OpenRouter's web plugin works with any model: it searches, then feeds the
+    // results in as context. Billed per result, so keep the count low.
+    if(opts && opts.web){
+      payload.plugins=[{id:"web", max_results:(opts.webResults||3)}];
+    }
     var res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
       method:"POST",
       headers:{
@@ -3599,6 +3693,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     }
     var data=await res.json();
     var msg=data.choices && data.choices[0] && data.choices[0].message;
+    if(msg && msg.annotations && msg.annotations.length){
+      var seen={};
+      msg.annotations.forEach(function(a){
+        var u=a && a.url_citation; if(!u || !u.url || seen[u.url]) return;
+        seen[u.url]=1; aiLastCitations.push({url:u.url, title:(u.title||u.url)});
+      });
+    }
     return msg && msg.content!=null ? String(msg.content) : "";
   }
   function parseMacroJSON(txt){
@@ -3668,7 +3769,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     thumbs.innerHTML=photoQueue.map(function(p,i){
       return "<div class='photo-thumb'><img src='data:"+p.media+";base64,"+p.b64+"' alt=''><button type='button' class='rm' data-rm='"+i+"' aria-label='Remove photo'>×</button></div>";
     }).join("");
-    hint.textContent=photoQueue.length+" photo"+(photoQueue.length===1?"":"s")+" ready";
+    hint.textContent = photoQueue.length===1
+      ? "1 photo. Add the other side too - the item's name and its nutrition label."
+      : photoQueue.length+" photos ready";
   }
   async function addPhotosToQueue(files){
     pstat("");
@@ -3709,12 +3812,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   document.getElementById("photoAnalyze").addEventListener("click",analyzePhotoQueue);
 
   document.addEventListener("paste",function(e){
-    if(!document.getElementById("addSheet").classList.contains("open")) return;
+    var chatOpen=document.getElementById("aiChatSheet").classList.contains("open");
+    if(!chatOpen && !document.getElementById("addSheet").classList.contains("open")) return;
     var items=(e.clipboardData&&e.clipboardData.items)||[];
     for(var i=0;i<items.length;i++){
       if(items[i].type && items[i].type.indexOf("image")===0){
         var f=items[i].getAsFile();
-        if(f){ e.preventDefault(); addPhotosToQueue([f]); return; }
+        if(f){ e.preventDefault(); if(chatOpen) aiChatAddShots([f]); else addPhotosToQueue([f]); return; }
       }
     }
   });
@@ -4801,12 +4905,23 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       var past=wDatesWith().filter(function(k){ return k<wKey(); }).reverse();  // most recent first
       var repHtml="";
       if(past.length){
-        repHtml="<div class='wk-repeat-head'>\u21bb Repeat a previous session</div><div class='wk-repeat-list'>"+
-          past.slice(0,20).map(function(k){
-            var ex=(workouts[k].exercises||[]);
-            var names=ex.map(function(e){return exDisplay(e.name);}).slice(0,3).join(", ")+(ex.length>3?" +"+(ex.length-3):"");
-            return "<button type='button' class='wk-repeat-row' data-repeat='"+k+"'><span class='wrr-date'>"+esc(fmtShort(k))+"</span><span class='wrr-ex'>"+esc(names)+"</span></button>";
-          }).join("")+"</div>";
+        var repRow=function(k){
+          var ex=(workouts[k].exercises||[]);
+          var names=ex.map(function(e){return exDisplay(e.name);}).slice(0,3).join(", ")+(ex.length>3?" +"+(ex.length-3):"");
+          return "<button type='button' class='wk-repeat-row' data-repeat='"+k+"'><span class='wrr-date'>"+esc(fmtShort(k))+"</span><span class='wrr-ex'>"+esc(names)+"</span></button>";
+        };
+        // default view is just the last 7 days; anything older sits behind a scrollable reveal
+        var cutK=keyOf(new Date(wCurrent.getFullYear(),wCurrent.getMonth(),wCurrent.getDate()-7));
+        var recent=past.filter(function(k){ return k>=cutK; });
+        var older=past.filter(function(k){ return k<cutK; });
+        if(!recent.length){ recent=past.slice(0,2); older=past.slice(2); }
+        repHtml="<div class='wk-repeat-head'>\u21bb Repeat a previous session</div>"+
+          "<div class='wk-repeat-list'>"+recent.map(repRow).join("")+"</div>"+
+          (older.length?("<button type='button' class='wk-repeat-more' data-repeat-more aria-expanded='false'>"+
+              "<span>Earlier sessions</span><i>"+older.length+"</i>"+
+              "<span class='wrm-chev' aria-hidden='true'><svg viewBox='0 0 24 24'><polyline points='6 9 12 15 18 9'/></svg></span>"+
+            "</button>"+
+            "<div class='wk-repeat-older' hidden>"+older.slice(0,60).map(repRow).join("")+"</div>"):"");
       }
       return repHtml + "<div class='wk-empty'>No exercises yet.<br>Add exercises, or load a saved plan.</div>";
     })();
@@ -5003,6 +5118,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(hist){ openExHist(decodeURIComponent(hist.getAttribute("data-hist"))); return; }
     var fb=e.target.closest("[data-form]");
     if(fb){ openFormReview(decodeURIComponent(fb.getAttribute("data-form"))); return; }
+    var repMore=e.target.closest("[data-repeat-more]");
+    if(repMore){
+      var older=repMore.parentNode.querySelector(".wk-repeat-older");
+      if(older){ var open=older.hidden; older.hidden=!open; repMore.classList.toggle("open",open); repMore.setAttribute("aria-expanded",open?"true":"false"); }
+      return;
+    }
     var rep=e.target.closest("[data-repeat]");
     if(rep){ repeatWorkout(rep.getAttribute("data-repeat")); return; }
     var spi=e.target.closest("[data-start-plan-inline]");
@@ -5475,7 +5596,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     aiSetStatus("");
     openSheet("aiPlanSheet");
   }
-  document.getElementById("aiPlanOpen").addEventListener("click", openAiPlanner);
+  document.getElementById("exAiPlan").addEventListener("click", openAiPlanner);
   document.getElementById("aiPresets").addEventListener("click", function(e){
     var b=e.target.closest("[data-preset]"); if(!b) return;
     var parts=AI_PRESET_PARTS[b.getAttribute("data-preset")]||[]; aiPlanParts=parts.slice();
@@ -5920,9 +6041,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   (function(){
     var back=alEl("aiLabBack"); if(back) back.addEventListener("click", alBackToMenu);
     // Food
-    var fi=alEl("alFoodIdeas");   if(fi) fi.addEventListener("click", function(){ alOpenDirect("meals"); });
-    var fq=alEl("alFoodQuick");   if(fq) fq.addEventListener("click", function(){ alOpenDirect("quicklog"); });
-    var fr=alEl("alFoodRecipe");  if(fr) fr.addEventListener("click", function(){ alOpenDirect("recipe"); });
     // Body: measured maintenance
     var mc=alEl("maintCard");     if(mc) mc.addEventListener("click", function(){ alOpenDirect("tdee"); });
     // Gym + Coach: [data-al-open] buttons, and per-exercise swap
@@ -6459,25 +6577,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var q=num(inp.value); if(q<=0){ arr.splice(idx,1); } else { arr[idx].qty=q; }
     saveLog(); renderAll();
   });
-
-  /* ---------- photo meal estimate ---------- */
-  async function mealPhoto(file){
-    setStatus("Estimating your meal\u2026");
-    try{
-      var b64=await new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){res(String(r.result).split(",")[1]);}; r.onerror=rej; r.readAsDataURL(file); });
-      var media=file.type||"image/jpeg";
-      var content=[
-        {type:"image",source:{type:"base64",media_type:media,data:b64}},
-        {type:"text",text:"This photo shows a plate or meal of food. Estimate the nutrition for the whole meal shown, accounting for typical portion sizes. Reply with ONLY a JSON object, no prose and no markdown: {\"name\":short description of the meal,\"serving\":\"1 plate\",\"cal\":number kcal,\"protein\":number grams,\"carbs\":number grams,\"fat\":number grams}."}
-      ];
-      var out=await aiComplete([{role:"user",content:content}],500);
-      if(out==null) return;
-      fillNewFood(parseMacroJSON(out));
-      setStatus("Estimated from the photo (approximate). Adjust, then save.","ok");
-    }catch(e){ setStatus("Couldn't read that photo. Check your key and model in settings.","err"); }
-  }
-  document.getElementById("mMeal").addEventListener("click", function(){ document.getElementById("mealFile").click(); });
-  document.getElementById("mealFile").addEventListener("change", function(e){ var f=e.target.files&&e.target.files[0]; if(f) mealPhoto(f); e.target.value=""; });
 
   /* ---------- daily journal ---------- */
   var JOURNAL_KEY="mt_journal", journal={};
