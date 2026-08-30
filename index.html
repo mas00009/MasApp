@@ -216,6 +216,16 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .macro + .macro{border-left:1px solid var(--border)}
   .macro-txt{display:flex;flex-direction:column;gap:4px;min-width:0;flex:none}
   .dot{width:6px;height:6px;border-radius:50%;flex:none}
+  .bodydue{display:flex;flex-direction:column;gap:6px;margin:10px 16px 0}
+  .bodydue[hidden]{display:none!important}
+  .bd-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(130deg,color-mix(in srgb,var(--protein) 13%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--protein) 42%,var(--border));border-radius:12px;padding:10px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:var(--ff-ui)}
+  .bd-row:active{filter:brightness(.96)}
+  .bd-ic{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--protein) 18%,transparent)}
+  .bd-ic svg{width:15px;height:15px;fill:none;stroke:var(--protein);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .bd-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .bd-txt b{font-size:13px;font-weight:700;color:var(--text)}
+  .bd-txt i{font-style:normal;font-family:var(--ff-num);font-size:11px;color:var(--muted)}
+  .bd-go{flex:none;color:var(--protein);font-size:19px;font-weight:700;line-height:1}
   .macro .lbl{display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
   .macro .amt{font-family:var(--ff-num);line-height:1;white-space:nowrap}
   .macro .amt b{font-size:15px;font-weight:700;color:var(--text)}
@@ -1767,6 +1777,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
         <div class="bstat-sub" id="cutSub"></div>
       </button>
     </div>
+    <div class="bodydue" id="bodyDue" hidden></div>
     <div class="spark" id="wSpark"></div>
 
     <div class="bodywrap">
@@ -2211,7 +2222,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 24 Aug 2026, 10:21 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 31 Aug 2026, 8:17 AM</div>
   </div>
 </div>
 
@@ -3983,7 +3994,25 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     document.getElementById("bodyNote").textContent = last ? "" : "Tap any point on the body to add your first measurement.";
     var sub=document.getElementById("bodyHeadSub"); if(sub) sub.textContent = last ? ("updated "+fmtShort(last)) : "measurements";
     renderComposition();
+    renderBodyDue();
     updateBadges();
+  }
+  var BD_ICON={
+    weight:"<path d='M6.5 8.5v7M4 10v4M17.5 8.5v7M20 10v4M6.5 12h11'/>",
+    measure:"<path d='M3 8.5h18v7H3zM7 8.5v3M11 8.5v4M15 8.5v3M19 8.5v4'/>"
+  };
+  window.__renderBodyDue=function(){ renderBodyDue(); };
+  function renderBodyDue(){
+    var el=document.getElementById("bodyDue"); if(!el) return;
+    var due=bodyDueList();
+    el.hidden=!due.length;
+    el.innerHTML=due.map(function(d){
+      return "<button type='button' class='bd-row' data-body-due='"+d.site+"'>"+
+        "<span class='bd-ic'><svg viewBox='0 0 24 24'>"+BD_ICON[d.kind]+"</svg></span>"+
+        "<span class='bd-txt'><b>"+esc(d.label)+"</b><i>"+esc(d.sub)+"</i></span>"+
+        "<span class='bd-go'>\u203a</span>"+
+      "</button>";
+    }).join("");
   }
   function openMeasure(site){
     measSite=site;
@@ -4013,6 +4042,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   });
   document.getElementById("tab-body").addEventListener("click",function(e){
     var p=e.target.closest("[data-site]"); if(p){ openMeasure(p.getAttribute("data-site")); return; }
+    var bd=e.target.closest("[data-body-due]");
+    if(bd){ openMeasure(bd.getAttribute("data-body-due")); return; }
     if(e.target.closest("#weightCard")){ openMeasure("weight"); }
   });
   document.getElementById("weightCard").addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMeasure("weight"); } });
@@ -6621,29 +6652,55 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     }
     return false;
   }
-  // Body badge: weekly Friday-night weigh-in reminder (from 8pm until weighed
-  // that day), plus a fallback if there's no data or the latest entry is 14+ days old.
-  function bodyNeedsUpdate(){
-    // Friday-night weigh-in reminder: from 8pm, show until a weight is logged today
-    var nowD=new Date();
-    if(nowD.getDay()===5 && nowD.getHours()>=20){
-      var lw=latestFor("weight");
-      if(!(lw && lw.date===keyOf(new Date()))) return true;
-    }
-    var ds=bodyDatesDesc(), latest=null;
+  // The most recent Friday 8pm that has already passed - the weigh-in is due from
+  // then and STAYS due until a weight is actually logged, so it never quietly
+  // disappears at midnight without you doing anything.
+  function lastWeighWindow(){
+    var d=new Date();
+    d.setHours(20,0,0,0);
+    var back=(d.getDay()-5+7)%7;                 // days since Friday
+    if(back===0 && new Date()<d) back=7;         // Friday but not yet 8pm
+    d.setDate(d.getDate()-back);
+    return d;
+  }
+  function daysAgo(key){
+    var d=new Date(key+"T00:00:00"), now=new Date(); now.setHours(0,0,0,0);
+    return Math.floor((now-d)/86400000);
+  }
+  // Latest date holding any tape measurement (weight on its own doesn't count).
+  function latestMeasureDate(){
+    var ds=bodyDatesDesc();
     for(var i=0;i<ds.length;i++){
       var e=body[ds[i]]; if(!e) continue;
-      for(var k in e){ if(e[k]!=null && isFinite(e[k])){ latest=ds[i]; break; } }
-      if(latest) break;
+      for(var j=0;j<SITES.length;j++){ var v=e[SITES[j].k]; if(v!=null && isFinite(v)) return ds[i]; }
     }
-    if(!latest) return true;                     // no data
-    var d=new Date(latest+"T00:00:00"), now=new Date(); now.setHours(0,0,0,0);
-    return Math.floor((now-d)/86400000) >= 14;   // not updated in 14 days
+    return null;
   }
+  var MEASURE_EVERY_DAYS=14;
+  // Returns one entry per thing that's actually due, each saying which one it is.
+  function bodyDueList(){
+    var out=[];
+    var lw=latestFor("weight"), win=lastWeighWindow();
+    if(!lw){
+      out.push({kind:"weight", label:"Weigh in", sub:"no weight logged yet", site:"weight"});
+    } else if(new Date(lw.date+"T23:59:59") < win){
+      var wd=daysAgo(lw.date);
+      out.push({kind:"weight", label:"Weekly weigh-in due", sub:"last weighed "+fmtShort(lw.date)+" ("+wd+" day"+(wd===1?"":"s")+" ago)", site:"weight"});
+    }
+    var lm=latestMeasureDate();
+    if(!lm){
+      out.push({kind:"measure", label:"Take your measurements", sub:"none recorded yet", site:"chest"});
+    } else if(daysAgo(lm) >= MEASURE_EVERY_DAYS){
+      out.push({kind:"measure", label:"Measurements due", sub:"last taken "+fmtShort(lm)+" ("+daysAgo(lm)+" days ago)", site:"chest"});
+    }
+    return out;
+  }
+  function bodyNeedsUpdate(){ return bodyDueList().length>0; }
   function updateBadges(){
     try{
       setBadge("supps", suppsIncompleteToday());
       setBadge("body", bodyNeedsUpdate());
+      if(window.__renderBodyDue) window.__renderBodyDue();
       setBadge("plan", planAlertNow());
     }catch(e){}
   }
