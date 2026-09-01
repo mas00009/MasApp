@@ -1,5 +1,5 @@
 /* MásGains service worker - offline shell + runtime asset cache */
-var VERSION = "mg-v9";
+var VERSION = "mg-v10";
 var CORE = [
   "./", "index.html", "manifest.webmanifest",
   "assets/icon.png", "assets/icon-192.png", "assets/icon-512.png", "assets/icon-180.png",

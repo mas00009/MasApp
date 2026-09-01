@@ -329,7 +329,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .grab{width:38px;height:4px;border-radius:3px;background:var(--border);margin:9px auto 4px}
   .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;gap:10px}
   .sheet-head h2{font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;position:relative;padding-left:12px}
-  .sheet-head h2::before{content:"";position:absolute;left:0;top:0;width:4px;height:14px;border-radius:2px;background:var(--grad)}
+  .sheet-head h2::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:13px;border-radius:2px;background:var(--grad)}
   .sheet-head .close{background:none;border:none;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;padding:6px}
   .search{margin:0 16px 10px;display:flex;gap:8px;align-items:stretch}
   .search input{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
@@ -1022,6 +1022,32 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #plansList .plan-item .pi-meta{font-family:var(--ff-num);font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #plansList .plan-item .pi-start{flex:none;background:var(--grad);color:var(--on-accent);border:none;border-radius:10px;padding:9px 15px;font-family:var(--ff-ui);font-weight:700;font-size:12px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;box-shadow:var(--glow)}
   #plansList .plan-item .pi-start:active{filter:brightness(.94)}
+  #plansList .plan-item .pi-share{flex:none;width:34px;height:34px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #plansList .plan-item .pi-share svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #plansList .plan-item .pi-share:active{background:var(--border);color:var(--text)}
+  .plans-scan{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+  .plans-scan svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .share-body{display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:26px}
+  .share-title{text-align:center}
+  .share-title b{display:block;font-size:15px;font-weight:700;color:var(--text)}
+  .share-qr{display:block;border-radius:14px;background:#fff;padding:14px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .share-qr[hidden]{display:none!important}
+  .share-status{font-family:var(--ff-num);font-size:11.5px;line-height:1.4;color:var(--muted);text-align:center;word-break:break-all}
+  .share-status:empty{display:none}
+  .share-status.err{color:var(--danger)}
+  .share-status.ok{color:var(--ok)}
+  .share-acts{display:flex;gap:8px;width:100%;margin-top:2px}
+  .share-acts button{flex:1;margin:0}
+  .share-note{text-align:center;margin:0 4px}
+  .scan-video{width:100%;max-width:320px;border-radius:12px;background:#000;display:block}
+  .scan-video[hidden]{display:none!important}
+  #scanManual{width:100%}
+  #scanManual[hidden]{display:none!important}
+  .imp-list{width:100%;display:flex;flex-direction:column;gap:5px}
+  .imp-row{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:8px 11px}
+  .imp-ex{flex:1;min-width:0;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .imp-sr{flex:none;font-family:var(--ff-num);font-size:11.5px;color:var(--muted)}
+  .share-body .field{width:100%}
   #plansList .plan-empty{text-align:center;color:var(--faint);font-size:12.5px;padding:14px 0;line-height:1.6}
   /* AI planner */
   .apl-lbl{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 2px 8px}
@@ -2227,7 +2253,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 1 Sep 2026, 12:31 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 1 Sep 2026, 1:01 PM</div>
   </div>
 </div>
 
@@ -2392,6 +2418,51 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   </div>
 </div>
 
+<div class="sheet" id="shareSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2>Share Workout</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body share-body">
+    <canvas id="shareQR" class="share-qr" aria-label="QR code for this workout"></canvas>
+    <div class="share-status" id="shareStatus"></div>
+  </div>
+</div>
+
+<div class="sheet" id="scanSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2>Scan a Workout</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body share-body">
+    <div id="scanLive" hidden><video id="scanVideo" class="scan-video" playsinline muted hidden></video></div>
+    <div class="mono-note share-note" id="scanHint"></div>
+    <div class="share-status" id="scanStatus"></div>
+    <div id="scanManual" hidden>
+      <div class="field"><input type="text" id="scanPaste" placeholder="Paste the link" autocomplete="off"></div>
+      <button type="button" class="primary" id="scanGo">Open workout</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="importSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sheet-head">
+    <h2>Shared Workout</h2>
+    <button class="close" data-close>Close</button>
+  </div>
+  <div class="sheet-body share-body">
+    <div class="share-title"><b id="impName"></b></div>
+    <div class="imp-list" id="impList"></div>
+    <div class="share-acts">
+      <button type="button" class="ghost" id="impSave">Save as plan</button>
+      <button type="button" class="primary" id="impStart">Start it now</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="plansSheet" role="dialog" aria-modal="true">
   <div class="grab"></div>
   <div class="sheet-head">
@@ -2402,6 +2473,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <div class="mono-note" style="text-align:left;margin:0 4px 10px">Build a plan once - its exercises, sets and target reps. Then load it onto any day and just punch in the weight.</div>
     <div id="plansList"></div>
     <button id="plansNew">+ New plan</button>
+    <button type="button" class="ghost plans-scan" id="plansScan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/></svg>Scan a shared workout</button>
   </div>
 </div>
 
@@ -3082,13 +3154,14 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- sheet open/close ---------- */
   var backdrop=document.getElementById("backdrop");
-  var ALL_SHEETS=["addSheet","aiChatSheet","aiLabSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","stackSheet","stackItemSheet","formSheet"];
+  var ALL_SHEETS=["addSheet","aiChatSheet","aiLabSheet","manageSheet","editSheet","statsSheet","measureSheet","scheduleSheet","exSheet","exHistSheet","plansSheet","planEditSheet","aiPlanSheet","shareSheet","scanSheet","importSheet","stackSheet","stackItemSheet","formSheet"];
   function openSheet(id){
     ALL_SHEETS.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove("open"); });
     backdrop.classList.add("open");
     document.getElementById(id).classList.add("open");
   }
   function closeSheets(){
+    if(window.__stopScan) window.__stopScan();
     backdrop.classList.remove("open");
     ALL_SHEETS.forEach(function(s){ var el=document.getElementById(s); if(el) el.classList.remove("open"); });
     toggleSchTimePicker(false);
@@ -5458,10 +5531,443 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       return "<div class='plan-item'>"+
         "<div class='pi-main' data-edit-plan='"+p.id+"'><div class='pi-name'>"+esc(p.name||"Untitled plan")+"</div>"+
         "<div class='pi-meta'>"+esc(planSummary(p))+"</div></div>"+
+        "<button class='pi-share' data-share-plan='"+p.id+"' aria-label='Share this workout'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7'/><path d='M12 15V3M8 7l4-4 4 4'/></svg></button>"+
         "<button class='pi-start' data-start-plan='"+p.id+"'>Start</button></div>";
     }).join("") : "<div class='plan-empty'>No plans yet.<br>Tap “New plan” to set one up.</div>";
   }
   function openPlans(){ renderPlansList(); openSheet("plansSheet"); }
+
+  /* ---------- QR encoder: byte mode, error level L, versions 1-20 ---------- */
+  var QR = (function(){
+    // [version][ [blocks, totalCodewords, dataCodewords], ... ]  level L
+    var ECC_L = [[[1, 26, 19]], [[1, 44, 34]], [[1, 70, 55]], [[1, 100, 80]], [[1, 134, 108]], [[2, 86, 68]], [[2, 98, 78]], [[2, 121, 97]], [[2, 146, 116]], [[2, 86, 68], [2, 87, 69]], [[4, 101, 81]], [[2, 116, 92], [2, 117, 93]], [[4, 133, 107]], [[3, 145, 115], [1, 146, 116]], [[5, 109, 87], [1, 110, 88]], [[5, 122, 98], [1, 123, 99]], [[1, 135, 107], [5, 136, 108]], [[5, 150, 120], [1, 151, 121]], [[3, 141, 113], [4, 142, 114]], [[3, 135, 107], [5, 136, 108]]];
+    var ALIGN = [[6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90]];
+    var VERSION_INFO = [31892, 34236, 39577, 42195, 48118, 51042, 55367, 58893, 63784, 68472, 70749, 76311, 79154, 84390];
+
+    // --- GF(256), primitive polynomial 0x11d ---
+    var EXP=new Uint8Array(512), LOG=new Uint8Array(256);
+    (function(){
+      var x=1;
+      for(var i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11d; }
+      for(var j=255;j<512;j++) EXP[j]=EXP[j-255];
+    })();
+    function gmul(a,b){ return (a===0||b===0)?0:EXP[LOG[a]+LOG[b]]; }
+    function genPoly(n){
+      var p=[1];
+      for(var i=0;i<n;i++){
+        var np=new Array(p.length+1).fill(0);
+        for(var j=0;j<p.length;j++){
+          np[j]^=gmul(p[j],1);              // multiply by (x + a^i): the x term
+          np[j+1]^=gmul(p[j],EXP[i]);
+        }
+        p=np;
+      }
+      return p;
+    }
+    function rsEncode(data, ecLen){
+      var gen=genPoly(ecLen), res=new Array(ecLen).fill(0);
+      for(var i=0;i<data.length;i++){
+        var factor=data[i]^res[0];
+        res.shift(); res.push(0);
+        for(var j=0;j<ecLen;j++) res[j]^=gmul(gen[j+1],factor);
+      }
+      return res;
+    }
+
+    function utf8(str){
+      var out=[], s=unescape(encodeURIComponent(str));
+      for(var i=0;i<s.length;i++) out.push(s.charCodeAt(i));
+      return out;
+    }
+    function countBits(v){ return v<10 ? 8 : 16; }
+    function dataCapacity(v){
+      var t=ECC_L[v-1], n=0;
+      for(var i=0;i<t.length;i++) n+=t[i][0]*t[i][2];
+      return n;
+    }
+    function pickVersion(len){
+      for(var v=1;v<=ECC_L.length;v++){
+        var bits=4+countBits(v)+8*len;
+        if(bits <= dataCapacity(v)*8) return v;
+      }
+      return -1;
+    }
+
+    function buildCodewords(bytes, v){
+      var bits=[];
+      function push(val,n){ for(var i=n-1;i>=0;i--) bits.push((val>>i)&1); }
+      push(4,4);
+      push(bytes.length, countBits(v));
+      for(var i=0;i<bytes.length;i++) push(bytes[i],8);
+      var cap=dataCapacity(v)*8;
+      for(var t=0;t<4 && bits.length<cap;t++) bits.push(0);
+      while(bits.length%8) bits.push(0);
+      var cw=[];
+      for(var b=0;b<bits.length;b+=8){
+        var byte=0; for(var k=0;k<8;k++) byte=(byte<<1)|bits[b+k];
+        cw.push(byte);
+      }
+      var pads=[0xEC,0x11], pi=0;
+      while(cw.length<dataCapacity(v)) cw.push(pads[pi++%2]);
+      return cw;
+    }
+
+    function interleave(cw, v){
+      var spec=ECC_L[v-1], blocks=[], ecBlocks=[], pos=0, ecLen=spec[0][1]-spec[0][2];
+      for(var g=0; g<spec.length; g++){
+        for(var b=0;b<spec[g][0];b++){
+          var d=cw.slice(pos,pos+spec[g][2]); pos+=spec[g][2];
+          blocks.push(d);
+          ecBlocks.push(rsEncode(d, spec[g][1]-spec[g][2]));
+        }
+      }
+      var out=[], maxD=0, maxE=0, i, j;
+      for(i=0;i<blocks.length;i++){ if(blocks[i].length>maxD) maxD=blocks[i].length; if(ecBlocks[i].length>maxE) maxE=ecBlocks[i].length; }
+      for(i=0;i<maxD;i++) for(j=0;j<blocks.length;j++) if(i<blocks[j].length) out.push(blocks[j][i]);
+      for(i=0;i<maxE;i++) for(j=0;j<ecBlocks.length;j++) if(i<ecBlocks[j].length) out.push(ecBlocks[j][i]);
+      return out;
+    }
+
+    function newMatrix(size){
+      var m=[], r;
+      for(r=0;r<size;r++) m.push(new Array(size).fill(null));
+      return m;
+    }
+    function placeFinder(m,r,c){
+      for(var i=-1;i<=7;i++) for(var j=-1;j<=7;j++){
+        var rr=r+i, cc=c+j;
+        if(rr<0||cc<0||rr>=m.length||cc>=m.length) continue;
+        var dark = (i>=0&&i<=6&&(j===0||j===6)) || (j>=0&&j<=6&&(i===0||i===6)) || (i>=2&&i<=4&&j>=2&&j<=4);
+        m[rr][cc]=dark?1:0;
+      }
+    }
+    function placeFunction(m, v){
+      var size=m.length, i;
+      placeFinder(m,0,0); placeFinder(m,0,size-7); placeFinder(m,size-7,0);
+      for(i=8;i<size-8;i++){ var bit=(i%2===0)?1:0; m[6][i]=bit; m[i][6]=bit; }
+      var pos=ALIGN[v-2]||null;
+      if(pos){
+        for(var a=0;a<pos.length;a++) for(var b=0;b<pos.length;b++){
+          var r=pos[a], c=pos[b];
+          if((r<=7&&c<=7)||(r<=7&&c>=size-8)||(r>=size-8&&c<=7)) continue;
+          for(var dr=-2;dr<=2;dr++) for(var dc=-2;dc<=2;dc++){
+            var d=(Math.max(Math.abs(dr),Math.abs(dc))!==1)?1:0;
+            m[r+dr][c+dc]=d;
+          }
+        }
+      }
+      m[size-8][8]=1;                                   // dark module
+      for(i=0;i<9;i++){                                 // reserve format areas
+        if(m[8][i]===null) m[8][i]=0;
+        if(m[i][8]===null) m[i][8]=0;
+      }
+      for(i=0;i<8;i++){
+        if(m[8][size-1-i]===null) m[8][size-1-i]=0;
+        if(m[size-1-i][8]===null) m[size-1-i][8]=0;
+      }
+      if(v>=7){
+        var vi=VERSION_INFO[v-7];
+        for(i=0;i<18;i++){
+          var bitv=(vi>>i)&1, rr=Math.floor(i/3), cc=i%3;
+          m[size-11+cc][rr]=bitv;
+          m[rr][size-11+cc]=bitv;
+        }
+      }
+    }
+    function placeData(m, cw){
+      var size=m.length, dir=-1, row=size-1, idx=0, bit=0;
+      for(var col=size-1; col>0; col-=2){
+        if(col===6) col--;
+        while(true){
+          for(var k=0;k<2;k++){
+            var c=col-k;
+            if(m[row][c]===null){
+              var v=0;
+              if(idx<cw.length){ v=(cw[idx]>>(7-bit))&1; bit++; if(bit===8){ bit=0; idx++; } }
+              m[row][c]=v;
+            }
+          }
+          row+=dir;
+          if(row<0||row>=size){ row-=dir; dir=-dir; break; }
+        }
+      }
+    }
+    function maskFn(n,r,c){
+      switch(n){
+        case 0: return (r+c)%2===0;
+        case 1: return r%2===0;
+        case 2: return c%3===0;
+        case 3: return (r+c)%3===0;
+        case 4: return (Math.floor(r/2)+Math.floor(c/3))%2===0;
+        case 5: return ((r*c)%2)+((r*c)%3)===0;
+        case 6: return (((r*c)%2)+((r*c)%3))%2===0;
+        case 7: return (((r+c)%2)+((r*c)%3))%2===0;
+      }
+    }
+    function penalty(m){
+      var size=m.length, p=0, r, c, i;
+      for(r=0;r<size;r++){
+        var run=1;
+        for(c=1;c<size;c++){
+          if(m[r][c]===m[r][c-1]) run++;
+          else { if(run>=5) p+=3+(run-5); run=1; }
+        }
+        if(run>=5) p+=3+(run-5);
+      }
+      for(c=0;c<size;c++){
+        var runc=1;
+        for(r=1;r<size;r++){
+          if(m[r][c]===m[r-1][c]) runc++;
+          else { if(runc>=5) p+=3+(runc-5); runc=1; }
+        }
+        if(runc>=5) p+=3+(runc-5);
+      }
+      for(r=0;r<size-1;r++) for(c=0;c<size-1;c++){
+        var v=m[r][c];
+        if(v===m[r][c+1]&&v===m[r+1][c]&&v===m[r+1][c+1]) p+=3;
+      }
+      var pat1=[1,0,1,1,1,0,1,0,0,0,0], pat2=[0,0,0,0,1,0,1,1,1,0,1];
+      function match(get,len){
+        var n=0;
+        for(var s=0;s+11<=len;s++){
+          var ok1=true, ok2=true;
+          for(i=0;i<11;i++){ var g=get(s+i); if(g!==pat1[i]) ok1=false; if(g!==pat2[i]) ok2=false; }
+          if(ok1) n++; if(ok2) n++;
+        }
+        return n;
+      }
+      for(r=0;r<size;r++) p+=40*match(function(i){return m[r][i];}, size);
+      for(c=0;c<size;c++) p+=40*match(function(i){return m[i][c];}, size);
+      var dark=0;
+      for(r=0;r<size;r++) for(c=0;c<size;c++) if(m[r][c]) dark++;
+      var pct=dark*100/(size*size);
+      p += Math.floor(Math.abs(pct-50)/5)*10;
+      return p;
+    }
+    function bchFormat(data){
+      var d=data<<10, g=0x537;
+      for(var i=14;i>=10;i--) if((d>>i)&1) d^=g<<(i-10);
+      return ((data<<10)|d)^0x5412;
+    }
+    function placeFormat(m, mask){
+      var size=m.length, bits=bchFormat((1<<3)|mask), i;   // 01 = level L
+      for(i=0;i<15;i++){
+        var b=(bits>>i)&1;
+        if(i<6) m[i][8]=b;                 // copy 1: up the column, then along row 8
+        else if(i===6) m[7][8]=b;
+        else if(i===7) m[8][8]=b;
+        else if(i===8) m[8][7]=b;
+        else m[8][14-i]=b;
+        if(i<8) m[8][size-1-i]=b;          // copy 2: along row 8, then down the column
+        else m[size-15+i][8]=b;
+      }
+      m[size-8][8]=1;
+    }
+
+    function make(text, forceMask){
+      var bytes=utf8(text), v=pickVersion(bytes.length);
+      if(v<0) throw new Error("too much data for a QR code");
+      var cw=interleave(buildCodewords(bytes,v), v);
+      var size=17+4*v;
+      var base=newMatrix(size);
+      placeFunction(base, v);
+      var reserved=[];
+      for(var r=0;r<size;r++) reserved.push(base[r].map(function(x){ return x!==null; }));
+      placeData(base, cw);
+
+      var best=null, bestP=Infinity, bestMask=-1;
+      for(var mk=0;mk<8;mk++){
+        if(forceMask!=null && mk!==forceMask) continue;
+        var m=base.map(function(row){ return row.slice(); });
+        for(var rr=0;rr<size;rr++) for(var cc=0;cc<size;cc++)
+          if(!reserved[rr][cc] && maskFn(mk,rr,cc)) m[rr][cc]^=1;
+        placeFormat(m, mk);
+        var p=penalty(m);
+        if(p<bestP){ bestP=p; best=m; bestMask=mk; }
+      }
+      return {size:size, version:v, mask:bestMask, modules:best};
+    }
+    return {make:make};
+  })();
+
+  /* ---------- share a workout as a link / QR (no server, all in the URL) ---------- */
+  // Payload: ["plan name", [[exercise, sets, reps], ...]] -> JSON -> deflate -> base64url.
+  // The whole thing rides in the URL fragment, so nothing is ever uploaded anywhere.
+  var SHARE_MAX_CHARS=560;                       // keeps the QR at a size that scans off a screen
+  function b64u(u8){
+    var s=""; for(var i=0;i<u8.length;i++) s+=String.fromCharCode(u8[i]);
+    return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+  function ub64u(s){
+    s=String(s).replace(/-/g,"+").replace(/_/g,"/");
+    while(s.length%4) s+="=";
+    var b=atob(s), u=new Uint8Array(b.length);
+    for(var i=0;i<b.length;i++) u[i]=b.charCodeAt(i);
+    return u;
+  }
+  function planToJSON(p){
+    return JSON.stringify([String(p.name||"Shared workout").slice(0,60),
+      (p.exercises||[]).map(function(e){ return [exDisplay(e.name), Number(e.sets)||0, Number(e.reps)||0]; })]);
+  }
+  async function packShare(str){
+    var bytes=new TextEncoder().encode(str);
+    if(window.CompressionStream){
+      try{
+        var cs=new CompressionStream("deflate-raw");
+        var ab=await new Response(new Blob([bytes]).stream().pipeThrough(cs)).arrayBuffer();
+        return "1"+b64u(new Uint8Array(ab));
+      }catch(e){}
+    }
+    return "0"+b64u(bytes);
+  }
+  async function unpackShare(s){
+    var flag=String(s).charAt(0), raw=ub64u(String(s).slice(1));
+    if(flag==="1"){
+      var ds=new DecompressionStream("deflate-raw");
+      var ab=await new Response(new Blob([raw]).stream().pipeThrough(ds)).arrayBuffer();
+      return new TextDecoder().decode(new Uint8Array(ab));
+    }
+    return new TextDecoder().decode(raw);
+  }
+  function shareBaseUrl(){ return location.origin+location.pathname; }
+
+  /* --- draw a QR onto a canvas --- */
+  function drawQR(canvas, text){
+    var q=QR.make(text), n=q.size, quiet=3, total=n+quiet*2;
+    var css=Math.max(210, Math.min(300, (window.innerWidth||360)-108));
+    var dpr=Math.min(3, window.devicePixelRatio||1);
+    var scale=Math.max(1, Math.floor(css*dpr/total));
+    canvas.width=total*scale; canvas.height=total*scale;
+    canvas.style.width=css+"px"; canvas.style.height=css+"px";
+    var g=canvas.getContext("2d");
+    g.fillStyle="#ffffff"; g.fillRect(0,0,canvas.width,canvas.height);   // QR needs a light ground in every theme
+    g.fillStyle="#000000";
+    for(var r=0;r<n;r++) for(var c=0;c<n;c++)
+      if(q.modules[r][c]) g.fillRect((c+quiet)*scale,(r+quiet)*scale,scale,scale);
+    return q.version;
+  }
+
+  /* --- share sheet --- */
+  var shareUrl="";
+  async function openShare(plan){
+    if(!plan || !(plan.exercises||[]).length){ return; }
+    var st=document.getElementById("shareStatus"); st.textContent=""; st.className="share-status";
+    openSheet("shareSheet");
+    try{
+      var payload=await packShare(planToJSON(plan));
+      shareUrl=shareBaseUrl()+"#w="+payload;
+      if(shareUrl.length>SHARE_MAX_CHARS) throw new Error("This plan is too long to fit in a code. Split it into two plans.");
+      drawQR(document.getElementById("shareQR"), shareUrl);
+      document.getElementById("shareQR").hidden=false;
+    }catch(e){
+      document.getElementById("shareQR").hidden=true;
+      st.textContent=(e&&e.message)||"Couldn't build the code.";
+      st.className="share-status err";
+    }
+  }
+
+  /* --- receiving: import a shared workout --- */
+  var incomingPlan=null;
+  function renderIncoming(p){
+    incomingPlan=p;
+    document.getElementById("impName").textContent=p.name||"Shared workout";
+    document.getElementById("impList").innerHTML=(p.exercises||[]).map(function(e){
+      return "<div class='imp-row'><span class='imp-ex'>"+esc(e.name)+"</span><span class='imp-sr'>"+(e.sets||0)+" × "+(e.reps||0)+"</span></div>";
+    }).join("");
+    openSheet("importSheet");
+  }
+  // Keep the sender's exercise exactly as they named it unless this device already
+  // knows that exact name - a fuzzy match would silently swap the movement.
+  var SHARED_EX_INDEX=null;
+  function matchSharedEx(name){
+    var q=String(name||"").trim(); if(!q) return q;
+    if(!SHARED_EX_INDEX){
+      SHARED_EX_INDEX={};
+      allExNames().forEach(function(n){ SHARED_EX_INDEX[n.toLowerCase()]=n; SHARED_EX_INDEX[exDisplay(n).toLowerCase()]=n; });
+    }
+    return SHARED_EX_INDEX[q.toLowerCase()] || q;
+  }
+  async function loadShared(payload){
+    try{
+      var arr=JSON.parse(await unpackShare(payload));
+      if(!Array.isArray(arr) || !Array.isArray(arr[1])) throw new Error("bad payload");
+      // match each name back to this device's exercise database so photos and history line up
+      var p={name:String(arr[0]||"Shared workout"), exercises:arr[1].map(function(row){
+        return {name:matchSharedEx(String(row[0]||"")), sets:Number(row[1])||3, reps:Number(row[2])||10};
+      })};
+      if(!p.exercises.length) throw new Error("no exercises");
+      renderIncoming(p);
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+  function consumeShareHash(){
+    var m=/[#&]w=([A-Za-z0-9\-_]+)/.exec(location.hash||"");
+    if(!m) return;
+    history.replaceState(null,"",shareBaseUrl());      // don't re-import on every reload
+    loadShared(m[1]).then(function(ok){
+      if(!ok) setStatus("That shared workout couldn't be read.","err");
+    });
+  }
+  document.getElementById("impSave").addEventListener("click",function(){
+    if(!incomingPlan) return;
+    plans.push({id:uid(), name:incomingPlan.name, exercises:incomingPlan.exercises});
+    savePlans(); renderPlansList(); closeSheets(); openPlans();
+  });
+  document.getElementById("impStart").addEventListener("click",function(){
+    if(!incomingPlan) return;
+    applyPlan(incomingPlan); closeSheets();
+    var t=document.querySelector('.tabbtn[data-tab="lift"]'); if(t) t.click();
+  });
+
+  /* --- scanning a code from inside the app --- */
+  var scanStream=null, scanTimer=null;
+  function scanStatus(m,cls){ var el=document.getElementById("scanStatus"); if(el){ el.textContent=m||""; el.className="share-status"+(cls?(" "+cls):""); } }
+  window.__stopScan=function(){ stopScan(); };
+  function stopScan(){
+    if(scanTimer){ clearInterval(scanTimer); scanTimer=null; }
+    if(scanStream){ scanStream.getTracks().forEach(function(t){ t.stop(); }); scanStream=null; }
+    var v=document.getElementById("scanVideo"); if(v){ v.srcObject=null; v.hidden=true; }
+  }
+  function takeScanUrl(raw){
+    var m=/[#&]w=([A-Za-z0-9\-_]+)/.exec(String(raw||""));
+    if(!m){ scanStatus("That code isn't a MásGains workout.","err"); return; }
+    stopScan();
+    loadShared(m[1]).then(function(ok){ if(!ok) scanStatus("That workout couldn't be read.","err"); });
+  }
+  async function openScan(){
+    scanStatus(""); openSheet("scanSheet");
+    document.getElementById("scanPaste").value="";
+    var live=("BarcodeDetector" in window);
+    document.getElementById("scanLive").hidden=!live;
+    document.getElementById("scanManual").hidden=live;
+    document.getElementById("scanHint").textContent = live
+      ? "Point the camera at the code."
+      : "Point your phone's Camera app at the code and it will open the workout.";
+    if(!live) return;
+    try{
+      var det=new window.BarcodeDetector({formats:["qr_code"]});
+      scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+      var v=document.getElementById("scanVideo");
+      v.srcObject=scanStream; v.hidden=false; await v.play();
+      scanTimer=setInterval(async function(){
+        try{
+          var codes=await det.detect(v);
+          if(codes && codes.length) takeScanUrl(codes[0].rawValue);
+        }catch(e){}
+      }, 400);
+    }catch(e){
+      scanStatus("Couldn't open the camera.","err");
+      document.getElementById("scanLive").hidden=true;
+      document.getElementById("scanManual").hidden=false;
+      document.getElementById("scanHint").textContent="Point your phone's Camera app at the code instead.";
+    }
+  }
+  document.getElementById("scanGo").addEventListener("click",function(){
+    takeScanUrl(document.getElementById("scanPaste").value.trim());
+  });
+
   function fillPlanExOptions(){
     var dl=document.getElementById("planExOptions"); if(!dl) return;
     dl.innerHTML=COMMON_EX.map(function(n){ return "<option value='"+esc(n)+"'></option>"; }).join("");
@@ -6142,7 +6648,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   document.getElementById("wkPlansBtn").addEventListener("click", openPlans);
   document.getElementById("plansNew").addEventListener("click", function(){ openPlanEditor(null); });
+  document.getElementById("plansScan").addEventListener("click", openScan);
   document.getElementById("plansList").addEventListener("click", function(e){
+    var sh=e.target.closest("[data-share-plan]"); if(sh){ openShare(planById(sh.getAttribute("data-share-plan"))); return; }
     var st=e.target.closest("[data-start-plan]"); if(st){ startPlanOnCurrentDay(st.getAttribute("data-start-plan")); return; }
     var ed=e.target.closest("[data-edit-plan]"); if(ed){ openPlanEditor(ed.getAttribute("data-edit-plan")); }
   });
@@ -7163,6 +7671,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     if(!obFlag && !FRESH && obHasData()){ sSet(ONBOARD_KEY,"1"); obFlag="1"; }   // existing users skip it
     needsOnboard = FRESH || !obFlag;
     hideSplash();
+    if(!needsOnboard) consumeShareHash();     // a scanned/opened share link lands here
   }
   var splashT0=Date.now();
   function hideSplash(){
