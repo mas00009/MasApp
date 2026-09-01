@@ -1025,7 +1025,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #plansList .plan-item .pi-share{flex:none;width:34px;height:34px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   #plansList .plan-item .pi-share svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   #plansList .plan-item .pi-share:active{background:var(--border);color:var(--text)}
-  .plans-scan{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+  .plans-acts{display:flex;gap:8px;align-items:stretch;margin-top:10px}
+  /* #plansNew is an id rule, so match its weight to keep both buttons identical */
+  #plansSheet .plans-acts > button{flex:1;margin:0;min-width:0;padding:0 10px;height:46px;font-size:13px;
+    display:flex;align-items:center;justify-content:center;gap:7px;line-height:1}
+  .plans-scan{display:flex;align-items:center;justify-content:center;gap:7px}
   .plans-scan svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .share-body{display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:26px}
   .share-title{text-align:center}
@@ -1039,8 +1043,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .share-acts{display:flex;gap:8px;width:100%;margin-top:2px}
   .share-acts button{flex:1;margin:0}
   .share-note{text-align:center;margin:0 4px}
-  .scan-video{width:100%;max-width:320px;border-radius:12px;background:#000;display:block}
-  .scan-video[hidden]{display:none!important}
+  .scan-stage{position:relative;width:100%;max-width:320px;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#000}
+  .scan-stage[hidden]{display:none!important}
+  .scan-video{width:100%;height:100%;object-fit:cover;display:block}
+  .scan-frame{position:absolute;inset:14%;border-radius:10px;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);pointer-events:none}
+  .scan-frame::before,.scan-frame::after{content:"";position:absolute;width:30px;height:30px;border:3px solid var(--protein)}
+  .scan-frame::before{top:-2px;left:-2px;border-right:none;border-bottom:none;border-radius:10px 0 0 0}
+  .scan-frame::after{bottom:-2px;right:-2px;border-left:none;border-top:none;border-radius:0 0 10px 0}
   #scanManual{width:100%}
   #scanManual[hidden]{display:none!important}
   .imp-list{width:100%;display:flex;flex-direction:column;gap:5px}
@@ -2253,7 +2262,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 1 Sep 2026, 1:01 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 1 Sep 2026, 4:24 PM</div>
   </div>
 </div>
 
@@ -2437,7 +2446,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     <button class="close" data-close>Close</button>
   </div>
   <div class="sheet-body share-body">
-    <div id="scanLive" hidden><video id="scanVideo" class="scan-video" playsinline muted hidden></video></div>
+    <div class="scan-stage" id="scanLive" hidden>
+      <video id="scanVideo" class="scan-video" playsinline muted autoplay></video>
+      <div class="scan-frame" aria-hidden="true"></div>
+    </div>
     <div class="mono-note share-note" id="scanHint"></div>
     <div class="share-status" id="scanStatus"></div>
     <div id="scanManual" hidden>
@@ -2472,8 +2484,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div class="sheet-body">
     <div class="mono-note" style="text-align:left;margin:0 4px 10px">Build a plan once - its exercises, sets and target reps. Then load it onto any day and just punch in the weight.</div>
     <div id="plansList"></div>
-    <button id="plansNew">+ New plan</button>
-    <button type="button" class="ghost plans-scan" id="plansScan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/></svg>Scan a shared workout</button>
+    <div class="plans-acts">
+      <button id="plansNew">+ New plan</button>
+      <button type="button" class="ghost plans-scan" id="plansScan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/></svg>Scan</button>
+    </div>
   </div>
 </div>
 
@@ -5790,6 +5804,526 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     return {make:make};
   })();
 
+  /* ---------- QR decoder: finds a code in a camera frame (Safari has no BarcodeDetector) ---------- */
+  var QRD = (function(){
+    var ECC = {"L": [[[1, 26, 19]], [[1, 44, 34]], [[1, 70, 55]], [[1, 100, 80]], [[1, 134, 108]], [[2, 86, 68]], [[2, 98, 78]], [[2, 121, 97]], [[2, 146, 116]], [[2, 86, 68], [2, 87, 69]], [[4, 101, 81]], [[2, 116, 92], [2, 117, 93]], [[4, 133, 107]], [[3, 145, 115], [1, 146, 116]], [[5, 109, 87], [1, 110, 88]], [[5, 122, 98], [1, 123, 99]], [[1, 135, 107], [5, 136, 108]], [[5, 150, 120], [1, 151, 121]], [[3, 141, 113], [4, 142, 114]], [[3, 135, 107], [5, 136, 108]]], "M": [[[1, 26, 16]], [[1, 44, 28]], [[1, 70, 44]], [[2, 50, 32]], [[2, 67, 43]], [[4, 43, 27]], [[4, 49, 31]], [[2, 60, 38], [2, 61, 39]], [[3, 58, 36], [2, 59, 37]], [[4, 69, 43], [1, 70, 44]], [[1, 80, 50], [4, 81, 51]], [[6, 58, 36], [2, 59, 37]], [[8, 59, 37], [1, 60, 38]], [[4, 64, 40], [5, 65, 41]], [[5, 65, 41], [5, 66, 42]], [[7, 73, 45], [3, 74, 46]], [[10, 74, 46], [1, 75, 47]], [[9, 69, 43], [4, 70, 44]], [[3, 70, 44], [11, 71, 45]], [[3, 67, 41], [13, 68, 42]]], "Q": [[[1, 26, 13]], [[1, 44, 22]], [[2, 35, 17]], [[2, 50, 24]], [[2, 33, 15], [2, 34, 16]], [[4, 43, 19]], [[2, 32, 14], [4, 33, 15]], [[4, 40, 18], [2, 41, 19]], [[4, 36, 16], [4, 37, 17]], [[6, 43, 19], [2, 44, 20]], [[4, 50, 22], [4, 51, 23]], [[4, 46, 20], [6, 47, 21]], [[8, 44, 20], [4, 45, 21]], [[11, 36, 16], [5, 37, 17]], [[5, 54, 24], [7, 55, 25]], [[15, 43, 19], [2, 44, 20]], [[1, 50, 22], [15, 51, 23]], [[17, 50, 22], [1, 51, 23]], [[17, 47, 21], [4, 48, 22]], [[15, 54, 24], [5, 55, 25]]], "H": [[[1, 26, 9]], [[1, 44, 16]], [[2, 35, 13]], [[4, 25, 9]], [[2, 33, 11], [2, 34, 12]], [[4, 43, 15]], [[4, 39, 13], [1, 40, 14]], [[4, 40, 14], [2, 41, 15]], [[4, 36, 12], [4, 37, 13]], [[6, 43, 15], [2, 44, 16]], [[3, 36, 12], [8, 37, 13]], [[7, 42, 14], [4, 43, 15]], [[12, 33, 11], [4, 34, 12]], [[11, 36, 12], [5, 37, 13]], [[11, 36, 12], [7, 37, 13]], [[3, 45, 15], [13, 46, 16]], [[2, 42, 14], [17, 43, 15]], [[2, 42, 14], [19, 43, 15]], [[9, 39, 13], [16, 40, 14]], [[15, 43, 15], [10, 44, 16]]]};                 // {L|M|Q|H: [version][ [blocks,total,data] ... ]}
+    var ALIGN = [[6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90]];                 // alignment centres, versions 2..20
+    var LEVELS = ["M","L","H","Q"];          // format-info level bits 00,01,10,11
+
+    /* ---- GF(256) ---- */
+    var EXP=new Uint8Array(512), LOG=new Uint8Array(256);
+    (function(){ var x=1; for(var i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11d; }
+                 for(var j=255;j<512;j++) EXP[j]=EXP[j-255]; })();
+    function gmul(a,b){ return (a===0||b===0)?0:EXP[LOG[a]+LOG[b]]; }
+    function ginv(a){ return EXP[255-LOG[a]]; }
+    function gpow(a,e){ return a===0 ? (e===0?1:0) : EXP[(LOG[a]*e)%255]; }
+
+    /* ---- Reed-Solomon decode (syndromes, Berlekamp-Massey, Chien, Forney) ---- */
+    function rsDecode(msg, ecLen){
+      var n=msg.length, synd=new Array(ecLen).fill(0), has=false, i, j;
+      for(i=0;i<ecLen;i++){
+        var s=0;
+        for(j=0;j<n;j++) s=gmul(s,EXP[i])^msg[j];
+        synd[i]=s; if(s) has=true;
+      }
+      if(!has) return msg.slice(0, n-ecLen);
+      // Berlekamp-Massey
+      var C=[1], B=[1], L=0, m=1, b=1;
+      for(var nn=0;nn<ecLen;nn++){
+        var d=synd[nn];
+        for(i=1;i<=L;i++) d^=gmul(C[i]||0, synd[nn-i]);
+        if(d===0){ m++; }
+        else if(2*L<=nn){
+          var T=C.slice(), coef=gmul(d, ginv(b));
+          while(C.length < B.length+m) C.push(0);
+          for(i=0;i<B.length;i++) C[i+m]^=gmul(coef, B[i]);
+          L=nn+1-L; B=T; b=d; m=1;
+        } else {
+          var coef2=gmul(d, ginv(b));
+          while(C.length < B.length+m) C.push(0);
+          for(i=0;i<B.length;i++) C[i+m]^=gmul(coef2, B[i]);
+          m++;
+        }
+      }
+      if(L>ecLen/2) return null;                       // more errors than we can fix
+      // Chien search for error positions
+      var pos=[];
+      for(i=0;i<n;i++){
+        var v=0, xi=255-((n-1-i)%255);
+        for(j=0;j<C.length;j++) v^=gmul(C[j]||0, EXP[(xi*j)%255]);
+        if(v===0) pos.push(i);
+      }
+      if(pos.length!==L) return null;
+      // Forney: e = X * omega(X^-1) / lambda'(X^-1), with generator roots from alpha^0
+      var omega=new Array(ecLen).fill(0);
+      for(i=0;i<ecLen;i++){ var acc=0; for(j=0;j<=i;j++) acc^=gmul(synd[j], C[i-j]||0); omega[i]=acc; }
+      var out=msg.slice();
+      for(var p=0;p<pos.length;p++){
+        var ip=pos[p];
+        var X=EXP[(n-1-ip)%255];                       // error locator for this position
+        var Xi=ginv(X);                                // X^-1
+        var num=0;
+        for(i=0;i<ecLen;i++) num^=gmul(omega[i], gpow(Xi,i));
+        var den=0;
+        for(i=1;i<C.length;i+=2) den^=gmul(C[i]||0, gpow(Xi,i-1));
+        if(den===0) return null;
+        out[ip]^=gmul(X, gmul(num, ginv(den)));
+      }
+      // verify
+      for(i=0;i<ecLen;i++){
+        var s2=0; for(j=0;j<n;j++) s2=gmul(s2,EXP[i])^out[j];
+        if(s2) return null;
+      }
+      return out.slice(0, n-ecLen);
+    }
+
+    /* ---- binarise a greyscale image with a local (block) threshold ---- */
+    function binarise(gray,w,h){
+      var BS=8, bw=Math.max(1,Math.ceil(w/BS)), bh=Math.max(1,Math.ceil(h/BS));
+      var means=new Float32Array(bw*bh), x, y, bx, by;
+      for(by=0;by<bh;by++) for(bx=0;bx<bw;bx++){
+        var sum=0, cnt=0, x0=bx*BS, y0=by*BS;
+        for(y=y0;y<Math.min(y0+BS,h);y++) for(x=x0;x<Math.min(x0+BS,w);x++){ sum+=gray[y*w+x]; cnt++; }
+        means[by*bw+bx]=cnt?sum/cnt:128;
+      }
+      var bits=new Uint8Array(w*h);
+      for(by=0;by<bh;by++) for(bx=0;bx<bw;bx++){
+        var s=0,n=0;
+        for(var dy=-2;dy<=2;dy++) for(var dx=-2;dx<=2;dx++){
+          var nx=bx+dx, ny=by+dy;
+          if(nx>=0&&nx<bw&&ny>=0&&ny<bh){ s+=means[ny*bw+nx]; n++; }
+        }
+        var t=s/n;
+        for(y=by*BS;y<Math.min(by*BS+BS,h);y++) for(x=bx*BS;x<Math.min(bx*BS+BS,w);x++)
+          bits[y*w+x]= gray[y*w+x] < t-3 ? 1 : 0;      // 1 = dark
+      }
+      return bits;
+    }
+
+    /* ---- finder patterns: rows matching dark:light:dark:light:dark = 1:1:3:1:1 ---- */
+    function ratioOK(st){
+      var total=st[0]+st[1]+st[2]+st[3]+st[4];
+      if(total<7) return false;
+      var mod=total/7, tol=mod*0.6;
+      return Math.abs(mod-st[0])<tol && Math.abs(mod-st[1])<tol && Math.abs(3*mod-st[2])<3*tol &&
+             Math.abs(mod-st[3])<tol && Math.abs(mod-st[4])<tol;
+    }
+    function centreFromEnd(st,end){ return end-st[4]-st[3]-st[2]/2; }
+    function crossCheckV(bits,w,h,cx,cy,maxCount,origTotal){
+      var st=[0,0,0,0,0], y=cy;
+      while(y>=0 && bits[y*w+cx]){ st[2]++; y--; }
+      if(y<0) return NaN;
+      while(y>=0 && !bits[y*w+cx] && st[1]<maxCount){ st[1]++; y--; }
+      if(y<0||st[1]>=maxCount) return NaN;
+      while(y>=0 && bits[y*w+cx] && st[0]<maxCount){ st[0]++; y--; }
+      if(st[0]>=maxCount) return NaN;
+      y=cy+1;
+      while(y<h && bits[y*w+cx]){ st[2]++; y++; }
+      if(y===h) return NaN;
+      while(y<h && !bits[y*w+cx] && st[3]<maxCount){ st[3]++; y++; }
+      if(y===h||st[3]>=maxCount) return NaN;
+      while(y<h && bits[y*w+cx] && st[4]<maxCount){ st[4]++; y++; }
+      if(st[4]>=maxCount) return NaN;
+      var total=st[0]+st[1]+st[2]+st[3]+st[4];
+      if(5*Math.abs(total-origTotal) >= 2*origTotal) return NaN;
+      return ratioOK(st) ? centreFromEnd(st,y) : NaN;
+    }
+    function crossCheckH(bits,w,h,cx,cy,maxCount,origTotal){
+      var st=[0,0,0,0,0], x=cx;
+      while(x>=0 && bits[cy*w+x]){ st[2]++; x--; }
+      if(x<0) return NaN;
+      while(x>=0 && !bits[cy*w+x] && st[1]<maxCount){ st[1]++; x--; }
+      if(x<0||st[1]>=maxCount) return NaN;
+      while(x>=0 && bits[cy*w+x] && st[0]<maxCount){ st[0]++; x--; }
+      if(st[0]>=maxCount) return NaN;
+      x=cx+1;
+      while(x<w && bits[cy*w+x]){ st[2]++; x++; }
+      if(x===w) return NaN;
+      while(x<w && !bits[cy*w+x] && st[3]<maxCount){ st[3]++; x++; }
+      if(x===w||st[3]>=maxCount) return NaN;
+      while(x<w && bits[cy*w+x] && st[4]<maxCount){ st[4]++; x++; }
+      if(st[4]>=maxCount) return NaN;
+      var total=st[0]+st[1]+st[2]+st[3]+st[4];
+      if(5*Math.abs(total-origTotal) >= origTotal) return NaN;
+      return ratioOK(st) ? centreFromEnd(st,x) : NaN;
+    }
+    function findFinders(bits,w,h){
+      var found=[], skip=Math.max(1,Math.floor(h/(4*35)));
+      for(var y=skip-1;y<h;y+=skip){
+        var st=[0,0,0,0,0], cur=0, x;
+        for(x=0;x<w;x++){
+          var dark=bits[y*w+x];
+          if(dark){
+            if(cur%2===1) cur++;
+            st[cur]++;
+          } else {
+            if(cur%2===1) st[cur]++;
+            else if(cur===4){
+              if(ratioOK(st)){
+                tryCentre(st,x);
+              } else { st=[st[2],st[3],st[4],1,0]; cur=3; continue; }
+              st=[0,0,0,0,0]; cur=0;
+            } else { cur++; st[cur]++; }
+          }
+        }
+        if(cur===4 && ratioOK(st)) tryCentre(st,w);
+        function tryCentre(s,end){
+          var total=s[0]+s[1]+s[2]+s[3]+s[4], maxCount=total/7*3;
+          var cx=Math.floor(centreFromEnd(s,end));
+          if(cx<0||cx>=w) return;
+          var cy=crossCheckV(bits,w,h,cx,y,maxCount,total);
+          if(isNaN(cy)) return;
+          var cx2=crossCheckH(bits,w,h,cx,Math.floor(cy),maxCount,total);
+          if(isNaN(cx2)) return;
+          var mod=total/7;
+          for(var i=0;i<found.length;i++){
+            if(Math.abs(found[i].x-cx2)<mod*1.5 && Math.abs(found[i].y-cy)<mod*1.5 &&
+               Math.abs(found[i].mod-mod)<Math.max(1,mod*0.5)){
+              found[i].x=(found[i].x*found[i].n+cx2)/(found[i].n+1);
+              found[i].y=(found[i].y*found[i].n+cy)/(found[i].n+1);
+              found[i].mod=(found[i].mod*found[i].n+mod)/(found[i].n+1);
+              found[i].n++; return;
+            }
+          }
+          found.push({x:cx2,y:cy,mod:mod,n:1});
+        }
+      }
+      return found.filter(function(f){ return f.n>=2; });
+    }
+    function orderFinders(p){
+      // the corner opposite the longest side is the top-left
+      function d(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return dx*dx+dy*dy; }
+      var ab=d(p[0],p[1]), bc=d(p[1],p[2]), ac=d(p[0],p[2]);
+      var tl,x1,x2;
+      if(bc>=ab && bc>=ac){ tl=p[0]; x1=p[1]; x2=p[2]; }
+      else if(ac>=ab && ac>=bc){ tl=p[1]; x1=p[0]; x2=p[2]; }
+      else { tl=p[2]; x1=p[0]; x2=p[1]; }
+      // cross product decides which of the two is the top-right
+      var cross=(x1.x-tl.x)*(x2.y-tl.y)-(x1.y-tl.y)*(x2.x-tl.x);
+      return cross>0 ? {tl:tl, tr:x1, bl:x2} : {tl:tl, tr:x2, bl:x1};   // image y grows downward
+    }
+
+    /* ---- perspective sampling ---- */
+    // Row-major 3x3 homography [a,b,c, d,e,f, g,h,1]:
+    //   px = (a*x+b*y+c)/(g*x+h*y+1),  py = (d*x+e*y+f)/(g*x+h*y+1)
+    // sq2quad maps the unit square (0,0),(1,0),(1,1),(0,1) onto p0..p3.
+    function sq2quad(p){
+      var x0=p[0],y0=p[1],x1=p[2],y1=p[3],x2=p[4],y2=p[5],x3=p[6],y3=p[7];
+      var dx3=x0-x1+x2-x3, dy3=y0-y1+y2-y3;
+      if(dx3===0 && dy3===0) return [x1-x0, x3-x0, x0, y1-y0, y3-y0, y0, 0, 0, 1];
+      var dx1=x1-x2, dx2=x3-x2, dy1=y1-y2, dy2=y3-y2;
+      var den=dx1*dy2-dx2*dy1;
+      if(!den) return null;
+      var g=(dx3*dy2-dx2*dy3)/den, h=(dx1*dy3-dx3*dy1)/den;
+      return [x1-x0+g*x1, x3-x0+h*x3, x0, y1-y0+g*y1, y3-y0+h*y3, y0, g, h, 1];
+    }
+    function adj(m){
+      return [m[4]*m[8]-m[5]*m[7], m[2]*m[7]-m[1]*m[8], m[1]*m[5]-m[2]*m[4],
+              m[5]*m[6]-m[3]*m[8], m[0]*m[8]-m[2]*m[6], m[2]*m[3]-m[0]*m[5],
+              m[3]*m[7]-m[4]*m[6], m[1]*m[6]-m[0]*m[7], m[0]*m[4]-m[1]*m[3]];
+    }
+    function mul(A,B){
+      var C=new Array(9);
+      for(var r=0;r<3;r++) for(var c=0;c<3;c++)
+        C[r*3+c]=A[r*3]*B[c]+A[r*3+1]*B[3+c]+A[r*3+2]*B[6+c];
+      return C;
+    }
+    function quad2quad(s,d){
+      var ms=sq2quad(s), md=sq2quad(d);
+      if(!ms||!md) return null;
+      return mul(md, adj(ms));
+    }
+
+    // Read each module as a majority vote over five points inside it, so a stray
+    // noisy pixel or a soft edge from blur cannot flip a module on its own.
+    var SAMPLE_OFFSETS=[[0,0],[-0.12,-0.12],[0.12,-0.12],[-0.12,0.12],[0.12,0.12]];
+    function sampleGrid(bits,w,h,size,tf){
+      var out=[], r, c, k;
+      for(r=0;r<size;r++){
+        var row=new Array(size);
+        for(c=0;c<size;c++){
+          var votes=0, seen=0;
+          for(k=0;k<SAMPLE_OFFSETS.length;k++){
+            var x=c+0.5+SAMPLE_OFFSETS[k][0], y=r+0.5+SAMPLE_OFFSETS[k][1];
+            var den=tf[6]*x+tf[7]*y+tf[8];
+            if(!den) continue;
+            var px=Math.round((tf[0]*x+tf[1]*y+tf[2])/den);
+            var py=Math.round((tf[3]*x+tf[4]*y+tf[5])/den);
+            if(px<0||px>=w||py<0||py>=h) continue;
+            seen++; if(bits[py*w+px]) votes++;
+          }
+          row[c]= seen ? (votes*2>seen ? 1 : 0) : 0;
+        }
+        out.push(row);
+      }
+      return out;
+    }
+
+    /* ---- the bottom-right alignment pattern pins down the perspective ---- */
+    function findAlignment(bits,w,h,estX,estY,mod,allow){
+      var rad=Math.max(5, Math.round(mod*(allow||4)));
+      var x0=Math.max(0,Math.round(estX-rad)), x1=Math.min(w-1,Math.round(estX+rad));
+      var y0=Math.max(0,Math.round(estY-rad)), y1=Math.min(h-1,Math.round(estY+rad));
+      var found=[];
+      function runsOf(get,a,b){                      // run-length encode a scan line
+        var runs=[], cur=get(a), len=0;
+        for(var i=a;i<=b;i++){
+          var v=get(i);
+          if(v===cur) len++;
+          else { runs.push({v:cur,len:len,end:i}); cur=v; len=1; }
+        }
+        runs.push({v:cur,len:len,end:b+1});
+        return runs;
+      }
+      // Through its centre the pattern reads light ring, dark centre, light ring,
+      // so match L,D,L and take the middle of the dark run.
+      function triple(runs,i){
+        var a=runs[i], b=runs[i+1], c=runs[i+2];
+        if(!(a&&b&&c)) return null;
+        if(!(a.v===0 && b.v===1 && c.v===0)) return null;
+        var t=a.len+b.len+c.len, m=t/3, tol=Math.max(1.2, m*0.75);
+        if(Math.abs(a.len-m)>tol || Math.abs(b.len-m)>tol || Math.abs(c.len-m)>tol) return null;
+        if(Math.abs(m-mod)>mod*0.75) return null;
+        return c.end-c.len-b.len/2;                  // centre of the dark middle
+      }
+      for(var y=y0;y<=y1;y++){
+        var rr=runsOf(function(i){ return bits[y*w+i]?1:0; }, x0, x1);
+        for(var i=0;i+2<rr.length;i++){
+          var cx=triple(rr,i);
+          if(cx==null) continue;
+          var xi=Math.round(cx); if(xi<0||xi>=w) continue;
+          var vr=runsOf(function(j){ return bits[j*w+xi]?1:0; }, Math.max(0,y-rad), Math.min(h-1,y+rad));
+          for(var k=0;k+2<vr.length;k++){
+            var cy=triple(vr,k);
+            if(cy==null) continue;
+            if(Math.abs(cy-y)>mod*1.5) continue;     // must be the band we are standing in
+            var d=Math.pow(cx-estX,2)+Math.pow(cy-estY,2);
+            if(d>rad*rad) continue;
+            var dup=false;
+            for(var q=0;q<found.length;q++)
+              if(Math.abs(found[q].x-cx)<mod && Math.abs(found[q].y-cy)<mod){ dup=true; break; }
+            if(!dup) found.push({x:cx,y:cy,d:d});
+          }
+        }
+      }
+      found.sort(function(a,b){ return a.d-b.d; });
+      return found;
+    }
+
+    /* ---- read the symbol ---- */
+    function bchFormat(data){
+      var d=data<<10, g=0x537;
+      for(var i=14;i>=10;i--) if((d>>i)&1) d^=g<<(i-10);
+      return ((data<<10)|d)^0x5412;
+    }
+    function readFormat(m){
+      var size=m.length, i, a=0, b=0;
+      for(i=0;i<6;i++) a=(a)|(m[i][8]<<i);
+      a|=m[7][8]<<6; a|=m[8][8]<<7; a|=m[8][7]<<8;
+      for(i=9;i<15;i++) a|=m[8][14-i]<<i;
+      for(i=0;i<8;i++) b|=m[8][size-1-i]<<i;
+      for(i=8;i<15;i++) b|=m[size-15+i][8]<<i;
+      var best=-1, bestD=99, cand;
+      for(var v=0;v<32;v++){
+        var f=bchFormat(v);
+        var d1=bits(f^a), d2=bits(f^b);
+        var d=Math.min(d1,d2);
+        if(d<bestD){ bestD=d; best=v; }
+      }
+      if(bestD>3) return null;
+      return {level:LEVELS[(best>>3)&3], mask:best&7};
+    }
+    function bits(n){ var c=0; while(n){ c+=n&1; n>>=1; } return c; }
+    function maskFn(n,r,c){
+      switch(n){
+        case 0: return (r+c)%2===0;
+        case 1: return r%2===0;
+        case 2: return c%3===0;
+        case 3: return (r+c)%3===0;
+        case 4: return (Math.floor(r/2)+Math.floor(c/3))%2===0;
+        case 5: return ((r*c)%2)+((r*c)%3)===0;
+        case 6: return (((r*c)%2)+((r*c)%3))%2===0;
+        default: return (((r+c)%2)+((r*c)%3))%2===0;
+      }
+    }
+    function reservedMap(v,size){
+      var res=[], r, c, i;
+      for(r=0;r<size;r++) res.push(new Array(size).fill(false));
+      function fin(r0,c0){
+        for(i=-1;i<=7;i++) for(var j=-1;j<=7;j++){
+          var rr=r0+i, cc=c0+j;
+          if(rr>=0&&rr<size&&cc>=0&&cc<size) res[rr][cc]=true;
+        }
+      }
+      fin(0,0); fin(0,size-7); fin(size-7,0);
+      for(i=0;i<size;i++){ res[6][i]=true; res[i][6]=true; }
+      for(i=0;i<9;i++){ res[8][i]=true; res[i][8]=true; }
+      for(i=0;i<8;i++){ res[8][size-1-i]=true; res[size-1-i][8]=true; }
+      if(v>=2){
+        var pos=ALIGN[v-2];
+        for(var a=0;a<pos.length;a++) for(var b=0;b<pos.length;b++){
+          var pr=pos[a], pc=pos[b];
+          if((pr<=7&&pc<=7)||(pr<=7&&pc>=size-8)||(pr>=size-8&&pc<=7)) continue;
+          for(var dr=-2;dr<=2;dr++) for(var dc=-2;dc<=2;dc++) res[pr+dr][pc+dc]=true;
+        }
+      }
+      if(v>=7){
+        for(i=0;i<18;i++){
+          var rr2=Math.floor(i/3), cc2=i%3;
+          res[size-11+cc2][rr2]=true; res[rr2][size-11+cc2]=true;
+        }
+      }
+      return res;
+    }
+    function readCodewords(m,v,mask){
+      var size=m.length, res=reservedMap(v,size), bitsArr=[], dir=-1, row=size-1;
+      for(var col=size-1; col>0; col-=2){
+        if(col===6) col--;
+        while(true){
+          for(var k=0;k<2;k++){
+            var c=col-k;
+            if(!res[row][c]){
+              var val=m[row][c];
+              if(maskFn(mask,row,c)) val^=1;
+              bitsArr.push(val);
+            }
+          }
+          row+=dir;
+          if(row<0||row>=size){ row-=dir; dir=-dir; break; }
+        }
+      }
+      var cw=[];
+      for(var i=0;i+8<=bitsArr.length;i+=8){
+        var byte=0; for(var j=0;j<8;j++) byte=(byte<<1)|bitsArr[i+j];
+        cw.push(byte);
+      }
+      return cw;
+    }
+    function correct(cw, v, level){
+      var spec=ECC[level][v-1], blocks=[], i, j;
+      for(i=0;i<spec.length;i++) for(j=0;j<spec[i][0];j++) blocks.push({d:spec[i][2], t:spec[i][1]});
+      var ecLen=blocks[0].t-blocks[0].d;
+      var nd=blocks.reduce(function(a,b){ return a+b.d; },0);
+      var data=cw.slice(0,nd), ecc=cw.slice(nd, nd+ecLen*blocks.length);
+      var maxD=Math.max.apply(null, blocks.map(function(b){ return b.d; }));
+      var db=blocks.map(function(){ return []; }), idx=0;
+      for(i=0;i<maxD;i++) for(j=0;j<blocks.length;j++) if(i<blocks[j].d) db[j].push(data[idx++]);
+      var eb=blocks.map(function(){ return []; }); idx=0;
+      for(i=0;i<ecLen;i++) for(j=0;j<blocks.length;j++) eb[j].push(ecc[idx++]);
+      var out=[];
+      for(j=0;j<blocks.length;j++){
+        var fixed=rsDecode(db[j].concat(eb[j]), ecLen);
+        if(!fixed) return null;
+        out.push(fixed);
+      }
+      var merged=[];
+      for(j=0;j<out.length;j++) merged=merged.concat(out[j]);
+      return merged;
+    }
+    function readData(cw, v){
+      var bitPos=0;
+      function take(n){ var val=0; for(var i=0;i<n;i++){ var byte=cw[bitPos>>3]; if(byte===undefined) return -1;
+        val=(val<<1)|((byte>>(7-(bitPos&7)))&1); bitPos++; } return val; }
+      var text="", guard=0;
+      while(guard++<40){
+        var mode=take(4);
+        if(mode<=0) break;                                  // 0000 = terminator
+        if(mode!==4) return null;                           // byte mode only
+        var cnt=take(v<10?8:16);
+        if(cnt<0) return null;
+        var bytes=[];
+        for(var i=0;i<cnt;i++){ var b=take(8); if(b<0) return null; bytes.push(b); }
+        text+=new TextDecoder().decode(new Uint8Array(bytes));
+      }
+      return text;
+    }
+
+    /* ---- put it together ---- */
+    function decodeMatrix(m){
+      var size=m.length;
+      if(size<21 || (size-17)%4) return null;
+      var v=(size-17)/4;
+      if(v<1 || v>ECC.L.length) return null;
+      var fmt=readFormat(m);
+      if(!fmt || !ECC[fmt.level]) return null;
+      var cw=readCodewords(m, v, fmt.mask);
+      var fixed=correct(cw, v, fmt.level);
+      if(!fixed) return null;
+      return readData(fixed, v);
+    }
+
+    function decode(gray,w,h){
+      var bits=binarise(gray,w,h);
+      var f=findFinders(bits,w,h);
+      if(f.length<3) return null;
+      f.sort(function(a,b){ return b.n-a.n; });
+      // try the most confident triples
+      var tries=[];
+      for(var i=0;i<Math.min(f.length,5);i++)
+        for(var j=i+1;j<Math.min(f.length,5);j++)
+          for(var k=j+1;k<Math.min(f.length,5);k++) tries.push([f[i],f[j],f[k]]);
+      for(var t=0;t<tries.length;t++){
+        var r=tryTriple(bits,w,h,tries[t]);
+        if(r!=null) return r;
+      }
+      return null;
+    }
+    function tryTriple(bits,w,h,tri){
+      var o=orderFinders(tri);
+      var mod=(o.tl.mod+o.tr.mod+o.bl.mod)/3;
+      if(!(mod>0)) return null;
+      // Under perspective each finder has its own module size, so measure each edge
+      // with the two finders that actually bound it rather than one global average.
+      function edgeModules(a,b){
+        var d=Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));
+        var mm=(a.mod+b.mod)/2;
+        return mm>0 ? d/mm : 0;
+      }
+      var sizeEst=(edgeModules(o.tl,o.tr)+edgeModules(o.tl,o.bl))/2 + 7;
+      var vGuess=Math.round((sizeEst-17)/4);
+      var order=[0,-1,1,-2,2,-3,3];
+      for(var dv=0;dv<order.length;dv++){
+        var cand=vGuess+order[dv];
+        if(cand<1||cand>20) continue;
+        var size=17+4*cand;
+        // corner-of-symbol coordinates in module space: finder centres sit at 3.5
+        var brx=o.tr.x+o.bl.x-o.tl.x, bry=o.tr.y+o.bl.y-o.tl.y;   // parallelogram estimate
+        var src=[3.5,3.5, size-3.5,3.5, size-3.5,size-3.5, 3.5,size-3.5];
+        var dst=[o.tl.x,o.tl.y, o.tr.x,o.tr.y, brx,bry, o.bl.x,o.bl.y];
+        var tf=quad2quad(src,dst);
+        if(tf){
+          var res=decodeMatrix(sampleGrid(bits,w,h,size,tf));
+          if(res!=null) return res;
+          // that assumed a flat symbol; under perspective the fourth corner is wrong,
+          // so pin it with the real bottom-right alignment pattern instead
+          if(cand>=2){
+            // Walk from the top-left corner towards the parallelogram corner by the
+            // fraction that lands on the alignment centre; extrapolating the full
+            // perspective from three points is far too loose when the code is tilted.
+            var ax=size-6.5, ay=size-6.5;
+            var corr=1-3/(size-7);
+            var ex=o.tl.x+corr*(brx-o.tl.x), ey=o.tl.y+corr*(bry-o.tl.y);
+            var localMod=(o.tr.mod+o.bl.mod)/2;
+            // The nearest candidate is often a decoy, so try each in turn and let a
+            // successful decode decide which one was really the alignment pattern.
+            var cands=findAlignment(bits,w,h,ex,ey,localMod,10);
+            for(var ai=0; ai<Math.min(cands.length,8); ai++){
+              var al=cands[ai];
+              var tf2=quad2quad([3.5,3.5, size-3.5,3.5, ax,ay, 3.5,size-3.5],
+                                [o.tl.x,o.tl.y, o.tr.x,o.tr.y, al.x,al.y, o.bl.x,o.bl.y]);
+              if(!tf2) continue;
+              var res2=decodeMatrix(sampleGrid(bits,w,h,size,tf2));
+              if(res2!=null) return res2;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    return {decode:decode};
+  })();
+
   /* ---------- share a workout as a link / QR (no server, all in the URL) ---------- */
   // Payload: ["plan name", [[exercise, sets, reps], ...]] -> JSON -> deflate -> base64url.
   // The whole thing rides in the URL fragment, so nothing is ever uploaded anywhere.
@@ -5922,47 +6456,74 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   });
 
   /* --- scanning a code from inside the app --- */
-  var scanStream=null, scanTimer=null;
+  var scanStream=null, scanTimer=null, scanCanvas=null, scanDet=null;
   function scanStatus(m,cls){ var el=document.getElementById("scanStatus"); if(el){ el.textContent=m||""; el.className="share-status"+(cls?(" "+cls):""); } }
-  window.__stopScan=function(){ stopScan(); };
   function stopScan(){
     if(scanTimer){ clearInterval(scanTimer); scanTimer=null; }
     if(scanStream){ scanStream.getTracks().forEach(function(t){ t.stop(); }); scanStream=null; }
-    var v=document.getElementById("scanVideo"); if(v){ v.srcObject=null; v.hidden=true; }
+    var v=document.getElementById("scanVideo"); if(v) v.srcObject=null;
+    var st=document.getElementById("scanLive"); if(st) st.hidden=true;
   }
+  window.__stopScan=function(){ stopScan(); };
   function takeScanUrl(raw){
     var m=/[#&]w=([A-Za-z0-9\-_]+)/.exec(String(raw||""));
     if(!m){ scanStatus("That code isn't a MásGains workout.","err"); return; }
     stopScan();
     loadShared(m[1]).then(function(ok){ if(!ok) scanStatus("That workout couldn't be read.","err"); });
   }
+  // Grab a frame, shrink it (a 480px frame is plenty and keeps the decode a few ms)
+  // and hand the grey levels to the decoder.
+  function scanFrame(video){
+    var vw=video.videoWidth, vh=video.videoHeight;
+    if(!vw||!vh) return null;
+    var scale=Math.min(1, 480/Math.max(vw,vh));
+    var w=Math.round(vw*scale), h=Math.round(vh*scale);
+    if(!scanCanvas) scanCanvas=document.createElement("canvas");
+    if(scanCanvas.width!==w||scanCanvas.height!==h){ scanCanvas.width=w; scanCanvas.height=h; }
+    var g=scanCanvas.getContext("2d", {willReadFrequently:true});
+    g.drawImage(video,0,0,w,h);
+    var d=g.getImageData(0,0,w,h).data, grey=new Uint8Array(w*h);
+    for(var i=0,j=0;i<d.length;i+=4,j++) grey[j]=(d[i]*77+d[i+1]*151+d[i+2]*28)>>8;
+    return {grey:grey,w:w,h:h};
+  }
   async function openScan(){
     scanStatus(""); openSheet("scanSheet");
     document.getElementById("scanPaste").value="";
-    var live=("BarcodeDetector" in window);
-    document.getElementById("scanLive").hidden=!live;
-    document.getElementById("scanManual").hidden=live;
-    document.getElementById("scanHint").textContent = live
-      ? "Point the camera at the code."
-      : "Point your phone's Camera app at the code and it will open the workout.";
-    if(!live) return;
+    document.getElementById("scanManual").hidden=true;
+    document.getElementById("scanHint").textContent="Point the camera at the code.";
+    var stage=document.getElementById("scanLive"), video=document.getElementById("scanVideo");
     try{
-      var det=new window.BarcodeDetector({formats:["qr_code"]});
-      scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
-      var v=document.getElementById("scanVideo");
-      v.srcObject=scanStream; v.hidden=false; await v.play();
-      scanTimer=setInterval(async function(){
-        try{
-          var codes=await det.detect(v);
-          if(codes && codes.length) takeScanUrl(codes[0].rawValue);
-        }catch(e){}
-      }, 400);
+      scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}});
+      video.srcObject=scanStream; stage.hidden=false;
+      await video.play();
     }catch(e){
-      scanStatus("Couldn't open the camera.","err");
-      document.getElementById("scanLive").hidden=true;
+      stage.hidden=true;
       document.getElementById("scanManual").hidden=false;
-      document.getElementById("scanHint").textContent="Point your phone's Camera app at the code instead.";
+      document.getElementById("scanHint").textContent="Allow camera access to scan, or paste the link below.";
+      scanStatus("Couldn't open the camera.","err");
+      return;
     }
+    // Chrome has a native detector; Safari does not, so fall back to our own.
+    scanDet=null;
+    if("BarcodeDetector" in window){ try{ scanDet=new window.BarcodeDetector({formats:["qr_code"]}); }catch(e){} }
+    var busy=false;
+    scanTimer=setInterval(async function(){
+      if(busy || !scanStream) return;
+      busy=true;
+      try{
+        if(scanDet){
+          var codes=await scanDet.detect(video);
+          if(codes && codes.length){ takeScanUrl(codes[0].rawValue); return; }
+        } else {
+          var f=scanFrame(video);
+          if(f){
+            var txt=QRD.decode(f.grey,f.w,f.h);
+            if(txt) { takeScanUrl(txt); return; }
+          }
+        }
+      }catch(e){}
+      finally{ busy=false; }
+    }, 180);
   }
   document.getElementById("scanGo").addEventListener("click",function(){
     takeScanUrl(document.getElementById("scanPaste").value.trim());
