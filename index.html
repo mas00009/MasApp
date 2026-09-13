@@ -296,6 +296,19 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .chart .bar.empty{background:var(--surface-2)}
   .chart .dl{font-family:var(--ff-num);font-size:9px;color:var(--muted)}
   .chart .dl.now{color:var(--protein);font-weight:600}
+  .stype-del{background:none;border:none;color:var(--muted);font-family:var(--ff-ui);font-size:11px;font-weight:600;padding:6px 2px 0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .stype-del[hidden]{display:none!important}
+  .stype-del:active{color:var(--danger)}
+  .stype-new{margin:0 4px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:11px}
+  .stype-new[hidden]{display:none!important}
+  .stype-new input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px 12px;font-family:var(--ff-ui);font-size:15px;outline:none}
+  .stype-new input:focus{border-color:var(--protein)}
+  .stype-swatches{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 11px}
+  .stype-sw{width:28px;height:28px;border-radius:9px;border:2px solid transparent;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .stype-sw.on{border-color:var(--text);box-shadow:0 0 0 2px var(--surface-2) inset}
+  .stype-acts{display:flex;gap:8px}
+  .stype-acts button{flex:1;margin:0;padding:10px}
+  .stype-status{text-align:left;margin:0 6px 8px}
   .act-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 4px 10px}
   .act-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.02em}
   .act-legend-dot{width:8px;height:8px;border-radius:99px;flex:none}
@@ -2262,7 +2275,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 4 Sep 2026, 1:35 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 14 Sep 2026, 8:16 AM</div>
   </div>
 </div>
 
@@ -2357,10 +2370,18 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div class="sheet-body">
     <input type="hidden" id="schDay" value="0">
     <input type="hidden" id="schWeekStart" value="">
-    <div class="field"><label>Type</label><select id="schType">
-      <option value="gym">Gym</option><option value="basketball">Basketball</option>
-      <option value="swimming">Swimming</option>
-    </select></div>
+    <div class="field"><label for="schType">Type</label><select id="schType"></select>
+      <button type="button" class="stype-del" id="schTypeDel" hidden>Delete this type</button>
+    </div>
+    <div class="stype-new" id="schTypeNew" hidden>
+      <input type="text" id="schTypeName" placeholder="e.g. Dancing" autocomplete="off" maxlength="24">
+      <div class="stype-swatches" id="schTypeSwatches"></div>
+      <div class="stype-acts">
+        <button type="button" class="ghost" id="schTypeCancel">Cancel</button>
+        <button type="button" class="primary" id="schTypeAdd">Add type</button>
+      </div>
+    </div>
+    <div class="share-status stype-status" id="schTypeStatus"></div>
     <div class="field"><label>Title</label>
       <div class="sch-title-wrap">
         <input type="text" id="schTitleInput" autocomplete="off">
@@ -4470,10 +4491,29 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     {k:"basketball",label:"Basketball",color:"var(--blue)"},
     {k:"swimming",label:"Swimming",color:"var(--protein)"}
   ];
+  // Anything else you do - dancing, boxing, hiking - lives here.
+  var STYPES_KEY="mt_stypes", customSTypes=[];
+  function saveCustomSTypes(){ sSet(STYPES_KEY, JSON.stringify(customSTypes)); }
+  function allSTypes(){ return STYPES.concat(customSTypes); }
+  // Six that stay clearly apart in every theme: several tokens collapse to the
+  // same blue on Midnight, so they can't all be offered.
+  var STYPE_COLORS=["var(--ok)","var(--blue)","var(--protein-dial)","var(--carbs)","var(--water)","var(--danger)"];
+  function styleKeyFor(label){
+    var base=String(label).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "type";
+    var k="c_"+base, n=2, taken=allSTypes().map(function(t){ return t.k; });
+    while(taken.indexOf(k)>=0){ k="c_"+base+"-"+(n++); }
+    return k;
+  }
   var STYPE_DEFAULT_TIME={gym:"14:00",basketball:"19:30",swimming:"14:00"};
-  function defaultTimeForType(t){ return STYPE_DEFAULT_TIME[t] || STYPE_DEFAULT_TIME.gym; }
+  function defaultTimeForType(t){
+    for(var i=0;i<customSTypes.length;i++) if(customSTypes[i].k===t) return customSTypes[i].time||"18:00";
+    return STYPE_DEFAULT_TIME[t] || STYPE_DEFAULT_TIME.gym;
+  }
   var STYPE_DEFAULT_DUR={gym:60,basketball:120,swimming:45};
-  function defaultDurForType(t){ return STYPE_DEFAULT_DUR[t]!=null ? STYPE_DEFAULT_DUR[t] : 60; }
+  function defaultDurForType(t){
+    for(var i=0;i<customSTypes.length;i++) if(customSTypes[i].k===t) return customSTypes[i].dur||60;
+    return STYPE_DEFAULT_DUR[t]!=null ? STYPE_DEFAULT_DUR[t] : 60;
+  }
   // Actual tracked duration of the gym workout on a given date, if any.
   function schedGymActualDur(dateKey){ var w=workouts[dateKey]; return w ? wkDurationMin(w) : 0; }
   // Effective duration for a schedule session: for gym, the actual tracked
@@ -4589,7 +4629,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     tap.setAttribute("aria-expanded", show?"true":"false");
     if(show) syncSchTimePicker();
   }
-  function styleFor(t){ for(var i=0;i<STYPES.length;i++){ if(STYPES[i].k===t) return STYPES[i]; } return {k:t,label:t||"Session",color:"var(--muted)"}; }
+  function styleFor(t){
+    var all=allSTypes();
+    for(var i=0;i<all.length;i++){ if(all[i].k===t) return all[i]; }
+    return {k:t,label:t||"Session",color:"var(--muted)"};
+  }
   function todayIdx(){ return (new Date().getDay()+6)%7; }
   function saveSchedule(){ sSet(SCHED_KEY, JSON.stringify(schedule)); }
   function gymLogged(k){
@@ -4618,33 +4662,41 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       var bars=series.map(function(s,si){
         var v=rows[i][si];
         var h=v>0?Math.max(v/maxV*100,10):0;
-        var cls=v>0?s.cls:"empty";
-        return "<div class='bar "+cls+"' style='height:"+h+"%'></div>";
+        if(v<=0) return "<div class='bar empty' style='height:0%'></div>";
+        return "<div class='bar' style='height:"+h+"%;background:"+s.color+
+               ";box-shadow:0 0 10px color-mix(in srgb,"+s.color+" 32%,transparent)'></div>";
       }).join("");
       return "<div class='col'><div class='barwrap barwrap--group'>"+bars+"</div><div class='dl"+now+"'>"+DL[d.getDay()]+"</div></div>";
     }).join("");
     return "<div class='act-legend'>"+legend+"</div><div class='chart chart--act'>"+cols+"</div>";
   }
   function buildPlanStats(){
-    var days=last7();
-    var series=[
-      {label:"Gym", color:"var(--ok)", cls:"gym", fn:function(k){ return gymLogged(k)?1:0; }},
-      {label:"Basketball", color:"var(--blue)", cls:"bball", fn:function(k){ return schedTypeCountForKey(k,"basketball"); }},
-      {label:"Swimming", color:"var(--protein)", cls:"swim", fn:function(k){ return schedTypeCountForKey(k,"swimming"); }}
-    ];
+    var days=last7(), mo=monthKeysSoFar();
+    // Gym is always shown; every other type appears once you have used it.
+    var series=[{label:"Gym", color:"var(--ok)", fn:function(k){ return gymLogged(k)?1:0; }}];
+    allSTypes().forEach(function(t){
+      if(t.k==="gym") return;
+      var everUsed=schedule.some(function(x){ return x.type===t.k; });
+      if(!everUsed) return;
+      series.push({label:t.label, color:t.color, fn:function(k){ return schedTypeCountForKey(k,t.k); }});
+    });
     var chart=activityGroupChart(days, series);
-    var wkGym=days.filter(function(d){ return gymLogged(keyOf(d)); }).length;
-    var wkBasket=days.reduce(function(a,d){ return a+schedTypeCountForKey(keyOf(d),"basketball"); },0);
-    var wkSwim=days.reduce(function(a,d){ return a+schedTypeCountForKey(keyOf(d),"swimming"); },0);
-    var mo=monthKeysSoFar();
-    var moGym=mo.filter(function(k){ return gymLogged(k); }).length;
-    var moBasket=mo.reduce(function(a,k){ return a+schedTypeCountForKey(k,"basketball"); },0);
-    var moSwim=mo.reduce(function(a,k){ return a+schedTypeCountForKey(k,"swimming"); },0);
+    function wkCount(sr){ return days.reduce(function(a,d){ return a+sr.fn(keyOf(d)); },0); }
+    function moCount(sr){ return mo.reduce(function(a,k){ return a+sr.fn(k); },0); }
+    function tiles(fn,suffix){
+      return series.map(function(sr){ return statTile(esc(sr.label)+suffix, fn(sr)); }).join("");
+    }
+    var cls=series.length===2 ? "" : " three";
+    var others=series.slice(1).map(function(sr){ return sr.label; });
+    var note = others.length
+      ? "Gym counts days with completed sets logged. "+esc(others.join(", "))+
+        (others.length===1?" counts":" count")+" scheduled sessions on each day."
+      : "Gym counts days with completed sets logged. Add other session types in the calendar to track them here.";
     return "<div class='subhead'>Last 7 days</div>"+chart+
-      "<div class='stat-row three' style='margin-top:4px'>"+statTile("Gym · 7 days",wkGym)+statTile("Basketball · 7 days",wkBasket)+statTile("Swimming · 7 days",wkSwim)+"</div>"+
+      "<div class='stat-row"+cls+"' style='margin-top:4px'>"+tiles(wkCount," \u00b7 7 days")+"</div>"+
       "<div class='subhead' style='margin-top:18px'>This month</div>"+
-      "<div class='stat-row three'>"+statTile("Gym",moGym)+statTile("Basketball",moBasket)+statTile("Swimming",moSwim)+"</div>"+
-      "<div class='mono-note'>Gym counts days with completed sets logged. Basketball and swimming count scheduled sessions on each day.</div>";
+      "<div class='stat-row"+cls+"'>"+tiles(moCount,"")+"</div>"+
+      "<div class='mono-note'>"+note+"</div>";
   }
   function sessRow(s){
     var meta=styleFor(s.type);
@@ -4757,6 +4809,39 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     else if(isGym){ note.textContent="Planned time. The Gym tab updates this to your actual workout length once you log sets."; note.style.display="block"; }
     else { note.style.display="none"; }
   }
+  var NEW_TYPE_VALUE="__new__", pendingTypeColor=STYPE_COLORS[0], typeBeforeNew="gym";
+  function renderSTypeOptions(sel){
+    var el=document.getElementById("schType"); if(!el) return;
+    el.innerHTML=allSTypes().map(function(t){
+      return "<option value='"+esc(t.k)+"'>"+esc(t.label)+"</option>";
+    }).join("")+"<option value='"+NEW_TYPE_VALUE+"'>+ New type\u2026</option>";
+    if(sel) el.value=sel;
+  }
+  function renderSTypeSwatches(){
+    var box=document.getElementById("schTypeSwatches"); if(!box) return;
+    box.innerHTML=STYPE_COLORS.map(function(c){
+      return "<button type='button' class='stype-sw"+(c===pendingTypeColor?" on":"")+"' data-stype-color='"+c+"' style='background:"+c+"' aria-label='Colour'></button>";
+    }).join("");
+  }
+  function isCustomSType(k){ return customSTypes.some(function(t){ return t.k===k; }); }
+  function schTypeStatus(m,cls){
+    var el=document.getElementById("schTypeStatus");
+    if(el){ el.textContent=m||""; el.className="share-status"+(cls?(" "+cls):""); }
+  }
+  function showNewTypePanel(on){
+    var panel=document.getElementById("schTypeNew");
+    panel.hidden=!on;
+    if(on){
+      document.getElementById("schTypeName").value="";
+      pendingTypeColor=STYPE_COLORS[customSTypes.length % STYPE_COLORS.length];
+      renderSTypeSwatches(); schTypeStatus("");
+      setTimeout(function(){ document.getElementById("schTypeName").focus(); },80);
+    }
+  }
+  function syncTypeControls(){
+    var v=document.getElementById("schType").value;
+    document.getElementById("schTypeDel").hidden = !isCustomSType(v);
+  }
   function openSchedule(id, dayPre){
     editSchedId=id||null;
     var s = id ? schedule.filter(function(x){return x.id===id;})[0] : null;
@@ -4765,7 +4850,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     document.getElementById("schWeekStart").value = s ? (s.weekStart||planWeekKey()) : planWeekKey();
     var d=planWeekDate(dayIdx);
     document.getElementById("schHeading").textContent = (s ? "Edit Session" : "Add Session")+" · "+DAYS_FULL[dayIdx]+" "+d.getDate()+" "+MON_SHORT[d.getMonth()];
-    document.getElementById("schType").value = s ? s.type : "gym";
+    typeBeforeNew = s ? s.type : "gym";
+    renderSTypeOptions(typeBeforeNew);
+    showNewTypePanel(false); schTypeStatus("");
+    syncTypeControls();
     document.getElementById("schTitleInput").value = s ? (s.title||"") : "";
     setSchTime(s ? (s.time||defaultTimeForType(s.type)) : defaultTimeForType(document.getElementById("schType").value));
     document.getElementById("schDur").value = s ? (s.dur||"") : defaultDurForType(document.getElementById("schType").value);
@@ -7358,7 +7446,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
 
   /* ---------- backup / restore ---------- */
   async function exportData(){
-    var keys=["mt_foods","mt_targets","mt_log","mt_body","mt_profile","mt_schedule","mt_workouts","mt_plans","mt_rest","mt_water","mt_aimodel","mt_ai_custom_models","mt_supps_stack","mt_journal","mt_schema_version"];
+    var keys=["mt_foods","mt_targets","mt_log","mt_body","mt_profile","mt_schedule","mt_stypes","mt_workouts","mt_plans","mt_rest","mt_water","mt_aimodel","mt_ai_custom_models","mt_supps_stack","mt_journal","mt_schema_version"];
     var out={ _app:"macro-tracker", _exported:new Date().toISOString(), data:{}, stack:{} };
     for(var i=0;i<keys.length;i++){ var v=await sGet(keys[i]); if(v!=null) out.data[keys[i]]=v; }
     try{ for(var j=0;j<localStorage.length;j++){ var k=localStorage.key(j); if(k&&k.indexOf("stack-")===0) out.stack[k]=localStorage.getItem(k); } }catch(e){}
@@ -7541,8 +7629,43 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   /* ---------- calendar -> gym ---------- */
   function weekdayDateThisWeek(dayIdx){ return planWeekDate(dayIdx); }
   document.getElementById("schType").addEventListener("change", function(){
+    if(this.value===NEW_TYPE_VALUE){ this.value=typeBeforeNew; syncTypeControls(); showNewTypePanel(true); return; }
+    typeBeforeNew=this.value; syncTypeControls(); showNewTypePanel(false);
     if(!editSchedId){ setSchTime(defaultTimeForType(document.getElementById("schType").value)); document.getElementById("schDur").value=defaultDurForType(document.getElementById("schType").value); }
     toggleSchGymBits(); updateSchDurNote();
+  });
+  document.getElementById("schTypeSwatches").addEventListener("click", function(e){
+    var b=e.target.closest("[data-stype-color]"); if(!b) return;
+    pendingTypeColor=b.getAttribute("data-stype-color"); renderSTypeSwatches();
+  });
+  document.getElementById("schTypeCancel").addEventListener("click", function(){
+    showNewTypePanel(false);
+    var sel=document.getElementById("schType");
+    if(allSTypes().some(function(t){ return t.k===typeBeforeNew; })){ sel.value=typeBeforeNew; syncTypeControls(); }
+  });
+  document.getElementById("schTypeAdd").addEventListener("click", function(){
+    var name=document.getElementById("schTypeName").value.trim();
+    if(!name){ schTypeStatus("Give it a name first.","err"); return; }
+    var clash=allSTypes().some(function(t){ return t.label.toLowerCase()===name.toLowerCase(); });
+    if(clash){ schTypeStatus("You already have a type called that.","err"); return; }
+    var t={k:styleKeyFor(name), label:name, color:pendingTypeColor,
+           time:document.getElementById("schTime").value||"18:00",
+           dur:Math.max(0,Math.round(num(document.getElementById("schDur").value)))||60};
+    customSTypes.push(t); saveCustomSTypes();
+    renderSTypeOptions(t.k); typeBeforeNew=t.k; syncTypeControls(); showNewTypePanel(false);
+  });
+  document.getElementById("schTypeDel").addEventListener("click", function(){
+    var k=document.getElementById("schType").value;
+    if(!isCustomSType(k)) return;
+    var used=schedule.filter(function(x){ return x.type===k; }).length;
+    if(used){ schTypeStatus("Still used by "+used+" session"+(used===1?"":"s")+". Change those first.","err"); return; }
+    customSTypes=customSTypes.filter(function(t){ return t.k!==k; });
+    saveCustomSTypes();
+    // fall back to whatever this session was already using, not blindly to gym
+    var cur = editSchedId ? (schedule.filter(function(x){return x.id===editSchedId;})[0]||{}).type : null;
+    var back = (cur && allSTypes().some(function(t){ return t.k===cur; })) ? cur : "gym";
+    renderSTypeOptions(back); typeBeforeNew=back; syncTypeControls();
+    schTypeStatus("");
   });
   document.getElementById("schTimeTap").addEventListener("click", function(){ toggleSchTimePicker(); });
   document.getElementById("schOpenGym").addEventListener("click", function(){
@@ -8211,6 +8334,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var excRaw=await sGet(EXCUSTOM_KEY); if(excRaw){ try{ EX_CUSTOM=JSON.parse(excRaw)||[]; }catch(e){ EX_CUSTOM=[]; } }
     var expRaw=await sGet(EXPHOTO_KEY); if(expRaw){ try{ EX_PHOTO=JSON.parse(expRaw)||{}; }catch(e){ EX_PHOTO={}; } }
     var rRaw=await sGet(REST_KEY); if(rRaw){ var rv=parseInt(rRaw,10); if(isFinite(rv)&&rv>0) restDefault=rv; }
+    var stRaw=await sGet(STYPES_KEY);
+    if(stRaw){ try{ customSTypes=JSON.parse(stRaw)||[]; }catch(e){ customSTypes=[]; } }
     var wtRaw=await sGet(WATER_KEY); if(wtRaw){ try{ water=JSON.parse(wtRaw)||{}; }catch(e){ water={}; } }
     var jRaw=await sGet(JOURNAL_KEY); if(jRaw){ try{ journal=JSON.parse(jRaw)||{}; }catch(e){ journal={}; } }
     var coRaw=await sGet(COACH_KEY); if(coRaw){ try{ coachMsgs=JSON.parse(coRaw)||[]; }catch(e){ coachMsgs=[]; } }
@@ -8637,7 +8762,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   // Secrets / device-local flags stay off the cloud. Everything else under mt_ / stack- syncs.
   var EXCLUDE={ "mt_aikey":1, "mt_syncurl":1, "mt_synctoken":1, "mt_syncauto":1, "mt_sync_meta":1, "mt_lastexport":1, "mt_freshreset_2":1 };
   // Known app keys - always considered so a missing local key can still be filled from cloud.
-  var KNOWN=["mt_foods","mt_foodsver","mt_targets","mt_log","mt_logreset","mt_body","mt_profile","mt_schedule","mt_workouts","mt_plans","mt_rest","mt_water","mt_supps_stack","mt_journal","mt_aimodel","mt_ai_custom_models","mt_schema_version"];
+  var KNOWN=["mt_foods","mt_foodsver","mt_targets","mt_log","mt_logreset","mt_body","mt_profile","mt_schedule","mt_stypes","mt_workouts","mt_plans","mt_rest","mt_water","mt_supps_stack","mt_journal","mt_aimodel","mt_ai_custom_models","mt_schema_version"];
   var lastHash=null, timer=null;
   function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lset(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
