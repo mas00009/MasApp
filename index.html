@@ -937,7 +937,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #tab-lift .exc-x{background:none;border:none;color:var(--faint);font-size:19px;cursor:pointer;padding:2px 3px;line-height:1}
   #tab-lift .exc-x:active{color:var(--danger)}
   #tab-lift .sets{padding:0 8px 8px}
-  #tab-lift .set-row{display:flex;align-items:center;gap:6px;padding:5px 2px;border-top:1px solid color-mix(in srgb,var(--border) 70%,transparent)}
+  #tab-lift .set-row{position:relative;overflow:hidden;border-top:1px solid color-mix(in srgb,var(--border) 70%,transparent);touch-action:pan-y}
+  #tab-lift .set-slide{display:flex;align-items:center;gap:6px;padding:5px 2px;background:var(--surface);position:relative;z-index:1;transition:transform .18s ease;will-change:transform}
+  #tab-lift .set-row.swiping .set-slide{transition:none}
+  #tab-lift .set-row.open .set-slide{transform:translateX(-84px)}
+  #tab-lift .set-del{position:absolute;top:0;right:0;bottom:0;width:84px;z-index:0;border:none;padding:0;
+    background:var(--danger);color:#fff;font-family:var(--ff-ui);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  #tab-lift .set-del:active{filter:brightness(.9)}
   #tab-lift .set-n{font-family:var(--ff-num);font-size:10px;font-weight:600;color:var(--muted);width:16px;flex:none;text-align:center}
   #tab-lift .set-fld{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:0 8px;flex:1;min-width:0}
   #tab-lift .set-fld input{grid-column:1/-1;grid-row:1;width:100%;min-width:0;background:none;border:none;color:var(--text);font-family:var(--ff-num);font-size:14px;font-weight:500;padding:7px 26px;text-align:center;outline:none;-moz-appearance:textfield;z-index:0}
@@ -948,8 +954,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   #tab-lift .set-done svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round}
   #tab-lift .set-row.done .set-done{background:var(--ok);border-color:var(--ok);color:#06231a}
   #tab-lift .set-row.done .set-fld{border-color:color-mix(in srgb,var(--ok) 28%,var(--border))}
-  #tab-lift .set-x{width:24px;height:30px;flex:none;background:none;border:none;color:var(--faint);font-size:17px;line-height:1;cursor:pointer;padding:0;display:grid;place-items:center}
-  #tab-lift .set-x:active{color:var(--danger)}
   #tab-lift .set-sugg{flex:none;border:none;background:color-mix(in srgb,var(--protein) 15%,transparent);color:var(--protein);font-family:var(--ff-num);font-size:10px;font-weight:700;padding:3px 7px;border-radius:7px;cursor:pointer;white-space:nowrap}
   /* bodyweight set: reps is the main field, +kg added load is a narrower optional field */
   #tab-lift .set-row.bw .set-fld{flex:1.6}
@@ -965,12 +969,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   .mgv-track{flex:1;height:9px;border-radius:99px;background:var(--surface-2);overflow:hidden}
   .mgv-fill{display:block;height:100%;border-radius:99px;background:var(--grad);box-shadow:var(--glow)}
   .mgv-v{font-family:var(--ff-num);font-size:11px;color:var(--text);font-weight:600;width:52px;text-align:right;flex:none}
-  #tab-lift .set-add,#tab-lift .set-del{width:30px;height:30px;flex:none;border-radius:8px;border:1px solid var(--border);background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;margin:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;color:var(--muted)}
-  #tab-lift .set-add svg,#tab-lift .set-del svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;display:block}
+  #tab-lift .set-add{width:30px;height:30px;flex:none;border-radius:8px;border:1px solid var(--border);background:transparent;display:grid;place-items:center;cursor:pointer;padding:0;margin:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;color:var(--muted)}
+  #tab-lift .set-add svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;display:block}
   #tab-lift .set-add{color:var(--protein);border-color:color-mix(in srgb,var(--protein) 45%,var(--border))}
   #tab-lift .set-add:active{background:color-mix(in srgb,var(--protein) 12%,transparent)}
-  #tab-lift .set-del{color:var(--muted)}
-  #tab-lift .set-del:active{background:var(--surface-2)}
   #tab-lift .wk-empty{text-align:center;color:var(--faint);font-size:12.5px;padding:6px 0 12px;line-height:1.6}
   #manageSheet .set-foot{text-align:center;color:var(--faint);font-size:12.5px;line-height:1.6;padding:16px 0 6px}
 
@@ -2275,7 +2277,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 14 Sep 2026, 8:16 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 30 Sep 2026, 3:16 PM</div>
   </div>
 </div>
 
@@ -5028,21 +5030,19 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var wv=(st.w!==""&&st.w!=null)?st.w:"", rv=(st.reps!==""&&st.reps!=null)?st.reps:"";
     if(isCardio){
       // cardio: log distance (km) and duration (min) instead of weight/reps
-      return "<div class='set-row cardio"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
+      return swipeRow(exId, i, st, "cardio",
         "<span class='set-n'>"+(i+1)+"</span>"+
         "<span class='set-fld'><input class='set-w' type='number' inputmode='decimal' value='"+wv+"' placeholder='0'><span class='u'>km</span></span>"+
         "<span class='set-fld'><input class='set-r' type='number' inputmode='decimal' value='"+rv+"' placeholder='0'><span class='u'>min</span></span>"+
-        "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
-        "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
+        "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>");
     }
     if(isBw){
       // bodyweight: log reps, with an optional small "+kg" added-load field
-      return "<div class='set-row bw"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
+      return swipeRow(exId, i, st, "bw",
         "<span class='set-n'>"+(i+1)+"</span>"+
         "<span class='set-fld'><input class='set-r' type='number' inputmode='numeric' value='"+rv+"' placeholder='0'><span class='u'>reps</span></span>"+
         "<span class='set-fld set-fld-add'><input class='set-w' type='number' inputmode='decimal' value='"+wv+"' placeholder='0'><span class='u'>+kg</span></span>"+
-        "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
-        "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
+        "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>");
     }
     var wPh="0", rPh=(isDur?"30":"0"), sugg="";
     if(!isDur){
@@ -5053,12 +5053,75 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
         if(wv==="") sugg="<button class='set-sugg' data-sugg-w='"+s.w+"' data-sugg-r='"+s.reps+"' aria-label='Use suggested target'>\u2192 "+s.w+"\u00d7"+s.reps+"</button>";
       }
     }
-    return "<div class='set-row"+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
+    return swipeRow(exId, i, st, "",
       "<span class='set-n'>"+(i+1)+"</span>"+
       "<span class='set-fld'><input class='set-w' type='number' inputmode='decimal' value='"+wv+"' placeholder='"+wPh+"'>"+sugg+"<span class='u'>kg</span></span>"+
       "<span class='set-fld'><input class='set-r' type='number' inputmode='numeric' value='"+rv+"' placeholder='"+rPh+"'><span class='u'>"+(isDur?"sec":"reps")+"</span></span>"+
-      "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>"+
-      "<button class='set-x' data-del-setrow='"+exId+"' data-i='"+i+"' aria-label='Remove this set'>×</button></div>";
+      "<button class='set-done' aria-label='Mark set done'><svg viewBox='0 0 24 24'><polyline points='5 13 10 18 19 7'/></svg></button>");
+  }
+  // Delete sits behind the row and is reached by swiping left, so it can't be
+  // hit by accident while tapping the tick.
+  function swipeRow(exId, i, st, extra, inner){
+    return "<div class='set-row"+(extra?" "+extra:"")+(st.done?" done":"")+"' data-ex='"+exId+"' data-set='"+i+"'>"+
+      "<button class='set-del' data-del-setrow='"+exId+"' data-i='"+i+"' tabindex='-1' aria-label='Delete set "+(i+1)+"'>Delete</button>"+
+      "<div class='set-slide'>"+inner+"</div></div>";
+  }
+  /* ---------- swipe a set row left to reveal Delete ---------- */
+  var SWIPE_W=84, swipeRowEl=null, swipeStartX=0, swipeStartY=0, swipeDx=0, swipeActive=false, swipeId=null;
+  function closeSwipes(except){
+    document.querySelectorAll("#wkList .set-row.open").forEach(function(r){
+      if(r!==except) r.classList.remove("open");
+    });
+  }
+  function swipeSet(el, dx){
+    var slide=el.querySelector(".set-slide"); if(slide) slide.style.transform="translateX("+dx+"px)";
+  }
+  function swipeClear(el){ var slide=el.querySelector(".set-slide"); if(slide) slide.style.transform=""; }
+  function onSwipeStart(ev){
+    if(ev.pointerType==="mouse" && ev.button!==0) return;
+    var row=ev.target.closest(".set-row"); if(!row) return;
+    if(ev.target.closest(".set-del")) return;
+    swipeRowEl=row; swipeId=ev.pointerId;
+    swipeStartX=ev.clientX; swipeStartY=ev.clientY; swipeDx=0; swipeActive=false;
+  }
+  function onSwipeMove(ev){
+    if(!swipeRowEl || ev.pointerId!==swipeId) return;
+    var dx=ev.clientX-swipeStartX, dy=ev.clientY-swipeStartY;
+    if(!swipeActive){
+      // only take over once the gesture is clearly horizontal, so taps and
+      // vertical scrolling are untouched
+      if(Math.abs(dx)<10 || Math.abs(dx)<=Math.abs(dy)) return;
+      swipeActive=true;
+      swipeRowEl.classList.add("swiping");
+      closeSwipes(swipeRowEl);
+      try{ ev.target.setPointerCapture(swipeId); }catch(e){}
+      var a=document.activeElement; if(a && a.blur && swipeRowEl.contains(a)) a.blur();
+    }
+    var base=swipeRowEl.classList.contains("open") ? -SWIPE_W : 0;
+    swipeDx=Math.max(-SWIPE_W, Math.min(0, base+dx));
+    swipeSet(swipeRowEl, swipeDx);
+    if(ev.cancelable) ev.preventDefault();
+  }
+  function onSwipeEnd(ev){
+    if(!swipeRowEl || (ev.pointerId!=null && ev.pointerId!==swipeId)) return;
+    var row=swipeRowEl, was=swipeActive;
+    swipeRowEl=null; swipeId=null; swipeActive=false;
+    row.classList.remove("swiping");
+    if(!was) return;
+    swipeClear(row);
+    row.classList.toggle("open", swipeDx < -SWIPE_W*0.45);
+  }
+  function initSetSwipe(){
+    var list=document.getElementById("wkList"); if(!list || list.__swipe) return;
+    list.__swipe=true;
+    list.addEventListener("pointerdown", onSwipeStart);
+    list.addEventListener("pointermove", onSwipeMove, {passive:false});
+    list.addEventListener("pointerup", onSwipeEnd);
+    list.addEventListener("pointercancel", onSwipeEnd);
+    // tapping anywhere else puts an open row away again
+    document.addEventListener("pointerdown", function(e){
+      if(!e.target.closest(".set-row")) closeSwipes(null);
+    }, true);
   }
   var collapsedExc={};              // today: ids explicitly collapsed (persisted)
   var pastOpen={};                  // past days: ids expanded in the current view (not saved)
@@ -5114,6 +5177,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   }
   function renderWorkout(){
     var list=document.getElementById("wkList"); if(!list) return;
+    initSetSwipe();
     document.getElementById("wkDate").textContent=wkDateLabel(wCurrent);
     var wkNext=document.getElementById("wkNext"); if(wkNext) wkNext.disabled=isToday(wCurrent);
     var s=wSession(), stt=wkStats();
@@ -5370,8 +5434,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     }
     var addS=e.target.closest("[data-add-set]");
     if(addS){ var ex=exById(addS.getAttribute("data-add-set")); if(ex){ var last=ex.sets[ex.sets.length-1]; ex.sets.push({w:last?last.w:"",reps:last?last.reps:"",done:false}); saveWorkouts(); renderWorkout(); } return; }
-    var delS=e.target.closest("[data-del-set]");
-    if(delS){ var ex2=exById(delS.getAttribute("data-del-set")); if(ex2&&ex2.sets.length){ ex2.sets.pop(); saveWorkouts(); renderWorkout(); } return; }
     var delR=e.target.closest("[data-del-setrow]");
     if(delR){ var exr=exById(delR.getAttribute("data-del-setrow")), ii=+delR.getAttribute("data-i"); if(exr&&exr.sets&&ii>=0&&ii<exr.sets.length){ exr.sets.splice(ii,1); saveWorkouts(); renderWorkout(); } return; }
     var rm=e.target.closest("[data-remove-ex]");
