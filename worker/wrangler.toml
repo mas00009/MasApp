@@ -1,0 +1,14 @@
+# The MasGains sync + feedback Worker (https://masapp-sync.mmohammad.workers.dev).
+# Deploy: cd worker && npx wrangler deploy
+# Secrets live in Cloudflare, never here: SYNC_TOKEN (the app's sync token) and
+# AGENT_KEY (the feedback agent's key, a copy is in ../.agent-key, gitignored).
+name = "masapp-sync"
+main = "worker.js"
+compatibility_date = "2026-07-14"
+
+[[kv_namespaces]]
+binding = "DATA"
+id = "ac7669f0a2894fc1b5e7d3c95de88585"
+
+[observability]
+enabled = true
