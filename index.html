@@ -979,6 +979,18 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   /* exercise picker */
   #exSheet .sheet-body{display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
   #exSheet .sheet-body .field{flex:none;margin-bottom:8px}
+  .exai-row{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0;padding:10px 12px;border-radius:11px;
+    background:transparent;border:1px dashed color-mix(in srgb,var(--protein) 40%,var(--border));color:var(--protein);
+    font-family:var(--ff-ui);font-size:12.5px;font-weight:700;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}
+  .exai-row svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+  .exai-row.strong{border-style:solid;background:color-mix(in srgb,var(--protein) 12%,var(--surface-2));padding:13px 12px;font-size:13.5px}
+  .exai-row:active{filter:brightness(.95)}
+  .exai-row.busy{cursor:default;color:var(--muted);border-color:var(--border)}
+  .exai-spin{width:14px;height:14px;flex:none;border-radius:50%;border:2px solid var(--border);border-top-color:var(--protein);animation:exaiSpin .8s linear infinite}
+  @keyframes exaiSpin{to{transform:rotate(360deg)}}
+  .exai-head,.exai-sep{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--protein);margin:8px 4px 6px;display:flex;align-items:center;gap:2px}
+  .exai-sep{color:var(--muted);margin-top:14px}
+  .exai-err{font-family:var(--ff-num);font-size:11.5px;color:var(--muted);margin:6px 4px 0}
   .exs-row{display:flex;gap:8px;align-items:stretch}
   .exs-row input{flex:1;min-width:0}
   .exs-row .search-cam{height:auto}
@@ -2277,7 +2289,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 30 Sep 2026, 3:16 PM</div>
+    <div class="set-foot">MásGains v1.0 · updated 1 Oct 2026, 5:10 PM</div>
   </div>
 </div>
 
@@ -5298,32 +5310,331 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     score += Math.max(0,44-hay.length)*0.6;                       // nudge shorter, canonical names up
     return score;
   }
+  /* ---------- exercise search: gym slang, synonyms, word roots, typos, and the
+     equipment/body-part fields, ranked by staples, your history and past picks ---------- */
+  var EXS = (function(){
+    var ABBR={db:"dumbbell",dbs:"dumbbell",bb:"barbell",kb:"kettlebell",ohp:"overhead press",
+      rdl:"romanian deadlift",rdls:"romanian deadlift",sldl:"stiff leg deadlift",bp:"bench press",
+      gm:"good morning",ez:"ez barbell",pushup:"push up",pushups:"push up",pullup:"pull up",
+      pullups:"pull up",situp:"sit up",situps:"sit up",chinup:"chin up",chinups:"chin up",
+      bw:"bodyweight",bws:"bodyweight",tri:"triceps",tris:"triceps",bi:"biceps",bis:"biceps",
+      delt:"deltoid",delts:"deltoid",lat:"lat",lats:"lat",quad:"quadriceps",quads:"quadriceps",
+      ham:"hamstring",hams:"hamstring",abs:"ab",oh:"overhead",ext:"extension",inc:"incline",dec:"decline"};
+    // gym slang -> the phrasing this database actually uses (tried alongside the original)
+    var PHRASES=[
+      [/\b(pec ?dec?k?|butterfly|pec fly|chest fly machine|machine (chest )?fly)\b/, "lever seated fly"],
+      [/\bbulgarian( split)?( squats?)?\b/, "split squat"],
+      [/\b(reverse pec ?deck|rear delt fly|rear fly|rear delt machine)\b/, "reverse fly"],
+      [/\bface ?pulls?\b/, "rear delt row rope"],
+      [/\b(hamstring|ham) curls?\b/, "leg curl"],
+      [/\b(quad|quadriceps) ext(ension)?s?\b/, "leg extension"],
+      [/\b(inner thigh|adductors?)( machine)?\b/, "hip adduction"],
+      [/\b(outer thigh|abductors?)( machine)?\b/, "hip abduction"],
+      [/\bhip thrusts?\b/, "glute bridge"],
+      [/\bglute machine\b/, "lever hip extension"],
+      [/\b(glute kick ?backs?|donkey kicks?)\b/, "hip extension"],
+      [/\b(stair ?master|stair ?climber|stairs)\b/, "stepmill"],
+      [/\b(back ext(ension)?s?|hypers?|roman chair)\b/, "hyperextension"],
+      [/\b(ab|abs|crunch) (crunch )?machine\b/, "lever seated crunch"],
+      [/\btri(cep|ceps)? push ?downs?\b/, "cable pushdown"],
+      [/\brope push ?downs?\b/, "pushdown rope"],
+      [/\b(lat pull ?downs?|pull ?downs?)\b/, "lat pulldown"],
+      [/\bskull ?crush(er|ers)?\b/, "skull crusher"],
+      [/\bshoulder press machine\b/, "lever shoulder press"],
+      [/\bchest press machine\b/, "lever chest press"],
+      [/\b(seated )?row machine\b/, "lever seated row"],
+      [/\bcalf (raise )?machine\b/, "lever calf raise"],
+      [/\bpreacher (curl )?machine\b/, "lever preacher curl"],
+      [/\bleg curl machine\b/, "lever leg curl"],
+      [/\bcable cross ?overs?\b/, "cable crossover"]
+    ];
+    // a query word is satisfied by any of these name words
+    var SYN={
+      machine:["machine","lever","sled","smith","assisted"],
+      cable:["cable","pulley"], pulley:["cable","pulley"],
+      triceps:["triceps","tricep"], tricep:["triceps","tricep"],
+      biceps:["biceps","bicep"], bicep:["biceps","bicep"],
+      deltoid:["delt","deltoid","shoulder"], ab:["ab","abs","crunch","waist"],
+      crossover:["crossover","crossovers","cross"],
+      treadmill:["treadmill"], bike:["bike","cycling","cycle"]
+    };
+    var STOP={the:1,a:1,an:1,of:1,on:1,with:1,for:1,exercise:1,exercises:1,workout:1,movement:1,and:1,to:1};
+    // canonical names in this database that are gym staples; a mild prior, not a rule
+    var STAPLES=["Barbell Bench Press","Barbell Full Squat","Barbell Deadlift","Pull-Up","Chin-Up",
+      "Chest Dip","Triceps Dip","Push-Up","Lever Seated Fly","Lever Leg Extension","Lever Lying Leg Curl",
+      "Lever Seated Hip Abduction","Lever Seated Hip Adduction","Lever Seated Row","Lever Shoulder Press",
+      "Lever Chest Press","Sled Hack Squat","Cable Pushdown","Cable Seated Row","Dumbbell Lateral Raise",
+      "Dumbbell Biceps Curl","Dumbbell Hammer Curl","Barbell Romanian Deadlift","Dumbbell Shrug",
+      "Barbell Shrug","Hyperextension","Lever Seated Crunch","Lever Preacher Curl","Barbell Curl",
+      "Dumbbell Incline Bench Press","Barbell Incline Bench Press","Dumbbell Bench Press","Barbell Glute Bridge",
+      "Dumbbell Reverse Fly","Lever Seated Calf Raise","Barbell Bent Over Row","Dumbbell Bent Over Row",
+      "Barbell Front Squat","Dumbbell Goblet Squat","Barbell Lunge","Dumbbell Lunge","Cable Lateral Raise",
+      "Dumbbell Shoulder Press","Barbell Overhead Press","Barbell Military Press","Cable Standing Hip Extension"];
+    var STAPLE={}; STAPLES.forEach(function(n,i){ STAPLE[n.toLowerCase()]=1; });
+
+    function norm(s){
+      return String(s||"").toLowerCase().replace(/в°/g,"°").replace(/[‐-―]/g,"-")
+        .replace(/[-/_.,()]+/g," ").replace(/\s+/g," ").trim();
+    }
+    function stem(w){
+      if(w.length>4 && /(ches|shes|sses|xes)$/.test(w)) return w.slice(0,-2);
+      if(w.length>3 && /s$/.test(w) && !/ss$/.test(w)) return w.slice(0,-1);
+      if(w==="ups") return "up";
+      return w;
+    }
+    function tokens(q){
+      var out=[];
+      norm(q).split(" ").forEach(function(p){
+        if(!p || STOP[p]) return;
+        if(ABBR[p]) ABBR[p].split(" ").forEach(function(w){ out.push(w); });
+        else out.push(p);
+      });
+      return out;
+    }
+    // abductor~abduction, extension~extensions: a shared root of 5+ chars that is
+    // most of the shorter word. Short words must match exactly or by prefix.
+    function rootMatch(a,b){
+      var n=Math.min(a.length,b.length); if(n<5) return false;
+      var i=0; while(i<n && a.charCodeAt(i)===b.charCodeAt(i)) i++;
+      return i>=5 && i>=Math.ceil(n*0.75);
+    }
+    function oneEdit(a,b){
+      var la=a.length, lb=b.length; if(Math.abs(la-lb)>1) return false;
+      var i=0, j=0, diff=0;
+      while(i<la && j<lb){
+        if(a.charCodeAt(i)===b.charCodeAt(j)){ i++; j++; continue; }
+        if(++diff>1) return false;
+        // adjacent swap counts as one edit
+        if(i+1<la && j+1<lb && a.charCodeAt(i)===b.charCodeAt(j+1) && a.charCodeAt(i+1)===b.charCodeAt(j)){ i+=2; j+=2; continue; }
+        if(la>lb) i++; else if(lb>la) j++; else { i++; j++; }
+      }
+      return diff+(la-i)+(lb-j)<=1;
+    }
+    function wordScore(t, words){
+      var ts=stem(t), best=-1;
+      for(var w=0; w<words.length; w++){
+        var word=words[w], ws=stem(word), pos=Math.min(w,10);
+        if(word===t){ best=Math.max(best,130-pos); break; }
+        if(ws===ts) best=Math.max(best,122-pos);
+        else if(t.length>=2 && word.indexOf(t)===0) best=Math.max(best,(t.length>=3?96:70)-pos);
+        else if(ts.length>=3 && ws.indexOf(ts)===0) best=Math.max(best,88-pos);
+        else if(rootMatch(ts,ws)) best=Math.max(best,80-pos);
+        else if(ts.length>=5 && oneEdit(ts,ws)) best=Math.max(best,62-pos);
+      }
+      return best;
+    }
+    // a token may be satisfied by the name, the equipment or the body part
+    function tokenScore(t, rec){
+      var alts=SYN[t]||[t], best=-1;
+      for(var a=0;a<alts.length;a++){
+        var s=wordScore(alts[a], rec.words);
+        if(alts[a]!==t && s>0) s-=6;                 // synonym, not the literal word
+        if(s>best) best=s;
+      }
+      if(best<0){
+        var se=-1, sb=-1;
+        for(a=0;a<alts.length;a++){
+          se=Math.max(se, wordScore(alts[a], rec.equipWords));
+          sb=Math.max(sb, wordScore(alts[a], rec.partWords));
+        }
+        if(se>0) best=se-55;                        // "machine" -> leverage machine
+        else if(sb>0) best=sb-65;                   // "chest" -> body part chest
+      }
+      return best;
+    }
+    function scoreRec(rec, toks, rawNorm){
+      var total=0, missed=0;
+      for(var i=0;i<toks.length;i++){
+        var s=tokenScore(toks[i], rec);
+        if(s<0){ missed++; continue; }
+        total+=s;
+      }
+      // every word must land, but forgive one filler word in a long query
+      if(missed>0 && !(toks.length>=4 && missed===1)) return -1;
+      total-=missed*40;
+      if(rec.hay===rawNorm) total+=1000;
+      else if(toks.length>1 && rec.hay.indexOf(rawNorm)===0) total+=200;
+      total+=Math.max(0,44-rec.hay.length)*0.6;
+      if(/\b(v [0-9]|pov|male|female)\b/.test(rec.hay)) total-=18;   // alternate camera angles etc
+      return total;
+    }
+    function prepare(rows){
+      return rows.map(function(r){
+        var disp=r.disp||r.name, hay=norm(disp), alt=norm(r.name);
+        var words=hay.split(" ");
+        if(alt!==hay) alt.split(" ").forEach(function(w){ if(words.indexOf(w)<0) words.push(w); });
+        return {name:r.name, disp:disp, hay:hay, words:words,
+          equipWords:norm(r.equip||"").split(" ").filter(Boolean),
+          partWords:norm(r.part||"").split(" ").filter(Boolean),
+          staple:!!STAPLE[String(r.name).toLowerCase()]};
+      });
+    }
+    // ctx: {fav(name)->bool, uses(name)->count, learned(normQuery)->name|null}
+    function search(q, recs, ctx){
+      ctx=ctx||{};
+      var raw=norm(q); if(!raw) return [];
+      var variants=[raw];
+      PHRASES.forEach(function(p){
+        if(p[0].test(raw)){ var v=raw.replace(p[0],p[1]).replace(/\s+/g," ").trim(); if(variants.indexOf(v)<0) variants.push(v); }
+      });
+      var vt=variants.map(function(v){ var t=tokens(v); return t.length?t:[v]; });
+      var learned=ctx.learned?ctx.learned(raw):null;
+      var out=[];
+      for(var i=0;i<recs.length;i++){
+        var rec=recs[i], best=-1;
+        for(var k=0;k<vt.length;k++){
+          var s=scoreRec(rec, vt[k], variants[k]);
+          if(k>0 && s>0) s-=4;                       // alias reading, a hair below literal
+          if(s>best) best=s;
+        }
+        var isLearned=!!(learned && (learned===rec.disp || learned===rec.name));
+        // a past pick for this exact search counts even when no words overlap,
+        // which is what lets an AI answer become a free, instant local one
+        if(best<0 && !isLearned) continue;
+        if(best<0) best=0;
+        if(rec.staple) best+=30;
+        if(ctx.uses){ var u=ctx.uses(rec.name)||0; best+=Math.min(u*10,90); }
+        if(ctx.fav && ctx.fav(rec.name)) best+=400;
+        if(isLearned) best+=600;
+        out.push({n:rec.name, s:best, len:rec.hay.length});
+      }
+      out.sort(function(a,b){ return b.s-a.s || a.len-b.len || (a.n<b.n?-1:a.n>b.n?1:0); });
+      return out.map(function(x){ return x.n; });
+    }
+    return {prepare:prepare, search:search, norm:norm, tokens:tokens};
+  })();
+
+  // Search index over the library plus your own exercises, rebuilt only when
+  // the set of names or their display names changes.
+  var EX_INDEX=null, EX_INDEX_SIG="";
+  function exIndexSig(){ return allExNames().length+"|"+JSON.stringify(EX_RENAMES); }
+  function exSearchIndex(){
+    var sig=exIndexSig();
+    if(EX_INDEX && sig===EX_INDEX_SIG) return EX_INDEX;
+    var meta={}; EX_DB.forEach(function(r){ meta[r[0]]=r; });
+    EX_INDEX=EXS.prepare(allExNames().map(function(n){
+      var r=meta[n];
+      return {name:n, disp:exDisplay(n), part:r?r[1]:"", equip:r?r[2]:""};
+    }));
+    EX_INDEX_SIG=sig;
+    return EX_INDEX;
+  }
+  // how often each exercise appears across your logged sessions
+  function exUseCounts(){
+    var c={};
+    Object.keys(workouts).forEach(function(k){
+      (workouts[k].exercises||[]).forEach(function(e){ if(e&&e.name) c[e.name]=(c[e.name]||0)+1; });
+    });
+    return c;
+  }
+  // what you picked after typing a given search; makes the next identical search instant
+  var EXLEARN_KEY="mt_ex_learned", EX_LEARNED={};
+  function learnExPick(query, disp){
+    var k=EXS.norm(query); if(!k || !disp) return;
+    EX_LEARNED[k]=disp;
+    var keys=Object.keys(EX_LEARNED);
+    if(keys.length>300) delete EX_LEARNED[keys[0]];
+    sSet(EXLEARN_KEY, JSON.stringify(EX_LEARNED));
+  }
+  function rankExercises(q){
+    var uses=exUseCounts();
+    return EXS.search(q, exSearchIndex(), {
+      fav:isFav,
+      uses:function(n){ return uses[n]||0; },
+      learned:function(k){ return EX_LEARNED[k]||null; }
+    });
+  }
+
+  /* --- AI lookup for when the words just don't line up --- */
+  var EXAI_KEY="mt_ex_ai_cache", EX_AI_CACHE={}, exAiState={q:"", busy:false, names:null, err:""};
+  function exAiCatalogue(){
+    var names=allExNames();
+    return {names:names, text:names.map(function(n,i){ return i.toString(36)+" "+exDisplay(n); }).join("\n")};
+  }
+  async function aiFindExercises(q){
+    var key=EXS.norm(q);
+    if(EX_AI_CACHE[key]) return EX_AI_CACHE[key].filter(function(n){ return allExNames().indexOf(n)>=0; });
+    var cat=exAiCatalogue();
+    var sys="You match what a gym-goer types to exercises in a fixed catalogue. "+
+      "Each catalogue line is an id, a space, then the exercise name. People use gym slang, brand or machine names, "+
+      "body parts, abbreviations and misspellings; work out the movement they mean. Machines in this catalogue are "+
+      "usually named Lever, Sled, Smith or Assisted. Prefer the standard gym-floor version over stretches, camera-angle "+
+      "duplicates (Back Pov, V. 2) and unusual variations. Reply with ONLY JSON: {\"ids\":[up to 6 ids, best first]}. "+
+      "Use only ids that appear in the catalogue. If nothing genuinely matches, reply {\"ids\":[]}.\n\nCATALOGUE:\n"+cat.text;
+    var out=await aiComplete([{role:"user", content:"Find: "+q}], 120, sys);
+    if(out==null) throw new Error("Add your OpenRouter key in Settings to use AI search.");
+    var ids=[];
+    try{
+      var m=String(out).match(/\{[\s\S]*\}/);
+      ids=(JSON.parse(m?m[0]:out).ids||[]);
+    }catch(e){
+      ids=(String(out).match(/[0-9a-z]+/g)||[]);
+    }
+    // only trust ids that exist; anything else is the model inventing a name
+    var seen={}, names=[];
+    ids.forEach(function(id){
+      var i=parseInt(String(id),36);
+      if(isFinite(i) && i>=0 && i<cat.names.length && !seen[i]){ seen[i]=1; names.push(cat.names[i]); }
+    });
+    names=names.slice(0,6);
+    EX_AI_CACHE[key]=names;
+    var keys=Object.keys(EX_AI_CACHE);
+    if(keys.length>150) delete EX_AI_CACHE[keys[0]];
+    sSet(EXAI_KEY, JSON.stringify(EX_AI_CACHE));
+    return names;
+  }
+  async function runExAi(){
+    var q=document.getElementById("exSearch").value.trim();
+    if(!q || exAiState.busy) return;
+    exAiState={q:q, busy:true, names:null, err:""};
+    renderExList(q);
+    try{
+      var names=await aiFindExercises(q);
+      exAiState={q:q, busy:false, names:names, err:names.length?"":"AI couldn't find a match. Add it as your own below."};
+    }catch(e){
+      exAiState={q:q, busy:false, names:null, err:(e&&e.message)||"AI search failed."};
+    }
+    if(document.getElementById("exSearch").value.trim()===q) renderExList(q);
+  }
+  function exAiBlock(q, localCount){
+    var mine=(exAiState.q===q);
+    if(mine && exAiState.busy){
+      return "<div class='exai-row busy'><span class='exai-spin' aria-hidden='true'></span>Asking AI to find it…</div>";
+    }
+    if(mine && exAiState.names && exAiState.names.length){
+      return "<div class='exai-head'>Best matches"+TAG_AI+"</div>"+exAiState.names.map(exOptHTML).join("")+
+             "<div class='exai-sep'>Also matching</div>";
+    }
+    var err=(mine && exAiState.err) ? "<div class='exai-err'>"+esc(exAiState.err)+"</div>" : "";
+    var strong=localCount===0;
+    return err+"<button type='button' class='exai-row"+(strong?" strong":"")+"' data-exai>"+
+      "<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l4 4'/></svg>"+
+      (strong ? "Can't find it? Ask AI" : "Not what you meant? Ask AI")+TAG_AI+"</button>";
+  }
+
   function renderExList(q){
     var box=document.getElementById("exList"); q=(q||"").trim().toLowerCase();
     var raw=document.getElementById("exSearch").value.trim(), html="";
     var names=allExNames();
     exMatches=[];
+    var customRow="";
     if(raw && !names.some(function(n){return n.toLowerCase()===q || exDisplay(n).toLowerCase()===q;})){
-      html+="<button class='exopt custom' data-exc='1'>+ Add \u201c"+esc(raw)+"\u201d</button>";
+      customRow="<button class='exopt custom' data-exc='1'>+ Add \u201c"+esc(raw)+"\u201d</button>";
     }
+    if(!q) html+=customRow;
     if(q){
-      var toks=exTokens(q);
-      if(!toks.length) toks=[q];
-      var scored=[];
-      names.forEach(function(n){
-        var hay=exDisplay(n).toLowerCase();
-        var words=hay.split(/[^a-z0-9]+/).filter(Boolean);
-        var s=exScore(hay, words, toks, q);
-        if(s<0 && n.toLowerCase()!==hay){                          // also try the raw stored name
-          var h2=n.toLowerCase(), w2=h2.split(/[^a-z0-9]+/).filter(Boolean);
-          s=exScore(h2, w2, toks, q);
-        }
-        if(s>=0){ if(isFav(n)) s+=400; scored.push({n:n,s:s,len:hay.length}); }
-      });
-      scored.sort(function(a,b){ return b.s-a.s || a.len-b.len || (a.n<b.n?-1:a.n>b.n?1:0); });
-      exMatches=scored.slice(0,60).map(function(x){ return x.n; });
-      html+=exMatches.map(exOptHTML).join("");
-      box.innerHTML=html || "<div class='wk-empty'>No matches. Type a custom name above.</div>";
+      exMatches=rankExercises(raw).slice(0,60);
+      var aiMine=(exAiState.q===raw), aiNames=(aiMine && exAiState.names) ? exAiState.names : [];
+      var rest=exMatches.filter(function(n){ return aiNames.indexOf(n)<0; });
+      if(aiMine && (exAiState.busy || aiNames.length) || !rest.length){
+        // AI is working, has answered, or there is nothing else to show: lead with
+        // it, ahead of saving whatever was typed as a brand new exercise
+        html+=exAiBlock(raw, rest.length)+customRow+rest.map(exOptHTML).join("");
+      } else {
+        // good local results come first; the AI offer waits just below them
+        html+=customRow+rest.slice(0,5).map(exOptHTML).join("")+exAiBlock(raw, rest.length)+rest.slice(5).map(exOptHTML).join("");
+      }
+      box.innerHTML=html;
       return;
     }
     if(EX_CUSTOM.length){
@@ -5564,6 +5875,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       if(!sWas){ setTimeout(function(){ var el=document.querySelector('.ex-sec-h[data-exsec="'+CSS.escape(sk)+'"]'); if(el) scrollExListTop(el, 10); }, 40); }
       return;
     }
+    if(e.target.closest("[data-exai]")){ runExAi(); return; }
     var cam=e.target.closest("[data-ex-photo]");
     if(cam){ exPhotoTarget=cam.getAttribute("data-ex-photo"); document.getElementById("exPhotoFile").click(); return; }
     var del=e.target.closest("[data-ex-delcustom]");
@@ -5578,6 +5890,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var name = b.hasAttribute("data-exc") ? document.getElementById("exSearch").value.trim() : b.getAttribute("data-exname");
     if(name){
       if(b.hasAttribute("data-exc")){ addExCustom(name); renderExList(document.getElementById("exSearch").value); b=document.querySelector('#exList [data-exname="'+CSS.escape(exDisplay(name))+'"]')||b; }
+      var typed=document.getElementById("exSearch").value.trim();
+      if(typed) learnExPick(typed, exDisplay(name));
       addExercise(name);
       flashExOpt(b);   // keep the picker open so several can be added; tap Done to close
     }
@@ -8394,6 +8708,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     var exfRaw=await sGet(EXFAV_KEY); if(exfRaw){ try{ EX_FAV=JSON.parse(exfRaw)||{}; }catch(e){ EX_FAV={}; } }
     var exmRaw=await sGet(EXMODE_KEY); if(exmRaw){ try{ EX_MODE=JSON.parse(exmRaw)||{}; }catch(e){ EX_MODE={}; } }
     var excRaw=await sGet(EXCUSTOM_KEY); if(excRaw){ try{ EX_CUSTOM=JSON.parse(excRaw)||[]; }catch(e){ EX_CUSTOM=[]; } }
+    var exlRaw=await sGet(EXLEARN_KEY); if(exlRaw){ try{ EX_LEARNED=JSON.parse(exlRaw)||{}; }catch(e){ EX_LEARNED={}; } }
+    var exaRaw=await sGet(EXAI_KEY); if(exaRaw){ try{ EX_AI_CACHE=JSON.parse(exaRaw)||{}; }catch(e){ EX_AI_CACHE={}; } }
     var expRaw=await sGet(EXPHOTO_KEY); if(expRaw){ try{ EX_PHOTO=JSON.parse(expRaw)||{}; }catch(e){ EX_PHOTO={}; } }
     var rRaw=await sGet(REST_KEY); if(rRaw){ var rv=parseInt(rRaw,10); if(isFinite(rv)&&rv>0) restDefault=rv; }
     var stRaw=await sGet(STYPES_KEY);
