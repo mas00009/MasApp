@@ -1259,9 +1259,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   }
   #tab-home .home-brand{
     display:flex;align-items:center;justify-content:center;margin:0;flex:none;
-    padding:var(--head-inset-top) 0 var(--head-pad-bottom);
-    height:calc(var(--head-inset-top) + var(--head-bar-h));
-    min-height:calc(var(--head-inset-top) + var(--head-bar-h));
+    /* extra 8px keeps the logo clear of the soft blur iOS draws under the status bar */
+    padding:calc(var(--head-inset-top) + 8px) 0 var(--head-pad-bottom);
+    height:calc(var(--head-inset-top) + var(--head-bar-h) + 8px);
+    min-height:calc(var(--head-inset-top) + var(--head-bar-h) + 8px);
     box-sizing:border-box;
     background:var(--bg);
     position:relative;
@@ -1645,8 +1646,8 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   <div id="tab-home" class="tab-panel active">
     <div class="home-brand">
       <span class="brand-mark">
-      <img class="brand-badge" src="assets/brand/badge-electric.png" alt="">
-      <img class="brand-logo" src="assets/brand/wordmark-electric.png" alt="MásGains">
+      <img class="brand-badge" src="assets/brand/badge-electric-sm.png" alt="">
+      <img class="brand-logo" src="assets/brand/wordmark-electric-sm.png" alt="MásGains">
 </span>
     </div>
     <div class="hero" data-goto="food">
@@ -2320,7 +2321,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
       </div>
     </div>
 
-    <div class="set-foot">MásGains v1.0 · updated 2 Oct 2026, 9:05 AM</div>
+    <div class="set-foot">MásGains v1.0 · updated 3 Oct 2026, 2:04 AM</div>
   </div>
 </div>
 
@@ -2708,8 +2709,12 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   function wordmarkSrcFor(t){ return "assets/brand/wordmark-"+(THEME_COLORWAY[t]||"crimson")+".png"; }
   function updateLogoSrc(){
     var badge=badgeSrcFor(theme), wm=wordmarkSrcFor(theme);
-    document.querySelectorAll(".htitle-logo, .splash-logo, .ob-badge, .brand-badge").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
-    document.querySelectorAll(".brand-logo, .splash-wordmark, .ob-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
+    // small header logos get pre-shrunk copies: iOS blurs the full-size art when it scales it down that far
+    var badgeSm=badge.replace(".png","-sm.png"), wmSm=wm.replace(".png","-sm.png");
+    document.querySelectorAll(".splash-logo, .ob-badge").forEach(function(im){ if(im.getAttribute("src")!==badge) im.setAttribute("src",badge); });
+    document.querySelectorAll(".htitle-logo, .brand-badge").forEach(function(im){ if(im.getAttribute("src")!==badgeSm) im.setAttribute("src",badgeSm); });
+    document.querySelectorAll(".splash-wordmark, .ob-wordmark").forEach(function(im){ if(im.getAttribute("src")!==wm) im.setAttribute("src",wm); });
+    document.querySelectorAll(".brand-logo").forEach(function(im){ if(im.getAttribute("src")!==wmSm) im.setAttribute("src",wmSm); });
   }
   function setTheme(t){ applyTheme(t); sSet(THEME_KEY, theme); }
 
@@ -8671,7 +8676,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
     document.addEventListener("visibilitychange", updateOverlay, {passive:true});
   }
   function initHtitleLogos(){
-    var badge=badgeSrcFor(theme);
+    var badge=badgeSrcFor(theme).replace(".png","-sm.png");
     document.querySelectorAll(".htitle").forEach(function(el){
       if(el.querySelector(".htitle-logo")) return;
       var text=(el.textContent||"").trim();

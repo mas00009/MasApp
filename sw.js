@@ -1,5 +1,5 @@
 /* MásGains service worker - offline shell + runtime asset cache */
-var VERSION = "mg-v18";
+var VERSION = "mg-v19";
 var CORE = [
   "./", "index.html", "manifest.webmanifest",
   "assets/icon.png", "assets/icon-192.png", "assets/icon-512.png", "assets/icon-180.png",
@@ -8,6 +8,11 @@ var CORE = [
   "assets/brand/badge-blue.png", "assets/brand/wordmark-blue.png",
   "assets/brand/badge-violet.png", "assets/brand/wordmark-violet.png",
   "assets/brand/badge-gold.png", "assets/brand/wordmark-gold.png",
+  "assets/brand/badge-electric-sm.png", "assets/brand/wordmark-electric-sm.png",
+  "assets/brand/badge-crimson-sm.png", "assets/brand/wordmark-crimson-sm.png",
+  "assets/brand/badge-blue-sm.png", "assets/brand/wordmark-blue-sm.png",
+  "assets/brand/badge-violet-sm.png", "assets/brand/wordmark-violet-sm.png",
+  "assets/brand/badge-gold-sm.png", "assets/brand/wordmark-gold-sm.png",
   "assets/body-figure-male.png", "assets/body-figure-female.jpg"
 ];
 
